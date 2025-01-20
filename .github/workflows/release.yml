@@ -29,8 +29,8 @@ jobs:
 
       - name: Create .npmrc
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          echo "@Todari:registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo email=rhymint@gmail.com > ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
