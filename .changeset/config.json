@@ -7,8 +7,6 @@
   "access": "public",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@react-pixel-ui/eslint-config",
-    "@react-pixel-ui/typescript-config",
     "docs"
   ]
 }
