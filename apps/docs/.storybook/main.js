@@ -26,7 +26,7 @@ const config = {
         alias: [
           {
             find: "ui",
-            replacement: resolve(__dirname, "../../../packages/ui/"),
+            replacement: resolve(__dirname, "../../../packages/pixel-ui/"),
           },
         ],
       },

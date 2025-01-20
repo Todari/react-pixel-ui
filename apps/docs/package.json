@@ -11,22 +11,25 @@
     "lint": "eslint ./stories/*.stories.tsx --max-warnings 0"
   },
   "dependencies": {
-    "@acme/ui": "workspace:*",
+    "@emotion/react": "^11.14.0",
+    "@react-pixel-ui/pixel-ui": "workspace:*",
+    "@react-pixel-ui/use-pixelated-css": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
+    "@react-pixel-ui/eslint-config": "workspace:*",
+    "@react-pixel-ui/typescript-config": "workspace:*",
     "@storybook/addon-actions": "^8.2.6",
     "@storybook/addon-essentials": "^8.2.6",
     "@storybook/addon-links": "^8.2.6",
     "@storybook/react": "^8.2.6",
     "@storybook/react-vite": "^8.2.6",
+    "@types/react": "^18.2.61",
     "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.57.0",
     "serve": "^14.2.1",
     "storybook": "^8.2.6",
-    "@repo/typescript-config": "workspace:*",
     "typescript": "5.5.4",
     "vite": "^5.1.4"
   }
