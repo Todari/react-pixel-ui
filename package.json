@@ -8,8 +8,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build --filter=docs^... && changeset publish",
-    "publish": "turbo run publish --filter=packages/*"
+    "release": "turbo run build --filter=docs^... && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
@@ -20,6 +19,6 @@
   "name": "react-pixel-ui",
   "publishConfig": {
     "access": "public",
-    "@Todari:registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org"
   }
 }
