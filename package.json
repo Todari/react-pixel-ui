@@ -19,6 +19,7 @@
   "packageManager": "pnpm@8.15.6",
   "name": "react-pixel-ui",
   "publishConfig": {
+    "access": "public",
     "@Todari:registry": "https://npm.pkg.github.com"
   }
 }
