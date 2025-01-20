@@ -26,27 +26,22 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
+      - name: Create .npmrc
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "@Todari:registry=https://registry.npmjs.org/" >> ~/.npmrc
+          
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
           # This expects you to have a script called release which does a build for your packages and calls changeset publish
+          
           publish: pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check if tokens exist
-        run: |
-          if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
-            echo "GITHUB_TOKEN is not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "NPM_TOKEN is not set"
-            exit 1
-          fi
 
       - name: Send a Slack notification if a publish happens
         if: steps.changesets.outputs.published == 'true'
