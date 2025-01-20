@@ -17,5 +17,8 @@
     "turbo": "^2.3.3"
   },
   "packageManager": "pnpm@8.15.6",
-  "name": "react-pixel-ui"
+  "name": "react-pixel-ui",
+  "publishConfig": {
+    "@Todari:registry": "https://npm.pkg.github.com"
+  }
 }
