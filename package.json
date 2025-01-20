@@ -17,7 +17,8 @@
   "packageManager": "pnpm@8.15.6",
   "name": "react-pixel-ui",
   "publishConfig": {
+    "latest": true,
     "access": "public",
-    "registry": "https://registry.npmjs.org"
+    "@react-pixel-ui:registry": "https://registry.npmjs.org"
   }
 }
