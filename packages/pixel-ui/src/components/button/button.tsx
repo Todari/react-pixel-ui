@@ -4,7 +4,7 @@ import { ButtonProps } from "./button.type";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  function Button({ children, size="md", variant="primary", bg="#FFDCFF", hasGradient=true, hasBorder=true, ...rest }, ref) {
+  function Button({ children, size="md", variant="primary", bg="#FF14FF", hasGradient=true, hasBorder=true, ...rest }, ref) {
 
     const buttonRef = useRef<HTMLButtonElement>(null);
 
