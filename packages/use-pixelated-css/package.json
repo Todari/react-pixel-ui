@@ -31,5 +31,25 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "keywords": [
+    "frontend",
+    "web-development",
+    "react",
+    "react-hooks",
+    "hook",
+    "ui",
+    "ui-library",
+    "css",
+    "emotion",
+    "retro",
+    "8-bit",
+    "styling",
+    "pixelated",
+    "pixel-art",
+    "pixel-style",
+    "pixel-design",
+    "pixel-effects",
+    "pixel-graphics"
+  ]
 }
