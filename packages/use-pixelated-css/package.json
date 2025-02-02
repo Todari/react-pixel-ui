@@ -1,6 +1,6 @@
 {
   "name": "@react-pixel-ui/use-pixelated-css",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "sideEffects": false,
   "license": "MIT",
   "exports": {
