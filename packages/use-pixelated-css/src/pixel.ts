@@ -12,12 +12,20 @@ interface PixelateParams {
 
 export const pixelate = ({ prevCss, ref, unitPixel }: PixelateParams) => {
   const canvas = document.createElement('canvas');
+  try {
+    return canvasToImage(canvas, prevCss, ref, unitPixel);
+  } finally {
+    canvas.remove();
+  }  
+}
+
+const canvasToImage = (canvas: HTMLCanvasElement, prevCss: SerializedStyles, ref: React.RefObject<HTMLElement>, unitPixel: number) => {
   const ctx = canvas.getContext('2d');
+
   if (!ctx || !ref.current) {
     console.error('Canvas context or ref is not available');
     return prevCss;
   }
-
   canvas.width = Math.floor(ref.current.clientWidth / unitPixel);
   canvas.height = Math.floor(ref.current.clientHeight / unitPixel);
 
