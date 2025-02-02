@@ -1,5 +1,11 @@
 # @react-pixel-ui/eslint-config
 
+## 0.1.3
+
+### Patch Changes
+
+- 8fe1451: fix usePixelatedCSS rendering issue
+
 ## 0.1.2
 
 ### Patch Changes

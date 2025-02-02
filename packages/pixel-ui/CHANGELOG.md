@@ -1,5 +1,13 @@
 # @react-pixel-ui/pixel-ui
 
+## 0.1.3
+
+### Patch Changes
+
+- 8fe1451: fix usePixelatedCSS rendering issue
+- Updated dependencies [8fe1451]
+  - @react-pixel-ui/use-pixelated-css@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
