@@ -12,9 +12,9 @@ interface UsePixelatedCSSProps {
 }
 
 export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSProps) => {
-  const [isInitialized, setIsInitialized] = useState(false);
   const [pixelatedCSS, setPixelatedCSS] = useState<SerializedStyles>(prevCSS);
   
+  const isInitialized = useRef(false);
   const prevCSSRef = useRef(prevCSS);
   const unitPixelRef = useRef(unitPixel);
   
@@ -24,15 +24,15 @@ export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSPr
     if (
       prevCSSRef.current !== prevCSS || 
       unitPixelRef.current !== unitPixel ||
-      !isInitialized
+      !isInitialized.current
     ) {
       prevCSSRef.current = prevCSS;
       unitPixelRef.current = unitPixel;
-      setIsInitialized(true);
+      isInitialized.current = true;
       
       setPixelatedCSS(pixelate({prevCss: prevCSS, ref, unitPixel}));
     }
-  }, [prevCSS, unitPixel, ref, isInitialized]);
+  }, []);
 
   useLayoutEffect(() => {
     requestAnimationFrame(() => {
