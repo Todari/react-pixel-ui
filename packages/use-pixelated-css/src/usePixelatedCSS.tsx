@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import { pixelate } from "./pixel";
 
@@ -12,18 +12,27 @@ interface UsePixelatedCSSProps {
 }
 
 export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSProps) => {
-  const [isRefReady, setIsRefReady] = useState(false);
-
+  const [pixelatedCSS, setPixelatedCSS] = useState<SerializedStyles>(prevCSS);
+  const prevUnitPixel = useRef(unitPixel);
+  
   useEffect(() => {
-    if (ref.current) {
-      setIsRefReady(true);
+    if (!ref.current) return;
+
+    if (prevUnitPixel.current !== unitPixel) {
+      prevUnitPixel.current = unitPixel;
     }
-  }, [ref]);
 
-  const pixelatedCSS = useMemo(() => {
-    if (!isRefReady) return prevCSS;
-    return pixelate({prevCss: prevCSS, ref, unitPixel}); 
-  }, [prevCSS, isRefReady, unitPixel, ref]);
+    const updatePixelatedCSS = () => {
+      setPixelatedCSS(pixelate({prevCss: prevCSS, ref, unitPixel}));
+    };
 
-  return {pixelatedCSS};
+    updatePixelatedCSS();
+
+    const resizeObserver = new ResizeObserver(updatePixelatedCSS);
+    resizeObserver.observe(ref.current);
+
+    return () => resizeObserver.disconnect();
+  }, [prevCSS, unitPixel, ref]);
+
+  return pixelatedCSS;
 };

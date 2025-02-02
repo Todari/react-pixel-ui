@@ -11,12 +11,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     useImperativeHandle(ref, () => buttonRef.current!);
     
     const vectorStyle = buttonStyle({size, variant, bg, hasGradient, hasBorder});
-    const {pixelatedCSS} = usePixelatedCSS({prevCSS: vectorStyle, ref: buttonRef});
+    const pixelatedCSS = usePixelatedCSS({prevCSS: vectorStyle, ref: buttonRef});
     
     return (
         <button ref={buttonRef} type="button" css={pixelatedCSS} {...rest}>
         {children}
       </button>
     );
-  }
+  }   
 );
