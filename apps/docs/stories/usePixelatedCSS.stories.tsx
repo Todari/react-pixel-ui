@@ -51,6 +51,38 @@ usePixelatedCSS 훅은 CSS 스타일을 픽셀화된 형태로 변환하는 기�
 - **prevCSS**: 픽셀화하고자 하는 원본 CSS (SerializedStyles)
 - **ref**: 픽셀화할 요소에 대한 참조 (React.RefObject<HTMLElement>)
 - **unitPixel**: 픽셀화 단위 크기 (기본값: 4)
+
+### 사용 방법
+
+\`\`\`tsx
+import { useRef } from 'react';
+import { css } from '@emotion/react';
+import { usePixelatedCSS } from '@react-pixel-ui/use-pixelated-css';
+
+const Component = () => {
+  const elementRef = useRef<HTMLDivElement>(null);
+  
+  const divStyle = css({
+    width: '200px',
+    height: '100px',
+    background: 'linear-gradient(45deg, #FFDCFF, #FF97FF)',
+    borderRadius: '16px'
+  });
+
+  const pixelatedCSS = usePixelatedCSS({
+    prevCSS: divStyle,
+    ref: elementRef,
+    unitPixel: 4
+  });
+
+  return <div ref={elementRef} css={pixelatedCSS} />;
+};
+\`\`\`
+
+### 특징
+- ResizeObserver를 통해 요소의 크기가 변경될 때마다 자동으로 픽셀화를 업데이트합니다.
+- 컴포넌트가 언마운트될 때 자동으로 ResizeObserver를 정리합니다.
+- Button 컴포넌트와 같은 UI 컴포넌트에서 내부적으로 사용되어 픽셀화된 스타일을 적용할 수 있습니다.
 `,
       },
     },
@@ -59,12 +91,12 @@ usePixelatedCSS 훅은 CSS 스타일을 픽셀화된 형태로 변환하는 기�
   argTypes: {
     width: {
       description: '요소의 너비를 설정합니다.',
-      control: {type: 'number'},
+      control: {type: 'range', min: 16, max: 256, step: 16},
       defaultValue: 128,
     },
     height: {
       description: '요소의 높이를 설정합니다.',
-      control: {type: 'number'},
+      control: {type: 'range', min: 4, max: 96, step: 4},
       defaultValue: 48,
     },
     background: {
@@ -139,15 +171,15 @@ export const BackgroundVariations: Story = {
     <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
       <div style={{textAlign: 'center'}}>
         <p style={{margin: '0 0 8px'}}>45도 그라데이션</p>
-        <DemoComponent background="linear-gradient(45deg, #FFDCFF, #FF97FF)" />
+        <DemoComponent background="linear-gradient(45deg, #FFDCFF, #FF97FF)" borderRadius={16}/>
       </div>
       <div style={{textAlign: 'center'}}>
         <p style={{margin: '0 0 8px'}}>90도 그라데이션</p>
-        <DemoComponent background="linear-gradient(90deg, #FFEEFF, #FF97FF)" />
+        <DemoComponent background="linear-gradient(90deg, #FFEEFF, #FF97FF)" borderRadius={16}/>
       </div>
       <div style={{textAlign: 'center'}}>
         <p style={{margin: '0 0 8px'}}>180도 그라데이션</p>
-        <DemoComponent background="linear-gradient(180deg, #FFEEFF, #FF97FF)" />
+        <DemoComponent background="linear-gradient(180deg, #FFEEFF, #FF97FF)" borderRadius={16}/>
       </div>
       <div style={{textAlign: 'center'}}>
         <p style={{margin: '0 0 8px'}}>단색</p>
