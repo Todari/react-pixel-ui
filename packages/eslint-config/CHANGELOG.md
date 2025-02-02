@@ -1,5 +1,11 @@
 # @react-pixel-ui/eslint-config
 
+## 0.1.2
+
+### Patch Changes
+
+- 7c67673: fix usePixelatedCSS hook
+
 ## 0.1.1
 
 ### Patch Changes
