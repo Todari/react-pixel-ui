@@ -1,42 +1,43 @@
 # React Pixel UI
 
-React Pixel UI는 픽셀화된 UI 컴포넌트를 제공하는 React 디자인 시스템입니다.
+React Pixel UI is a React design system that provides pixelated UI components.
 
-## 주요 기능
+## Key Features
 
-- 🎨 픽셀화된 UI 컴포넌트 제공
-- 🎮 레트로 게임 스타일의 디자인 시스템
-- 🛠 커스터마이징 가능한 픽셀화 설정
-- 📦 모듈화된 패키지 구조
+- 🎨 Pixelated UI components
+- 🎮 Retro game style design system
+- 🛠 Customizable pixelation settings
+- 📦 Modular package structure
 
-## 기술 스택
+## Tech Stack
 
-- 🏎 [Turborepo](https://turbo.build/repo) - 모노레포 빌드 시스템
-- ⚛️ [React](https://reactjs.org/) - UI 라이브러리
-- 💅 [@emotion/react](https://emotion.sh/) - CSS-in-JS 스타일링
-- 📚 [Storybook](https://storybook.js.org/) - UI 컴포넌트 문서화
+- 🏎 [Turborepo](https://turbo.build/repo) - Monorepo build system
+- ⚛️ [React](https://reactjs.org/) - UI library
+- 💅 [@emotion/react](https://emotion.sh/) - CSS-in-JS styling
+- 📚 [Storybook](https://storybook.js.org/) - UI component documentation
+- 📦 [Changeset](https://github.com/changesets/changesets) - Versioning and changelog management
 
-## 패키지 구조
+## Package Structure
 
-- `apps/docs`: Storybook 기반의 컴포넌트 문서 사이트
-- `packages/pixel-ui`: 핵심 React 컴포넌트
-- `packages/use-pixelated-css`: 픽셀화 CSS 변환 Hook
-- `packages/typescript-config`: 공유 TypeScript 설정
-- `packages/eslint-config`: 공유 ESLint 설정
+- `apps/docs`: Storybook-based component documentation site
+- `packages/pixel-ui`: Core React components
+- `packages/use-pixelated-css`: Pixelated CSS transformation Hook
+- `packages/typescript-config`: Shared TypeScript configuration
+- `packages/eslint-config`: Shared ESLint configuration
 
-## 시작하기
+## Getting Started
 
-- 의존성 설치
+- Install dependencies
 ```bash
 pnpm install
 ```
 
-- storybook 실행
+- Run storybook
 ```bash
 turbo dev
 ```
 
-- 빌드
+- Build
 ```bash
 turbo build
 ```
