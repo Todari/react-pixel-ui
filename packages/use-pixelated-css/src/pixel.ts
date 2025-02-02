@@ -27,12 +27,12 @@ export const pixelate = ({ prevCss, ref, unitPixel }: PixelateParams) => {
   const borderRadiusMatch = /border-radius:\s*([^;]+);/.exec(cssString);
   
   const borderRadius = Math.floor(convertCSSUnitToPx(borderRadiusMatch?.[1] || '0', ref.current) / unitPixel);
-  const borderWidth = Math.floor(getBorderWidth(borderMatch, ref.current) / unitPixel);
+  const borderWidth = Math.floor(getBorderWidth(borderMatch, ref.current, unitPixel) / unitPixel);
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawBorderRadiusMask(ctx, borderRadius, borderWidth);
-  drawBackground(ctx, backgroundMatch, borderRadius);
+  drawBorderRadiusMask(ctx, borderRadius);
+  drawBackground(ctx, backgroundMatch);
   drawBorder(ctx, borderMatch, borderRadius, borderWidth);
 
   const dataUrl = createPixelatedImage(canvas, unitPixel);
@@ -47,14 +47,15 @@ export const pixelate = ({ prevCss, ref, unitPixel }: PixelateParams) => {
   `;
 }
 
-function getBorderWidth(borderMatch: RegExpMatchArray | null, element: HTMLElement) {
+function getBorderWidth(borderMatch: RegExpMatchArray | null, element: HTMLElement, unitPixel: number) {
   if (!borderMatch) return 0;
   
   const borderParts = borderMatch[1].split(/\s+/);
-  return convertCSSUnitToPx(borderParts[0], element);
+  const originWidth = convertCSSUnitToPx(borderParts[0], element);
+  return Math.max(originWidth, unitPixel);
 }
 
-function drawBorderRadiusMask(ctx: CanvasRenderingContext2D, borderRadius: number, borderWidth: number) {
+function drawBorderRadiusMask(ctx: CanvasRenderingContext2D, borderRadius: number) {
   if (borderRadius > 0) {
     ctx.beginPath();
     ctx.moveTo(borderRadius, 0);
@@ -71,7 +72,7 @@ function drawBorderRadiusMask(ctx: CanvasRenderingContext2D, borderRadius: numbe
   }
 }
 
-function drawBackground(ctx: CanvasRenderingContext2D, backgroundMatch: RegExpMatchArray | null, borderRadius: number) {
+function drawBackground(ctx: CanvasRenderingContext2D, backgroundMatch: RegExpMatchArray | null) {
   if (backgroundMatch) {
     const gradient = backgroundMatch[1];
     if (gradient.includes('linear-gradient')) {
