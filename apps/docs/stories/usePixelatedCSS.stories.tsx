@@ -38,21 +38,21 @@ const DemoComponent = ({
 };
 
 const meta = {
-  title: 'Hooks/usePixelatedCSS',
+  title: 'use-pixelated-css/usePixelatedCSS',
   component: DemoComponent,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
         component: `
-usePixelatedCSS 훅은 CSS 스타일을 픽셀화된 형태로 변환하는 기능을 제공합니다.
+The usePixelatedCSS hook provides functionality to transform CSS styles into a pixelated form.
 
-### 주요 기능
-- **prevCSS**: 픽셀화하고자 하는 원본 CSS (SerializedStyles)
-- **ref**: 픽셀화할 요소에 대한 참조 (React.RefObject<HTMLElement>)
-- **unitPixel**: 픽셀화 단위 크기 (기본값: 4)
+### Props
+- **prevCSS (required)**: Original CSS to be pixelated (SerializedStyles)
+- **ref (required)**: Reference to the element to be pixelated (React.RefObject<HTMLElement>)
+- **unitPixel (optional default: 4)**: Pixelation unit size
 
-### 사용 방법
+### Usage
 
 \`\`\`tsx
 import { useRef } from 'react';
@@ -79,28 +79,33 @@ const Component = () => {
 };
 \`\`\`
 
-### 특징
-- ResizeObserver를 통해 요소의 크기가 변경될 때마다 자동으로 픽셀화를 업데이트합니다.
-- 컴포넌트가 언마운트될 때 자동으로 ResizeObserver를 정리합니다.
-- Button 컴포넌트와 같은 UI 컴포넌트에서 내부적으로 사용되어 픽셀화된 스타일을 적용할 수 있습니다.
+### Features
+- Automatically updates pixelation when element size changes through ResizeObserver
+- Automatically cleans up ResizeObserver when component unmounts
+- Can be used internally in UI components like Button to apply pixelated styles
 `,
       },
     },
   },
   tags: ['autodocs'],
   argTypes: {
+    unitPixel: {
+      description: '**[Props]** Determines the pixelation unit size',
+      control: {type: 'range', min: 4, max: 20, step: 2},
+      defaultValue: 4,
+    },
     width: {
-      description: '요소의 너비를 설정합니다.',
+      description: '**[for playground]** Sets the width of the element',
       control: {type: 'range', min: 16, max: 256, step: 16},
       defaultValue: 128,
     },
     height: {
-      description: '요소의 높이를 설정합니다.',
+      description: '**[for playground]** Sets the height of the element',
       control: {type: 'range', min: 4, max: 96, step: 4},
       defaultValue: 48,
     },
     background: {
-      description: '배경을 설정합니다.',
+      description: '**[for playground]** Sets the background',
       control: 'select',
       options: [
         'linear-gradient(45deg, #FFDCFF, #FF97FF)',
@@ -112,7 +117,7 @@ const Component = () => {
       defaultValue: 'linear-gradient(45deg, #FFDCFF, #FF97FF)',
     },
     border: {
-      description: '테두리를 설정합니다.',
+      description: '**[for playground]** Sets the border',
       control: 'select',
       options: [
         undefined,
@@ -122,14 +127,9 @@ const Component = () => {
       ],
     },
     borderRadius: {
-      description: '테두리 반경을 설정합니다.',
+      description: '**[for playground]** Sets the border radius',
       control: {type: 'range', min: 0, max: 32, step: 4},
       defaultValue: 16,
-    },
-    unitPixel: {
-      description: '픽셀화 단위 크기를 결정합니다.',
-      control: {type: 'range', min: 4, max: 20, step: 2},
-      defaultValue: 4,
     },
   },
 } satisfies Meta<typeof DemoComponent>;
@@ -139,12 +139,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
   args: {
+    unitPixel: 4,
     width: 128,
     height: 48,
     background: 'linear-gradient(45deg, #FFDCFF, #FF97FF)',
     border: '4px solid #8425EC',
     borderRadius: 16,
-    unitPixel: 4
   }
 };
 
@@ -153,7 +153,7 @@ export const UnitPixelComparison: Story = {
     <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
       {[1, 4, 8, 12].map((pixel) => (
         <div key={pixel} style={{textAlign: 'center'}}>
-          <p style={{margin: '0 0 8px'}}>{pixel}px 단위</p>
+          <p style={{margin: '0 0 8px'}}>{pixel}px unit</p>
           <DemoComponent 
             unitPixel={pixel}
             background="linear-gradient(45deg, #FFDCFF, #FF97FF)"
@@ -170,19 +170,19 @@ export const BackgroundVariations: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>45도 그라데이션</p>
+        <p style={{margin: '0 0 8px'}}>45° Gradient</p>
         <DemoComponent background="linear-gradient(45deg, #FFDCFF, #FF97FF)" borderRadius={16}/>
       </div>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>90도 그라데이션</p>
+        <p style={{margin: '0 0 8px'}}>90° Gradient</p>
         <DemoComponent background="linear-gradient(90deg, #FFEEFF, #FF97FF)" borderRadius={16}/>
       </div>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>180도 그라데이션</p>
+        <p style={{margin: '0 0 8px'}}>180° Gradient</p>
         <DemoComponent background="linear-gradient(180deg, #FFEEFF, #FF97FF)" borderRadius={16}/>
       </div>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>단색</p>
+        <p style={{margin: '0 0 8px'}}>Solid Color</p>
         <DemoComponent background="#FFDCFF" borderRadius={16} />
       </div>
     </div>
@@ -193,19 +193,19 @@ export const BorderVariations: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>테두리 없음</p>
+        <p style={{margin: '0 0 8px'}}>No Border</p>
         <DemoComponent borderRadius={16} />
       </div>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>얇은 테두리</p>
+        <p style={{margin: '0 0 8px'}}>Thin Border</p>
         <DemoComponent border="4px solid #8425EC" borderRadius={16} />
       </div>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>중간 테두리</p>
+        <p style={{margin: '0 0 8px'}}>Medium Border</p>
         <DemoComponent border="8px solid #8425EC" borderRadius={16} />
       </div>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>두꺼운 테두리</p>
+        <p style={{margin: '0 0 8px'}}>Thick Border</p>
         <DemoComponent border="12px solid #8425EC" borderRadius={16} />
       </div>
     </div>
@@ -216,19 +216,19 @@ export const BorderRadiusVariations: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '20px', flexWrap: 'wrap'}}>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>반경 없음</p>
+        <p style={{margin: '0 0 8px'}}>No Radius</p>
         <DemoComponent border="4px solid #8425EC" />
       </div>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>작은 반경</p>
+        <p style={{margin: '0 0 8px'}}>Small Radius</p>
         <DemoComponent border="4px solid #8425EC" borderRadius={8} />
       </div>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>중간 반경</p>
+        <p style={{margin: '0 0 8px'}}>Medium Radius</p>
         <DemoComponent border="4px solid #8425EC" borderRadius={16} />
       </div>
       <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>큰 반경</p>
+        <p style={{margin: '0 0 8px'}}>Large Radius</p>
         <DemoComponent border="4px solid #8425EC" borderRadius={24} />
       </div>
     </div>

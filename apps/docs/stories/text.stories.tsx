@@ -3,7 +3,7 @@ import type {Meta, StoryObj} from '@storybook/react';
 import {Text} from '@react-pixel-ui/pixel-ui';
 
 const meta = {
-  title: 'Components/text',
+  title: 'pixel-ui/text',
   component: Text,
   parameters: {
     layout: 'centered',
