@@ -25,6 +25,12 @@
     },
     "clean": {
       "cache": false
+    },
+    "version": {
+      "dependsOn": [
+        "build",
+        "lint"
+      ]
     }
   }
 }
