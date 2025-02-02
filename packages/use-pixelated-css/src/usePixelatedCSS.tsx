@@ -32,7 +32,7 @@ export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSPr
       
       setPixelatedCSS(pixelate({prevCss: prevCSS, ref, unitPixel}));
     }
-  }, []);
+  }, [prevCSS.styles, ref, unitPixel]);
 
   useLayoutEffect(() => {
     requestAnimationFrame(() => {

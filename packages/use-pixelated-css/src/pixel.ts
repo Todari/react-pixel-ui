@@ -10,53 +10,144 @@ interface PixelateParams {
   unitPixel: number;
 }
 
+interface ParsedStyles {
+  base: {
+    background?: string;
+    border?: string;
+    borderRadius?: string;
+  };
+  hover?: {
+    background?: string;
+    border?: string;
+  };
+  active?: {
+    background?: string;
+    border?: string;
+  };
+  disabled?: {
+    background?: string;
+    border?: string;
+  };
+}
+
+//TODO: refactoring
+
 export const pixelate = ({ prevCss, ref, unitPixel }: PixelateParams) => {
+  const styles = parseStyles(prevCss.styles);
   const canvas = document.createElement('canvas');
+  
   try {
-    return canvasToImage(canvas, prevCss, ref, unitPixel);
+    const baseImage = canvasToImage(canvas, {
+      name: 'base',
+      styles: Object.entries(styles.base).map(([key, value]) => `${key}: ${value};`).join(' ')
+    }, ref, unitPixel);
+
+    let cssString = css`
+      ${prevCss}
+      border: none;
+      border-radius: 0;
+      background: url(${baseImage});
+      background-size: 100% 100%;
+      image-rendering: pixelated;
+    `;
+
+    if (styles.hover) {
+      const hoverImage = canvasToImage(canvas, {
+        name: 'hover',
+        styles: Object.entries({...styles.base, ...styles.hover}).map(([key, value]) => `${key}: ${value};`).join(' ')
+      }, ref, unitPixel);
+
+      cssString = css`
+        ${cssString}
+        &:hover {
+          background: url(${hoverImage});
+          border: none;
+          border-radius: 0;
+          background-size: 100% 100%;
+          image-rendering: pixelated;
+        }
+      `;
+    }
+
+    if (styles.active) {
+      const activeImage = canvasToImage(canvas, {
+        name: 'active',
+        styles: Object.entries({...styles.base, ...styles.active}).map(([key, value]) => `${key}: ${value};`).join(' ')
+      }, ref, unitPixel);
+
+      cssString = css`
+        ${cssString}
+        &:active {
+          background: url(${activeImage});
+          border: none;
+          border-radius: 0;
+          background-size: 100% 100%;
+          image-rendering: pixelated;
+        }
+      `;
+    }
+
+    if (styles.disabled) {
+      const disabledImage = canvasToImage(canvas, {
+        name: 'disabled',
+        styles: Object.entries({...styles.base, ...styles.disabled}).map(([key, value]) => `${key}: ${value};`).join(' ')
+      }, ref, unitPixel);
+
+      cssString = css`
+        ${cssString}
+        &:disabled {
+          background: url(${disabledImage});
+          border: none;
+          border-radius: 0;
+          background-size: 100% 100%;
+          image-rendering: pixelated;
+        }
+      `;
+    }
+
+    return cssString;
   } finally {
     canvas.remove();
-  }  
-}
+  }
+};
 
 const canvasToImage = (canvas: HTMLCanvasElement, prevCss: SerializedStyles, ref: React.RefObject<HTMLElement>, unitPixel: number) => {
   const ctx = canvas.getContext('2d');
 
   if (!ctx || !ref.current) {
     console.error('Canvas context or ref is not available');
-    return prevCss;
+    return '';
   }
-  canvas.width = Math.floor(ref.current.clientWidth / unitPixel);
-  canvas.height = Math.floor(ref.current.clientHeight / unitPixel);
 
+  console.log(ref.current.clientWidth, ref.current.clientHeight);
+  
   const cssString = prevCss.styles;
   const backgroundMatch = /background:\s*([^;]+);/.exec(cssString);
+  const borderRadiusMatch = /borderRadius:\s*([^;]+);/.exec(cssString);
   const borderMatch = /border:\s*([^;]+);/.exec(cssString);
-  const borderRadiusMatch = /border-radius:\s*([^;]+);/.exec(cssString);
   
   const borderRadius = Math.floor(convertCSSUnitToPx(borderRadiusMatch?.[1] || '0', ref.current) / unitPixel);
   const borderWidth = Math.floor(getBorderWidth(borderMatch, ref.current, unitPixel) / unitPixel);
-
+  
+  const canvasWidth = Math.floor((ref.current.clientWidth + borderWidth * unitPixel * 2) / unitPixel);
+  const canvasHeight = Math.floor((ref.current.clientHeight + borderWidth * unitPixel * 2) / unitPixel);
+  
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+  console.log(canvas.width, canvas.height, borderWidth);
+  
   drawBorderRadiusMask(ctx, borderRadius);
   drawBackground(ctx, backgroundMatch);
   drawBorder(ctx, borderMatch, borderRadius, borderWidth);
 
   const dataUrl = createPixelatedImage(canvas, unitPixel);
 
-  return css`
-    ${prevCss}
-    border:none;
-    border-radius:0;
-    background: url(${dataUrl});
-    background-size: 100% 100%;
-    image-rendering: pixelated;
-  `;
+  return dataUrl;
 }
 
 function getBorderWidth(borderMatch: RegExpMatchArray | null, element: HTMLElement, unitPixel: number) {
-  if (!borderMatch) return 0;
+  if (!borderMatch || borderMatch[1] === 'undefined') return 0;
   
   const borderParts = borderMatch[1].split(/\s+/);
   const originWidth = convertCSSUnitToPx(borderParts[0], element);
@@ -95,12 +186,12 @@ function drawBackground(ctx: CanvasRenderingContext2D, backgroundMatch: RegExpMa
 }
 
 function drawBorder(ctx: CanvasRenderingContext2D, borderMatch: RegExpMatchArray | null, borderRadius: number, borderWidth: number) {
-  if (!borderMatch) return;
+  if (!borderMatch || borderMatch[1] === 'undefined') return;
 
   const borderParts = borderMatch[1].split(/\s+/);
   const borderColor = borderParts[borderParts.length - 1];
   
-  if (borderRadius === 0 || borderColor === 'none') return;
+  if (borderColor === 'none') return;
 
   ctx.strokeStyle = borderColor;
   ctx.lineWidth = borderWidth;
@@ -185,4 +276,42 @@ function createPixelatedImage(canvas: HTMLCanvasElement, unitPixel: number) {
   );
 
   return extendCanvas.toDataURL();
+}
+
+function parseStyles(cssString: string): ParsedStyles {
+  const styles: ParsedStyles = { base: {} };
+  
+  const baseMatch = cssString.match(/^([^&]*)/);
+  if (baseMatch) {
+    const baseStyles = baseMatch[1];
+    styles.base.background = /background:\s*([^;]+);/.exec(baseStyles)?.[1];
+    styles.base.border = /border:\s*([^;]+);/.exec(baseStyles)?.[1];
+    styles.base.borderRadius = /border-radius:\s*([^;]+);/.exec(baseStyles)?.[1];
+  }
+
+  const hoverMatch = cssString.match(/&:hover\s*{([^}]+)}/);
+  if (hoverMatch) {
+    styles.hover = {
+      background: /background:\s*([^;]+);/.exec(hoverMatch[1])?.[1],
+      border: /border:\s*([^;]+);/.exec(hoverMatch[1])?.[1]
+    };
+  }
+
+  const activeMatch = cssString.match(/&:active\s*{([^}]+)}/);
+  if (activeMatch) {
+    styles.active = {
+      background: /background:\s*([^;]+);/.exec(activeMatch[1])?.[1],
+      border: /border:\s*([^;]+);/.exec(activeMatch[1])?.[1]
+    };
+  }
+
+  const disabledMatch = cssString.match(/&:disabled\s*{([^}]+)}/);
+  if (disabledMatch) {
+    styles.disabled = {
+      background: /background:\s*([^;]+);/.exec(disabledMatch[1])?.[1],
+      border: /border:\s*([^;]+);/.exec(disabledMatch[1])?.[1]
+    };
+  }
+
+  return styles;
 }
