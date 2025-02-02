@@ -1,5 +1,11 @@
 # @react-pixel-ui/use-pixelated-css
 
+## 0.1.4
+
+### Patch Changes
+
+- 6effd0c: adjust for interaction states
+
 ## 0.1.3
 
 ### Patch Changes
