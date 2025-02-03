@@ -11,7 +11,7 @@ interface UsePixelatedCSSProps {
   unitPixel?: number;
 }
 
-export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSProps) => {
+export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 16}: UsePixelatedCSSProps) => {
   const [pixelatedCSS, setPixelatedCSS] = useState<SerializedStyles>(prevCSS);
   
   const isInitialized = useRef(false);
@@ -30,7 +30,7 @@ export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSPr
       unitPixelRef.current = unitPixel;
       isInitialized.current = true;
       
-      setPixelatedCSS(pixelate({prevCss: prevCSS, ref, unitPixel}));
+      setPixelatedCSS(pixelate({ref, unitPixel}));
     }
   }, [prevCSS.styles, ref, unitPixel]);
 

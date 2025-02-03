@@ -255,126 +255,126 @@ export const Playground: Story = {
   }
 };
 
-export const UnitPixelComparison: Story = {
-  render: () => (
-    <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
-      {[1, 4, 8, 12].map((pixel) => (
-        <div key={pixel} style={{textAlign: 'center'}}>
-          <p style={{margin: '0 0 8px'}}>{pixel}px unit</p>
-          <DemoComponent 
-            unitPixel={pixel}
-            background="linear-gradient(45deg, #FFDCFF, #FF97FF)"
-            border={`${pixel}px solid #8425EC`}
-            borderRadius={16}
-          />
-        </div>
-      ))}
-    </div>
-  )
-};
+// export const UnitPixelComparison: Story = {
+//   render: () => (
+//     <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
+//       {[1, 4, 8, 12].map((pixel) => (
+//         <div key={pixel} style={{textAlign: 'center'}}>
+//           <p style={{margin: '0 0 8px'}}>{pixel}px unit</p>
+//           <DemoComponent 
+//             unitPixel={pixel}
+//             background="linear-gradient(45deg, #FFDCFF, #FF97FF)"
+//             border={`${pixel}px solid #8425EC`}
+//             borderRadius={16}
+//           />
+//         </div>
+//       ))}
+//     </div>
+//   )
+// };
 
-export const BackgroundVariations: Story = {
-  render: () => (
-    <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>45° Gradient</p>
-        <DemoComponent background="linear-gradient(45deg, #FFDCFF, #FF97FF)" borderRadius={16}/>
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>90° Gradient</p>
-        <DemoComponent background="linear-gradient(90deg, #FFEEFF, #FF97FF)" borderRadius={16}/>
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>180° Gradient</p>
-        <DemoComponent background="linear-gradient(180deg, #FFEEFF, #FF97FF)" borderRadius={16}/>
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>Solid Color</p>
-        <DemoComponent background="#FFDCFF" borderRadius={16} />
-      </div>
-    </div>
-  )
-};
+// export const BackgroundVariations: Story = {
+//   render: () => (
+//     <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>45° Gradient</p>
+//         <DemoComponent background="linear-gradient(45deg, #FFDCFF, #FF97FF)" borderRadius={16}/>
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>90° Gradient</p>
+//         <DemoComponent background="linear-gradient(90deg, #FFEEFF, #FF97FF)" borderRadius={16}/>
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>180° Gradient</p>
+//         <DemoComponent background="linear-gradient(180deg, #FFEEFF, #FF97FF)" borderRadius={16}/>
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>Solid Color</p>
+//         <DemoComponent background="#FFDCFF" borderRadius={16} />
+//       </div>
+//     </div>
+//   )
+// };
 
-export const BorderVariations: Story = {
-  render: () => (
-    <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>No Border</p>
-        <DemoComponent borderRadius={16} />
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>Thin Border</p>
-        <DemoComponent border="4px solid #8425EC" borderRadius={16} />
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>Medium Border</p>
-        <DemoComponent border="8px solid #8425EC" borderRadius={16} />
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>Thick Border</p>
-        <DemoComponent border="12px solid #8425EC" borderRadius={16} />
-      </div>
-    </div>
-  )
-};
+// export const BorderVariations: Story = {
+//   render: () => (
+//     <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>No Border</p>
+//         <DemoComponent borderRadius={16} />
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>Thin Border</p>
+//         <DemoComponent border="4px solid #8425EC" borderRadius={16} />
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>Medium Border</p>
+//         <DemoComponent border="8px solid #8425EC" borderRadius={16} />
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>Thick Border</p>
+//         <DemoComponent border="12px solid #8425EC" borderRadius={16} />
+//       </div>
+//     </div>
+//   )
+// };
 
-export const BorderRadiusVariations: Story = {
-  render: () => (
-    <div style={{display: 'flex', gap: '20px', flexWrap: 'wrap'}}>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>No Radius</p>
-        <DemoComponent border="4px solid #8425EC" />
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>Small Radius</p>
-        <DemoComponent border="4px solid #8425EC" borderRadius={8} />
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>Medium Radius</p>
-        <DemoComponent border="4px solid #8425EC" borderRadius={16} />
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>Large Radius</p>
-        <DemoComponent border="4px solid #8425EC" borderRadius={24} />
-      </div>
-    </div>
-  )
-};
+// export const BorderRadiusVariations: Story = {
+//   render: () => (
+//     <div style={{display: 'flex', gap: '20px', flexWrap: 'wrap'}}>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>No Radius</p>
+//         <DemoComponent border="4px solid #8425EC" />
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>Small Radius</p>
+//         <DemoComponent border="4px solid #8425EC" borderRadius={8} />
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>Medium Radius</p>
+//         <DemoComponent border="4px solid #8425EC" borderRadius={16} />
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>Large Radius</p>
+//         <DemoComponent border="4px solid #8425EC" borderRadius={24} />
+//       </div>
+//     </div>
+//   )
+// };
 
-export const InteractionStates: Story = {
-  render: () => (
-    <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>Hover & Active States</p>
-        <DemoComponent 
-          background="linear-gradient(45deg, #FFDCFF, #FF97FF)"
-          hoverBackground="linear-gradient(45deg, #FFB7FF, #FF6EFF)"
-          activeBackground="linear-gradient(45deg, #FF97FF, #FF4FFF)"
-          border="4px solid #8425EC"
-          hoverBorder="4px solid #6B1EBF"
-          activeBorder="4px solid #521790"
-          borderRadius={16}
-        />
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>Background Change Only</p>
-        <DemoComponent 
-          background="#FFDCFF"
-          hoverBackground="#FFB7FF"
-          activeBackground="#FF97FF"
-          borderRadius={16}
-        />
-      </div>
-      <div style={{textAlign: 'center'}}>
-        <p style={{margin: '0 0 8px'}}>Border Change Only</p>
-        <DemoComponent 
-          border="4px solid #8425EC"
-          hoverBorder="4px solid #6B1EBF"
-          activeBorder="4px solid #521790"
-          borderRadius={16}
-        />
-      </div>
-    </div>
-  )
-};
+// export const InteractionStates: Story = {
+//   render: () => (
+//     <div style={{display: 'flex', gap: '24px', flexWrap: 'wrap'}}>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>Hover & Active States</p>
+//         <DemoComponent 
+//           background="linear-gradient(45deg, #FFDCFF, #FF97FF)"
+//           hoverBackground="linear-gradient(45deg, #FFB7FF, #FF6EFF)"
+//           activeBackground="linear-gradient(45deg, #FF97FF, #FF4FFF)"
+//           border="4px solid #8425EC"
+//           hoverBorder="4px solid #6B1EBF"
+//           activeBorder="4px solid #521790"
+//           borderRadius={16}
+//         />
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>Background Change Only</p>
+//         <DemoComponent 
+//           background="#FFDCFF"
+//           hoverBackground="#FFB7FF"
+//           activeBackground="#FF97FF"
+//           borderRadius={16}
+//         />
+//       </div>
+//       <div style={{textAlign: 'center'}}>
+//         <p style={{margin: '0 0 8px'}}>Border Change Only</p>
+//         <DemoComponent 
+//           border="4px solid #8425EC"
+//           hoverBorder="4px solid #6B1EBF"
+//           activeBorder="4px solid #521790"
+//           borderRadius={16}
+//         />
+//       </div>
+//     </div>
+//   )
+// };
