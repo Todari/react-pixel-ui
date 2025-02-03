@@ -1,2 +1,2 @@
-export * from './border/index'; 
+// export * from './border/index'; 
 export * from './background/index';

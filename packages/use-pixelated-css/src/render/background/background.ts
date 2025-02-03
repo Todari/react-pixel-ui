@@ -1,4 +1,4 @@
-import { StyleMap } from "../../type";
+import { StyleMap } from "../../types/type";
 import { parsePosition, parseSize } from "../../util/parse";
 import { getCanvasBlendMode } from "./backgroundBlend";
 import { drawBackgroundGradient } from "./backgroundGradient";
@@ -8,7 +8,7 @@ import { applyClipPath } from "./backgroundClip";
 interface Params {
   styleMap: StyleMap;
   ctx: CanvasRenderingContext2D;
-  ref: HTMLElement;
+  element: HTMLElement;
   unitPixel: number;
 }   
 
@@ -27,48 +27,27 @@ export interface BackgroundLayer {
 function parseBackgroundLayers(styleMap: StyleMap): BackgroundLayer[] {
   const layers: BackgroundLayer[] = [];
   
-  // 각 속성 배열 가져오기
-  const colors = styleMap['background-color'] || [];
-  const images = styleMap['background-image'] || [];
-  const positions = styleMap['background-position'] || [];
-  const sizes = styleMap['background-size'] || [];
-  const repeats = styleMap['background-repeat'] || [];
-  const attachments = styleMap['background-attachment'] || [];
-  const origins = styleMap['background-origin'] || [];
-  const clips = styleMap['background-clip'] || [];
-  const blendModes = styleMap['background-blend-mode'] || [];
-
-  // 가장 긴 배열 길이 찾기
-  const maxLength = Math.max(
-    images.length,
-    positions.length,
-    sizes.length,
-    repeats.length,
-    attachments.length,
-    origins.length,
-    clips.length,
-    blendModes.length
-  );
-
-  // 레이어 구성
-  for (let i = 0; i < maxLength; i++) {
+  // 이미지 기준으로 레이어 생성
+  const images = styleMap['background-image'] || ['none'];
+  
+  images.forEach((image, i) => {
     layers.push({
-      color: i === 0 ? colors[0] : undefined,
-      image: images[i % images.length],
-      position: parsePosition(positions[i % positions.length]),
-      size: parseSize(sizes[i % sizes.length]),
-      repeat: repeats[i % repeats.length] || 'repeat',
-      attachment: attachments[i % attachments.length] || 'scroll',
-      origin: origins[i % origins.length] || 'padding-box',
-      clip: clips[i % clips.length] || 'border-box',
-      blendMode: blendModes[i % blendModes.length] || 'normal'
+      color: i === images.length - 1 ? styleMap['background-color']?.[0] : undefined,
+      image: image === 'none' ? undefined : image,
+      position: parsePosition(styleMap['background-position']?.[i] || '0% 0%'),
+      size: parseSize(styleMap['background-size']?.[i] || 'auto'),
+      repeat: styleMap['background-repeat']?.[i] || 'repeat',
+      attachment: styleMap['background-attachment']?.[i] || 'scroll',
+      origin: styleMap['background-origin']?.[i] || 'padding-box',
+      clip: styleMap['background-clip']?.[i] || 'border-box',
+      blendMode: styleMap['background-blend-mode']?.[i] || 'normal'
     });
-  }
+  });
 
-  return layers;
+  return layers.reverse(); // 브라우저 렌더링 순서와 맞추기 위해 역순 정렬
 }
 
-export const drawBackground = ({styleMap, ctx, ref, unitPixel}: Params) => {
+export const drawBackground = ({styleMap, ctx, element, unitPixel}: Params) => {
   try {
     const layers = parseBackgroundLayers(styleMap);
     const canvas = ctx.canvas;
@@ -105,7 +84,7 @@ export const drawBackground = ({styleMap, ctx, ref, unitPixel}: Params) => {
 
       // 클리핑 처리
       if (layer.clip === 'padding-box' || layer.clip === 'content-box') {
-        applyClipPath(layerCtx, layer.clip, styleMap, ref, unitPixel);
+        applyClipPath(layerCtx, layer.clip, styleMap, element, unitPixel);
       }
 
       // 블렌드 모드 적용

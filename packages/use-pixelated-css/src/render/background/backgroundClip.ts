@@ -1,4 +1,4 @@
-import { StyleMap } from "../../type";
+import { StyleMap } from "../../types/type";
 import { pixelUnit } from "../../util/cssUnit";
 
 export function applyClipPath(

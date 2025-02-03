@@ -1,4 +1,4 @@
-import { BoxStyles, BoxStylesKeys, StyleMap } from "../type";
+import { BoxStyles, BoxStylesKeys, StyleMap } from "../types/type";
 
 export const styleMap = (ref: React.RefObject<HTMLElement>) => {
   const styleMap: StyleMap = {};
