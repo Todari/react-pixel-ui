@@ -2,7 +2,7 @@ import { css, SerializedStyles } from "@emotion/react";
 import { styleMap } from "./util/styles";
 import { drawBorder } from "./render/border";
 import { drawBackground } from "./render";
-import { rectSizeByStyleMap } from "./util/spacing";
+import { rectSize } from "./util/spacing";
 
 interface Params{
   ref: React.RefObject<HTMLElement>;
@@ -13,7 +13,7 @@ export function pixelate({ref, unitPixel}: Params) : SerializedStyles {
   const styles = styleMap(ref);
   const canvas = document.createElement('canvas');
 
-  const {contentWidth, contentHeight, border} = rectSizeByStyleMap(styles, ref);
+  const {contentWidth, contentHeight, border} = rectSize(styles, ref);
 
   canvas.width = contentWidth / unitPixel;
   canvas.height = contentHeight / unitPixel;
