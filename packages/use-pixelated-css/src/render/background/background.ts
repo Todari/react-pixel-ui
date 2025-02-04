@@ -28,7 +28,10 @@ function parseBackgroundLayers(styleMap: StyleMap): BackgroundLayer[] {
   const layers: BackgroundLayer[] = [];
   
   // 이미지 기준으로 레이어 생성
-  const images = styleMap['background-image'] || ['none'];
+  const image = styleMap['background-image'] || 'none';
+  
+  // 단일 이미지인 경우 배열로 변환
+  const images = Array.isArray(image) ? image : [image];
   
   images.forEach((image, i) => {
     layers.push({
