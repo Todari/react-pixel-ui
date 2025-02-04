@@ -1,13 +1,13 @@
-import { BackgroundLayer } from "./background";
+import { Background } from "./background";
 
 interface BackgroundImageParams {
   ctx: CanvasRenderingContext2D;
-  layer: BackgroundLayer;
+  background: Background;
 }
 
-export function drawBackgroundImage({ctx, layer}: BackgroundImageParams) {
+export function drawBackgroundImage({ctx, background}: BackgroundImageParams) {
   const image = new Image();
-  image.src = layer.image!.replace(/url\(['"]?(.*?)['"]?\)/g, '$1');
+  image.src = background.image!.replace(/url\(['"]?(.*?)['"]?\)/g, '$1');
 
   return new Promise((resolve) => {
     image.onload = () => {
@@ -15,20 +15,20 @@ export function drawBackgroundImage({ctx, layer}: BackgroundImageParams) {
       
       // 1. 이미지 크기 계산
       const size = calculateBackgroundSize(
-        layer.size,
+        background.size,
         { width: image.width, height: image.height },
         { width: canvas.width, height: canvas.height }
       );
 
       // 2. 이미지 위치 계산
       const position = calculateBackgroundPosition(
-        layer.position,
+        background.position,
         size,
         { width: canvas.width, height: canvas.height }
       );
 
       // 3. repeat 처리
-      switch (layer.repeat) {
+      switch (background.repeat) {
         case 'no-repeat':
           drawSingleImage(ctx, image, position, size);
           break;

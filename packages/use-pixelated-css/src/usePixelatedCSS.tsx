@@ -13,43 +13,39 @@ interface UsePixelatedCSSProps {
 
 export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSProps) => {
   const [pixelatedCSS, setPixelatedCSS] = useState<SerializedStyles>(prevCSS);
-  
   const isInitialized = useRef(false);
-  const prevCSSRef = useRef(prevCSS);
   const unitPixelRef = useRef(unitPixel);
   
-  const updatePixelatedCSS = useCallback(() => {
+  // prevCSS를 먼저 적용
+  useLayoutEffect(() => {
     if (!ref.current) return;
-    console.log(prevCSS)
+    ref.current.setAttribute('style', prevCSS.styles);
+  }, [prevCSS.styles, ref]);
+
+  // prevCSS가 적용된 후 pixelate 실행
+  useLayoutEffect(() => {
+    if (!ref.current) return;
     
     requestAnimationFrame(() => {
       if (
-        prevCSSRef.current !== prevCSS || 
         unitPixelRef.current !== unitPixel ||
         !isInitialized.current
       ) {
-        prevCSSRef.current = prevCSS;
         unitPixelRef.current = unitPixel;
         isInitialized.current = true;
-        
         setPixelatedCSS(pixelate({ref, unitPixel}));
       }
     });
   }, [prevCSS.styles, ref, unitPixel]);
 
-  useLayoutEffect(() => {
-    if (ref.current) {
-      updatePixelatedCSS();
-    }
-  }, [updatePixelatedCSS]);
-
+  // ResizeObserver와 MutationObserver 설정
   useEffect(() => {
     if (!ref.current) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
       requestAnimationFrame(() => {
         if (entries[0].contentRect) {
-          updatePixelatedCSS();
+          setPixelatedCSS(pixelate({ref, unitPixel}));
         }
       });
     });
@@ -61,7 +57,7 @@ export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSPr
           (mutation.attributeName === 'style' || mutation.attributeName === 'class')
         ) {
           requestAnimationFrame(() => {
-            updatePixelatedCSS();
+            setPixelatedCSS(pixelate({ref, unitPixel}));
           });
         }
       });
@@ -77,7 +73,7 @@ export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSPr
       resizeObserver.disconnect();
       mutationObserver.disconnect();
     };
-  }, [updatePixelatedCSS]);
+  }, [ref, unitPixel]);
 
   return pixelatedCSS;
 };

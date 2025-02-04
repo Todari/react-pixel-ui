@@ -42,18 +42,18 @@ function calculateClipBounds(
 ): ClipBounds {
   // padding 값 파싱
   const padding = {
-    top: pixelUnit(styleMap['padding-top']?.[0] || '0', ref) / unitPixel,
-    right: pixelUnit(styleMap['padding-right']?.[0] || '0', ref) / unitPixel,
-    bottom: pixelUnit(styleMap['padding-bottom']?.[0] || '0', ref) / unitPixel,
-    left: pixelUnit(styleMap['padding-left']?.[0] || '0', ref) / unitPixel
+    top: pixelUnit(styleMap['padding-top']  || '0', ref) / unitPixel,
+    right: pixelUnit(styleMap['padding-right']  || '0', ref) / unitPixel,
+    bottom: pixelUnit(styleMap['padding-bottom']  || '0', ref) / unitPixel,
+    left: pixelUnit(styleMap['padding-left']  || '0', ref) / unitPixel
   };
 
   // border 값 파싱
   const border = {
-    top: pixelUnit(styleMap['border-top-width']?.[0] || '0', ref) / unitPixel,
-    right: pixelUnit(styleMap['border-right-width']?.[0] || '0', ref) / unitPixel,
-    bottom: pixelUnit(styleMap['border-bottom-width']?.[0] || '0', ref) / unitPixel,
-    left: pixelUnit(styleMap['border-left-width']?.[0] || '0', ref) / unitPixel
+    top: pixelUnit(styleMap['border-top-width']  || '0', ref) / unitPixel,
+    right: pixelUnit(styleMap['border-right-width']  || '0', ref) / unitPixel,
+    bottom: pixelUnit(styleMap['border-bottom-width']  || '0', ref) / unitPixel,
+    left: pixelUnit(styleMap['border-left-width']  || '0', ref) / unitPixel
   };
 
   if (clipMode === 'padding-box') {

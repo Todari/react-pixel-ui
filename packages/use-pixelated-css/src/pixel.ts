@@ -3,6 +3,7 @@ import { styleMap } from "./util/styles";
 import { drawBorder } from "./render/border";
 import { drawBackground } from "./render";
 import { rectSize } from "./util/spacing";
+import { applyBorderRadius } from "./render/clip/borderRadius";
 
 interface Params{
   ref: React.RefObject<HTMLElement>;
@@ -12,8 +13,11 @@ interface Params{
 export function pixelate({ref, unitPixel}: Params) : SerializedStyles {
   const styles = styleMap(ref);
   const canvas = document.createElement('canvas');
+  console.log('styles', styles);
 
-  const {contentWidth, contentHeight, border} = rectSize(styles, ref);
+  const {contentWidth, contentHeight, border} = rectSize(styles, ref.current!);
+  console.log('contentWidth', contentWidth, contentHeight);
+
 
   canvas.width = contentWidth / unitPixel;
   canvas.height = contentHeight / unitPixel;
@@ -22,8 +26,14 @@ export function pixelate({ref, unitPixel}: Params) : SerializedStyles {
   if (!ctx) throw new Error('2D 컨텍스트를 초기화할 수 없습니다');
   ctx.imageSmoothingEnabled = false;
 
-  drawBackground({styleMap: styles, ctx, element: ref.current!, unitPixel});
-  drawBorder({styleMap: styles, ctx, element: ref.current!, unitPixel});
+  applyBorderRadius({ctx, styles, element: ref.current!, unitPixel});
+
+  drawBackground({styles, ctx, element: ref.current!, unitPixel});
+  drawBorder({styles, ctx, element: ref.current!, unitPixel});
+
+  console.log('canvasSize', canvas.width, canvas.height);
+  console.log('clientSize', ref.current?.clientWidth, ref.current?.clientHeight);
+  console.log('boundSize', ref.current?.getBoundingClientRect().width, ref.current?.getBoundingClientRect().height);
 
   return css`
     ${styles}
@@ -41,6 +51,7 @@ export function pixelate({ref, unitPixel}: Params) : SerializedStyles {
       image-rendering: pixelated;
       z-index: 1;
       pointer-events: none;
+      transition: all 0s;
     }
   `;
 }

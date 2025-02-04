@@ -5,7 +5,7 @@ import { drawBorderPath } from "./borderPath";
 
 export interface BorderParams {
   ctx: CanvasRenderingContext2D;
-  styleMap: StyleMap;
+  styles: StyleMap;
   unitPixel: number;
   element: HTMLElement;
 }
@@ -18,46 +18,46 @@ export interface BorderImageParams {
   repeat: string;
 }
 
-export function drawBorder({ctx, styleMap, unitPixel, element}: BorderParams) {
+export function drawBorder({ctx, styles, unitPixel, element}: BorderParams) {
   // 1. border-image 처리 (최우선)
-  const borderImage = parseBorderImage(styleMap);
+  const borderImage = parseBorderImage(styles);
   if (borderImage) {
     drawBorderImage(ctx, borderImage, unitPixel);
     return null;
   }
 
   // 2. border-radius 계산
-  const radius = parseBorderRadius(styleMap, element, unitPixel);
+  const radius = parseBorderRadius(styles, element, unitPixel);
   
   // 3. 각 방향별 border 스타일 계산
-  const borders = parseBorderStyles(styleMap, element, unitPixel);
+  const borders = parseBorderStyles(styles, element, unitPixel);
   // 4. border 그리기
   drawBorderPath(ctx, borders, radius);
 }
 
-function parseBorderImage(styleMap: StyleMap): BorderImageParams | null {
+function parseBorderImage(styles: StyleMap): BorderImageParams | null {
   // border-image가 없으면 null 반환
-  if (!styleMap['border-image-source']?.[0] || styleMap['border-image-source']?.[0] === 'none') {
+  if (!styles['border-image-source']  || styles['border-image-source']  === 'none') {
     return null;
   }
 
   // slice 값 파싱 (기본값: [0, 0, 0, 0])
-  const sliceValues = styleMap['border-image-slice']?.[0]?.split(' ') || ['0'];
+  const sliceValues = styles['border-image-slice'] ?.split(' ') || ['0'];
   const slice = expandToFourValues(sliceValues).map(v => parseInt(v));
 
   // width 값 파싱 (기본값: [1, 1, 1, 1])
-  const widthValues = styleMap['border-image-width']?.[0]?.split(' ') || ['1'];
+  const widthValues = styles['border-image-width'] ?.split(' ') || ['1'];
   const width = expandToFourValues(widthValues).map(v => parseInt(v));
 
   // outset 값 파싱 (기본값: [0, 0, 0, 0])
-  const outsetValues = styleMap['border-image-outset']?.[0]?.split(' ') || ['0'];
+  const outsetValues = styles['border-image-outset'] ?.split(' ') || ['0'];
   const outset = expandToFourValues(outsetValues).map(v => parseInt(v));
 
   // repeat 값 파싱 (기본값: 'stretch')
-  const repeat = styleMap['border-image-repeat']?.[0] || 'stretch';
+  const repeat = styles['border-image-repeat']  || 'stretch';
 
   return {
-    source: styleMap['border-image-source'][0],
+    source: styles['border-image-source'],
     slice,
     width,
     outset,
@@ -117,9 +117,9 @@ export function parseBorderRadius(
 
   Object.entries(corners).forEach(([corner, properties]) => {
     const value = 
-      styleMap[properties[0]]?.[0] ||
-      styleMap[properties[1]]?.[0] ||
-      styleMap['border-radius']?.[0] ||
+      styleMap[properties[0]]  ||
+      styleMap[properties[1]]  ||
+      styleMap['border-radius']  ||
       '0';
 
     result[corner as keyof BorderRadius] = pixelUnit(value, element) / unitPixel;
@@ -160,9 +160,9 @@ function getBorderWidth(
 ): number {
   // 우선순위: 논리적 > 물리적 > 축약형
   const value = 
-    styleMap[`border-${logical}-width`]?.[0] ||
-    styleMap[`border-${physical}-width`]?.[0] ||
-    styleMap['border-width']?.[0] ||
+    styleMap[`border-${logical}-width`]  ||
+    styleMap[`border-${physical}-width`]  ||
+    styleMap['border-width']  ||
     '0';
 
   return pixelUnit(value, element) / unitPixel;
@@ -170,18 +170,18 @@ function getBorderWidth(
 
 function getBorderStyle(styleMap: StyleMap, physical: string, logical: string): string {
   return (
-    styleMap[`border-${logical}-style`]?.[0] ||
-    styleMap[`border-${physical}-style`]?.[0] ||
-    styleMap['border-style']?.[0] ||
+    styleMap[`border-${logical}-style`]  ||
+    styleMap[`border-${physical}-style`]  ||
+    styleMap['border-style']  ||
     'none'
   );
 }
 
 function getBorderColor(styleMap: StyleMap, physical: string, logical: string): string {
   return (
-    styleMap[`border-${logical}-color`]?.[0] ||
-    styleMap[`border-${physical}-color`]?.[0] ||
-    styleMap['border-color']?.[0] ||
+    styleMap[`border-${logical}-color`]  ||
+    styleMap[`border-${physical}-color`]  ||
+    styleMap['border-color']  ||
     'currentcolor'
   );
 }

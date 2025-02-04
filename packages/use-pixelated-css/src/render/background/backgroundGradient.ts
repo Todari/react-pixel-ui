@@ -1,12 +1,12 @@
-import { BackgroundLayer } from "./background";
+import { Background } from "./background";
 
 interface BackgroundGradientParams {
   ctx: CanvasRenderingContext2D;
-  layer: BackgroundLayer;
+  background: Background;
 }
 
-export function drawBackgroundGradient({ ctx, layer }: BackgroundGradientParams) {
-  const gradientString = layer.image!;
+export function drawBackgroundGradient({ ctx, background }: BackgroundGradientParams) {
+  const gradientString = background.image!;
   const canvas = ctx.canvas;
 
   if (gradientString.includes('linear-gradient')) {
