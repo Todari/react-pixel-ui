@@ -1,4 +1,4 @@
-export function convertCSSUnitToPx(value: string, element: HTMLElement): number {
+export function pixelUnit(value: string, element: HTMLElement): number {
   if (!value) return 0;
   
   const match = /^([\d.]+)([a-z%]*)$/.exec(value);
@@ -12,8 +12,11 @@ export function convertCSSUnitToPx(value: string, element: HTMLElement): number 
       return num;
     case 'rem':
       return num * parseFloat(getComputedStyle(document.documentElement).fontSize);
-    case 'em':
-      return num * parseFloat(getComputedStyle(element).fontSize);
+    case 'em': {
+      const parentElement = element.parentElement;  
+      if (!parentElement) return num * parseFloat(getComputedStyle(element).fontSize);  
+      return num * parseFloat(getComputedStyle(parentElement).fontSize);
+    }
     case '%':
       return (num / 100) * element.clientWidth;
     case 'vw':
