@@ -3,7 +3,6 @@ import { parsePosition, parseSize } from "../../util/parse";
 import { getCanvasBlendMode } from "./backgroundBlend";
 import { drawBackgroundGradient } from "./backgroundGradient";
 import { drawBackgroundImage } from "./backgroundImage";
-import { applyClipPath } from "./backgroundClip";
 
 interface Params {
   styles: StyleMap;
