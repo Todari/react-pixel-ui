@@ -1,5 +1,13 @@
 # @react-pixel-ui/pixel-ui
 
+## 0.1.5
+
+### Patch Changes
+
+- b5ce597: refactor
+- Updated dependencies [b5ce597]
+  - @react-pixel-ui/use-pixelated-css@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes
