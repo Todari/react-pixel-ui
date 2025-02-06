@@ -6,10 +6,24 @@ interface BackgroundImageParams {
 }
 
 export function drawBackgroundImage({ctx, background}: BackgroundImageParams) {
+  if (!background.image) {  
+    return Promise.reject(new Error('이미지 URL이 제공되지 않았습니다.'));  
+  }  
+
   const image = new Image();
-  image.src = background.image!.replace(/url\(['"]?(.*?)['"]?\)/g, '$1');
+  const imageUrl = background.image!.replace(/url\(['"]?(.*?)['"]?\)/g, '$1');
+
+  if (!imageUrl) {  
+    return Promise.reject(new Error('유효하지 않은 이미지 URL입니다.'));  
+  }  
+  
+  image.src = imageUrl;  
 
   return new Promise((resolve) => {
+    const timeout = setTimeout(() => {  
+      console.error('이미지 로딩 시간 초과');  
+      resolve(false);  
+    }, 10000); // 10초 타임아웃  
     image.onload = () => {
       const canvas = ctx.canvas;
       
@@ -53,6 +67,7 @@ export function drawBackgroundImage({ctx, background}: BackgroundImageParams) {
     };
 
     image.onerror = () => {
+      clearTimeout(timeout);
       console.error('Background image loading failed');
       resolve(false);
     };
@@ -203,9 +218,10 @@ function createImageTile(image: HTMLImageElement, size: Size): HTMLCanvasElement
   canvas.width = size.width;
   canvas.height = size.height;
   const ctx = canvas.getContext('2d');
-  if (ctx) {
-    ctx.drawImage(image, 0, 0, size.width, size.height);
-  }
+  if (!ctx) {  
+    throw new Error('이미지 타일용 캔버스 컨텍스트를 생성할 수 없습니다.');  
+  }  
+  ctx.drawImage(image, 0, 0, size.width, size.height);
   return canvas;
 }
 

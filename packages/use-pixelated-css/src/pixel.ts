@@ -11,13 +11,14 @@ interface Params{
 }
 
 export function pixelate({ref, unitPixel}: Params) : SerializedStyles {
+  if (!ref.current) {
+    throw new Error('ref.current is null');
+  };
+
   const styles = styleMap(ref);
   const canvas = document.createElement('canvas');
-  console.log('styles', styles);
 
-  const {contentWidth, contentHeight, border} = rectSize(styles, ref.current!);
-  console.log('contentWidth', contentWidth, contentHeight);
-
+  const {contentWidth, contentHeight, border} = rectSize(styles, ref.current);
 
   canvas.width = contentWidth / unitPixel;
   canvas.height = contentHeight / unitPixel;
@@ -30,10 +31,6 @@ export function pixelate({ref, unitPixel}: Params) : SerializedStyles {
 
   drawBackground({styles, ctx, element: ref.current!, unitPixel});
   drawBorder({styles, ctx, element: ref.current!, unitPixel});
-
-  console.log('canvasSize', canvas.width, canvas.height);
-  console.log('clientSize', ref.current?.clientWidth, ref.current?.clientHeight);
-  console.log('boundSize', ref.current?.getBoundingClientRect().width, ref.current?.getBoundingClientRect().height);
 
   return css`
     ${styles}

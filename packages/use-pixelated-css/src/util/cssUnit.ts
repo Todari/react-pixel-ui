@@ -13,7 +13,9 @@ export function pixelUnit(value: string, element: HTMLElement): number {
     case 'rem':
       return num * parseFloat(getComputedStyle(document.documentElement).fontSize);
     case 'em':
-      return num * parseFloat(getComputedStyle(element.parentElement!).fontSize);
+      const parentElement = element.parentElement;  
+      if (!parentElement) return num * parseFloat(getComputedStyle(element).fontSize);  
+      return num * parseFloat(getComputedStyle(parentElement).fontSize); 
     case '%':
       return (num / 100) * element.clientWidth;
     case 'vw':

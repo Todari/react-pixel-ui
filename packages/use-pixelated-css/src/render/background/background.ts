@@ -24,14 +24,15 @@ export interface Background {
 }
 
 function parseBackground(styles: StyleMap): Background {
-  
+  if (!styles || typeof styles !== 'object') {  
+    throw new Error('유효하지 않은 styles 객체입니다.');  
+  }  
   // 이미지 기준으로 레이어 생성
   const image = styles['background-image'] || 'none';
   
-  
   return {
     color: styles['background-color'],
-    image: image === 'none' ? undefined : image,
+    image: image && image !== 'none' ? image : undefined, 
     position: parsePosition(styles['background-position'] || '0% 0%'),
     size: parseSize(styles['background-size'] || 'auto'),
     repeat: styles['background-repeat'] || 'repeat',
@@ -43,6 +44,11 @@ function parseBackground(styles: StyleMap): Background {
 }
 
 export const drawBackground = ({styles, ctx, element, unitPixel}: Params) => {
+  if (!ctx) {  
+    console.error('유효하지 않은 캔버스 컨텍스트입니다.');  
+    return null;  
+  }  
+
   try {
     const background = parseBackground(styles);
     const canvas = ctx.canvas;
@@ -61,6 +67,10 @@ export const drawBackground = ({styles, ctx, element, unitPixel}: Params) => {
       layerCanvas.width = canvas.width;
       layerCanvas.height = canvas.height;
       const layerCtx = layerCanvas.getContext('2d')!;
+
+      if (!layerCtx) {  
+        throw new Error('레이어 캔버스 컨텍스트를 생성할 수 없습니다.');  
+      }  
 
       // 배경색 처리
       if (background.color) {
@@ -87,10 +97,18 @@ export const drawBackground = ({styles, ctx, element, unitPixel}: Params) => {
       
       // 최종 레이어 합성
       ctx.drawImage(layerCanvas, 0, 0);
+
+      // 메모리 해제를 위해 임시 캔버스 참조 제거  
+      layerCanvas.width = 0;  
+      layerCanvas.height = 0;  
     }
 
   } catch (error) {
-    console.error('배경 렌더링 중 오류 발생:', error);
+    if (error instanceof Error) {  
+      console.error('배경 렌더링 중 오류 발생:', error.message);  
+    } else {  
+      console.error('알 수 없는 오류 발생');  
+    }  
     return null;
   }
 };

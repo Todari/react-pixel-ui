@@ -26,7 +26,7 @@ export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSPr
   useLayoutEffect(() => {
     if (!ref.current) return;
     
-    requestAnimationFrame(() => {
+    const frameId = requestAnimationFrame(() => {
       if (
         unitPixelRef.current !== unitPixel ||
         !isInitialized.current
@@ -36,6 +36,10 @@ export const usePixelatedCSS = ({prevCSS, ref, unitPixel = 4}: UsePixelatedCSSPr
         setPixelatedCSS(pixelate({ref, unitPixel}));
       }
     });
+
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
   }, [prevCSS.styles, ref, unitPixel]);
 
   // ResizeObserver와 MutationObserver 설정

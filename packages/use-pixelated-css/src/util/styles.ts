@@ -5,7 +5,13 @@ export const styleMap = (ref: React.RefObject<HTMLElement>) => {
   
   if (!ref.current) return styleMap;
   
-  const computedStyle = getComputedStyle(ref.current);
+  let computedStyle: CSSStyleDeclaration;  
+  try {  
+    computedStyle = getComputedStyle(ref.current);  
+  } catch (error) {  
+    console.error('스타일을 계산하는 중 오류가 발생했습니다:', error);  
+    return styleMap;  
+  }  
   
   for (let i = 0; i < computedStyle.length; i++) {
     const property = computedStyle[i];

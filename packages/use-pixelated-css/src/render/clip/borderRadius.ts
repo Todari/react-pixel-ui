@@ -15,12 +15,17 @@ export function applyBorderRadius({ctx, styles, element, unitPixel}: Params) {
   const height = ctx.canvas.height;
   
   // border-radius 값 가져오기
-  const radius = {
-    topLeft: pixelUnit(styles['border-top-left-radius'] || '0', element) / unitPixel,
-    topRight: pixelUnit(styles['border-top-right-radius'] || '0', element) / unitPixel,
-    bottomRight: pixelUnit(styles['border-bottom-right-radius'] || '0', element) / unitPixel,
-    bottomLeft: pixelUnit(styles['border-bottom-left-radius'] || '0', element) / unitPixel
-  };
+    const radius = {  
+    topLeft: Math.max(0, pixelUnit(styles['border-top-left-radius'] || '0', element)) / unitPixel,  
+    topRight: Math.max(0, pixelUnit(styles['border-top-right-radius'] || '0', element)) / unitPixel,  
+    bottomRight: Math.max(0, pixelUnit(styles['border-bottom-right-radius'] || '0', element)) / unitPixel,  
+    bottomLeft: Math.max(0, pixelUnit(styles['border-bottom-left-radius'] || '0', element)) / unitPixel  
+  };  
+
+  // 모든 radius가 0이면 클리핑 생략  
+  if (Object.values(radius).every(r => r === 0)) {  
+    return;  
+  }  
 
   // 경로 그리기
   ctx.moveTo(radius.topLeft, 0);
