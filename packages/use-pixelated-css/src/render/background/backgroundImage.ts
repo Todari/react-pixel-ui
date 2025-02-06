@@ -141,11 +141,16 @@ function drawRepeatedImage(
   direction: 'x' | 'y' | 'both'
 ) {
   const canvas = ctx.canvas;
-  const pattern = ctx.createPattern(createImageTile(image, size), 
+  const imageTile = createImageTile(image, size);     
+  const pattern = ctx.createPattern(imageTile, 
     direction === 'x' ? 'repeat-x' : 
     direction === 'y' ? 'repeat-y' : 
     'repeat'
   );
+  if (!pattern) {  
+    console.error('패턴을 생성할 수 없습니다.');  
+    return;  
+  }  
 
   if (pattern) {
     ctx.save();
@@ -260,9 +265,19 @@ function calculateContainSize(imageSize: Size, containerSize: Size): Size {
 }
 
 function parseBackgroundDimension(value: string, containerSize: number, originalSize: number): number {
+  if (typeof value !== 'string') {  
+    throw new Error('배경 크기는 문자열이어야 합니다.');  
+  }  
+  if (containerSize < 0 || originalSize < 0) {  
+    throw new Error('컨테이너와 원본 크기는 0보다 커야 합니다.');  
+  }  
   if (value === 'auto') return originalSize;
   if (value.endsWith('%')) return (containerSize * parseFloat(value)) / 100;
-  return parseFloat(value); // px 값 처리
+  const size = parseFloat(value);  
+  if (isNaN(size)) {  
+    throw new Error('유효하지 않은 크기 값입니다.');  
+  }  
+  return size;  
 }
 
 function parseBackgroundPosition(value: string, containerSize: number, imageSize: number): number {

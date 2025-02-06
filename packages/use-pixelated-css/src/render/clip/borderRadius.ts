@@ -9,6 +9,11 @@ interface Params{
 }
 
 export function applyBorderRadius({ctx, styles, element, unitPixel}: Params) {
+  if (!ctx || !ctx.canvas) {  
+    console.warn('Invalid canvas context');  
+    return;  
+  }  
+  
   ctx.beginPath();
   
   const width = ctx.canvas.width;
