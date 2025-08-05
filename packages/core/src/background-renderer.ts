@@ -54,7 +54,7 @@ function unitToPixels(unit: PixelUnit, containerSize: number): number {
  * 배경 요소들을 저화질 Canvas에 렌더링
  */
 function renderBackgroundToLowRes(
-  style: BackgroundStyle,
+  style: BackgroundStyle, 
   options: BackgroundRenderOptions
 ): HTMLCanvasElement {
   const { width, height, pixelSize } = options;
@@ -63,17 +63,32 @@ function renderBackgroundToLowRes(
   const lowResWidth = Math.ceil(width / pixelSize);
   const lowResHeight = Math.ceil(height / pixelSize);
 
+  // 브라우저 환경 체크
+  if (typeof document === 'undefined') {
+    throw new Error('픽셀화는 브라우저 환경에서만 사용할 수 있습니다.');
+  }
+
   const canvas = document.createElement('canvas');
   canvas.width = lowResWidth;
   canvas.height = lowResHeight;
 
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Canvas 2D 컨텍스트를 생성할 수 없습니다.');
+  }
+  
   ctx.imageSmoothingEnabled = false;
   
   // 둥근 모서리가 있는 경우 먼저 클리핑 패스 설정
   if (style.borderRadius) {
     const radius = unitToPixels(style.borderRadius, Math.min(width, height)) / pixelSize;
-    createRoundedPath(ctx, lowResWidth, lowResHeight, radius);
+    
+    // 픽셀 크기가 1일 때는 원본 radius 유지
+    const adjustedRadius = pixelSize === 1 ? 
+      unitToPixels(style.borderRadius, Math.min(width, height)) :
+      radius;
+      
+    createRoundedPath(ctx, lowResWidth, lowResHeight, adjustedRadius);
     ctx.clip();
   }
   
@@ -107,13 +122,18 @@ function renderGradientLowRes(
   height: number
 ): void {
   if (gradient.type === 'linear') {
-    const angle = (gradient.angle || 0) * Math.PI / 180;
+    // CSS linear-gradient 각도를 Canvas 각도로 변환
+    // CSS: 0deg = 위쪽, 90deg = 오른쪽 (시계방향)
+    // Canvas: 0deg = 오른쪽, 90deg = 위쪽 (수학적 각도)
+    const cssAngle = gradient.angle || 0;
+    const canvasAngle = (90 - cssAngle) * Math.PI / 180;
     
-    // 그라디언트 방향 계산
-    const x1 = width / 2 - (Math.cos(angle) * width) / 2;
-    const y1 = height / 2 - (Math.sin(angle) * height) / 2;
-    const x2 = width / 2 + (Math.cos(angle) * width) / 2;
-    const y2 = height / 2 + (Math.sin(angle) * height) / 2;
+    // 그라디언트 방향 계산 (대각선 길이 사용)
+    const diagonal = Math.sqrt(width * width + height * height);
+    const x1 = width / 2 - (Math.cos(canvasAngle) * diagonal) / 2;
+    const y1 = height / 2 - (Math.sin(canvasAngle) * diagonal) / 2;
+    const x2 = width / 2 + (Math.cos(canvasAngle) * diagonal) / 2;
+    const y2 = height / 2 + (Math.sin(canvasAngle) * diagonal) / 2;
     
     const canvasGradient = ctx.createLinearGradient(x1, y1, x2, y2);
     
@@ -163,15 +183,17 @@ function renderBorderLowRes(
   borderRadius?: BackgroundStyle['borderRadius']
 ): void {
   const borderWidth = unitToPixels(border.width, Math.min(originalWidth, originalHeight));
-  // 픽셀 크기에 맞게 스케일링하되, 최소 1픽셀은 보장하고 더 두껍게 표현
   const pixelSize = originalWidth / lowResWidth;
+  
+  // 정확한 비율 유지를 위한 border 크기 계산
   let scaledBorderWidth = borderWidth / pixelSize;
   
-  // 얇은 테두리도 픽셀화에서 잘 보이도록 조정
-  if (scaledBorderWidth < 1) {
+  // 픽셀 크기가 1일 때는 원본과 동일하게 유지
+  if (pixelSize === 1) {
+    scaledBorderWidth = borderWidth;
+  } else {
+    // 픽셀화 시에도 비율을 최대한 유지
     scaledBorderWidth = Math.max(0.5, scaledBorderWidth);
-  } else if (scaledBorderWidth < 2) {
-    scaledBorderWidth = Math.ceil(scaledBorderWidth);
   }
   
   const { r, g, b, a } = border.color;
@@ -186,19 +208,25 @@ function renderBorderLowRes(
   } else {
     ctx.setLineDash([]);
   }
+
   
-  // 둥근 모서리가 있는 경우 둥근 테두리, 없으면 직사각형 테두리
+  // border 두께를 2배로 늘려서 CSS border와 비슷하게 만들기
+  const adjustedBorderWidth = scaledBorderWidth * 2;
+  ctx.lineWidth = adjustedBorderWidth;
+  
   if (borderRadius) {
     const radius = unitToPixels(borderRadius, Math.min(originalWidth, originalHeight)) / pixelSize;
-    const adjustedRadius = Math.max(0, radius - scaledBorderWidth / 2);
+    const adjustedRadius = pixelSize === 1 ? 
+      unitToPixels(borderRadius, Math.min(originalWidth, originalHeight)) :
+      Math.max(0, radius - adjustedBorderWidth / 2);
     
     ctx.save();
     createRoundedPath(ctx, lowResWidth, lowResHeight, adjustedRadius);
     ctx.stroke();
     ctx.restore();
   } else {
-    const halfBorder = scaledBorderWidth / 2;
-    ctx.strokeRect(halfBorder, halfBorder, lowResWidth - scaledBorderWidth, lowResHeight - scaledBorderWidth);
+    const halfBorder = adjustedBorderWidth / 2;
+    ctx.strokeRect(halfBorder, halfBorder, lowResWidth - adjustedBorderWidth, lowResHeight - adjustedBorderWidth);
   }
 }
 
@@ -216,7 +244,10 @@ function upscaleToPixelated(
   highResCanvas.width = targetWidth;
   highResCanvas.height = targetHeight;
   
-  const ctx = highResCanvas.getContext('2d')!;
+  const ctx = highResCanvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Canvas 2D 컨텍스트를 생성할 수 없습니다.');
+  }
   
   // 픽셀화 효과를 위해 이미지 스무딩 비활성화
   ctx.imageSmoothingEnabled = false;

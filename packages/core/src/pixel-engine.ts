@@ -6,7 +6,7 @@ import { parseCSS, cssPropertiesToPixelStyle } from './css-parser';
 import { renderPixelatedBackground, BackgroundStyle } from './background-renderer';
 import { PixelStyle } from './types';
 
-export interface SimplePixelOptions {
+export interface PixelOptions {
   width: number;
   height: number;
   pixelSize: number;
@@ -54,7 +54,7 @@ function separateStyles(pixelStyle: PixelStyle): {
  */
 export function pixelizeCSS(
   cssString: string,
-  options: SimplePixelOptions
+  options: PixelOptions
 ): PixelizedResult {
   // CSS 파싱
   const pixelStyle = parseCSS(cssString);
@@ -67,20 +67,20 @@ export function pixelizeCSS(
   
   // 컨테이너 스타일 생성
   const containerStyle: any = {
-    width: options.width,
-    height: options.height,
+    width: `${options.width}px`,
+    height: `${options.height}px`,
     backgroundImage: `url(${backgroundImage})`,
-    backgroundSize: 'cover',
+    backgroundSize: `${options.width}px ${options.height}px`, // 정확한 크기 매칭
     backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'center',
+    backgroundPosition: '0 0', // 정확한 위치 매칭
     imageRendering: 'pixelated', // 브라우저 픽셀화 힌트
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'center', // 수직 중앙 정렬
     justifyContent: textStyle.textAlign === 'center' ? 'center' : 
                    textStyle.textAlign === 'right' ? 'flex-end' : 'flex-start',
-    padding: pixelStyle.padding ? 
-      `${pixelStyle.padding.top.value}${pixelStyle.padding.top.unit} ${pixelStyle.padding.right.value}${pixelStyle.padding.right.unit} ${pixelStyle.padding.bottom.value}${pixelStyle.padding.bottom.unit} ${pixelStyle.padding.left.value}${pixelStyle.padding.left.unit}` : 
-      undefined
+    boxSizing: 'border-box',
+    // 텍스트가 중앙에 오도록 추가 설정
+    textAlign: textStyle.textAlign || 'center'
   };
   
   return {
@@ -95,7 +95,7 @@ export function pixelizeCSS(
  */
 export function pixelizeCSSProperties(
   cssProps: any,
-  options: SimplePixelOptions
+  options: PixelOptions
 ): PixelizedResult {
   // CSS Properties를 PixelStyle로 변환
   const pixelStyle = cssPropertiesToPixelStyle(cssProps);

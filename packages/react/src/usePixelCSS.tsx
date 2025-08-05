@@ -1,35 +1,37 @@
 /**
- * CSS를 픽셀화하는 React 훅 - 배경만 픽셀화하고 텍스트는 선명하게 유지
+ * 간단한 픽셀 CSS 훅 - 가장 일반적인 사용 사례를 위한 단순화된 API
  */
 
 import { useMemo } from 'react';
-import { pixelizeCSS, pixelizeCSSProperties, SimplePixelOptions } from '@react-pixel-ui/core';
+import { pixelizeCSS, PixelOptions } from '@react-pixel-ui/core';
 
-export interface UsePixelCSSOptions extends Partial<SimplePixelOptions> {
-  // 추가 옵션들
+export interface PixelCSSOptions {
+  /** 픽셀 크기 (기본값: 4) */
+  pixelSize?: number;
+  /** 컨테이너 너비 (기본값: 자동 감지 또는 300) */
+  width?: number;
+  /** 컨테이너 높이 (기본값: 자동 감지 또는 150) */
+  height?: number;
 }
 
 /**
- * CSS 문자열을 픽셀화하는 훅
+ * 픽셀 CSS 훅 - 이전 API와 호환성 유지
  */
 export function usePixelCSS(
   css: string,
-  options: UsePixelCSSOptions = {}
+  options: PixelCSSOptions = {}
 ): {
   backgroundImage: string;
   textStyle: React.CSSProperties;
   containerStyle: React.CSSProperties;
-  pixelStyle: React.CSSProperties; // 호환성을 위한 통합 스타일
+  pixelStyle: React.CSSProperties;
 } {
-  // 기본 옵션
-  const pixelOptions: SimplePixelOptions = useMemo(() => ({
-    width: 200,
-    height: 100,
-    pixelSize: 4,
-    ...options
-  }), [options]);
+  const pixelOptions: PixelOptions = useMemo(() => ({
+    width: options.width || 300,
+    height: options.height || 150,
+    pixelSize: options.pixelSize || 4,
+  }), [options.width, options.height, options.pixelSize]);
 
-  // 픽셀화 처리
   const result = useMemo(() => {
     try {
       const pixelized = pixelizeCSS(css, pixelOptions);
@@ -61,52 +63,43 @@ export function usePixelCSS(
 }
 
 /**
- * React CSSProperties를 픽셀화하는 훅
+ * 프리셋을 사용한 픽셀 CSS 훅
  */
-export function usePixelCSSProperties(
-  cssProps: React.CSSProperties,
-  options: UsePixelCSSOptions = {}
-): {
-  backgroundImage: string;
-  textStyle: React.CSSProperties;
-  containerStyle: React.CSSProperties;
-  pixelStyle: React.CSSProperties; // 호환성을 위한 통합 스타일
-} {
-  // 기본 옵션
-  const pixelOptions: SimplePixelOptions = useMemo(() => ({
-    width: 200,
-    height: 100,
-    pixelSize: 4,
-    ...options
-  }), [options]);
+export function usePixelPreset(
+  preset: 'button' | 'card' | 'badge',
+  customCSS?: string,
+  options: PixelCSSOptions = {}
+): React.CSSProperties {
+  const presetCSS = useMemo(() => {
+    const presets = {
+      button: `
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: 2px solid #333;
+        border-radius: 8px;
+        padding: 12px 24px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      `,
+      card: `
+        background: white;
+        border: 1px solid #e1e5e9;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      `,
+      badge: `
+        background: #ff6b6b;
+        border-radius: 20px;
+        padding: 4px 12px;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+      `
+    };
 
-  // 픽셀화 처리
-  const result = useMemo(() => {
-    try {
-      const pixelized = pixelizeCSSProperties(cssProps, pixelOptions);
-      
-      // 호환성을 위한 통합 스타일
-      const pixelStyle: React.CSSProperties = {
-        ...pixelized.containerStyle,
-        ...pixelized.textStyle
-      };
+    return presets[preset] + (customCSS ? `\n${customCSS}` : '');
+  }, [preset, customCSS]);
 
-      return {
-        backgroundImage: pixelized.backgroundImage,
-        textStyle: pixelized.textStyle,
-        containerStyle: pixelized.containerStyle,
-        pixelStyle
-      };
-    } catch (error) {
-      console.error('픽셀 CSS Properties 렌더링 오류:', error);
-      return {
-        backgroundImage: '',
-        textStyle: {},
-        containerStyle: {},
-        pixelStyle: {}
-      };
-    }
-  }, [cssProps, pixelOptions]);
-
-  return result;
+  return usePixelCSS(presetCSS, options);
 }

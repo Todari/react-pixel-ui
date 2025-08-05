@@ -12,5 +12,5 @@ export * from './css-parser';
 // 배경 전용 픽셀 렌더러
 export * from './background-renderer';
 
-// 간단한 픽셀 엔진
-export * from './simple-pixel-engine';
+// 픽셀 엔진
+export * from './pixel-engine';

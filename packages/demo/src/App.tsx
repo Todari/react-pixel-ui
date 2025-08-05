@@ -7,7 +7,7 @@ function App() {
   const [content, setContent] = useState('픽셀 렌더링!');
 
   // CSS 문자열을 픽셀화하는 훅 (새로운 방식: 배경만 픽셀화)
-  const { pixelStyle } = usePixelCSS(
+  const pixelResult = usePixelCSS(
     `
       background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
       border: 16px solid #333;
@@ -27,6 +27,9 @@ function App() {
       pixelSize
     }
   );
+
+  
+  const { pixelStyle } = pixelResult;
 
   return (
     <div className="demo-container">
