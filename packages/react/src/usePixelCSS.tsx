@@ -1,141 +1,112 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { 
-  createDOMPixelate, 
-  PixelOptions, 
-  PixelatedStyle,
-  PixelateInstance,
-  parseCSS 
-} from '@react-pixel-ui/core';
-
 /**
- * DOM 요소를 실시간으로 pixel화하는 React 훅
- * 
- * @param css CSS 문자열
- * @param options pixel화 옵션
- * @returns [pixelatedStyle, elementRef] 튜플
- * 
- * @example
- * ```tsx
- * function MyComponent() {
- *   const [pixelCSS, ref] = usePixelCSS(`
- *     background: linear-gradient(45deg, #ff0000, #00ff00);
- *     border: 2px solid #000;
- *     border-radius: 8px;
- *     padding: 16px;
- *   `);
- *   
- *   return <div ref={ref} style={pixelCSS}>Pixelated Content</div>;
- * }
- * ```
+ * CSS를 픽셀화하는 React 훅 - 배경만 픽셀화하고 텍스트는 선명하게 유지
  */
-export function usePixelCSS(
-  css: string,
-  options: PixelOptions = {}
-): [React.CSSProperties, React.RefCallback<HTMLElement>] {
-  const [pixelatedStyle, setPixelatedStyle] = useState<React.CSSProperties>({});
-  const [originalStyle, setOriginalStyle] = useState<React.CSSProperties>({});
-  const pixelateInstanceRef = useRef<PixelateInstance | null>(null);
-  const elementRef = useRef<HTMLElement | null>(null);
 
-  // CSS 파싱 및 원본 스타일 설정
-  useEffect(() => {
-    const parsedCSS = parseCSS(css);
-    setOriginalStyle(parsedCSS);
-  }, [css]);
+import { useMemo } from 'react';
+import { pixelizeCSS, pixelizeCSSProperties, SimplePixelOptions } from '@react-pixel-ui/core';
 
-  // 픽셀화 인스턴스 생성 및 관리
-  const setupPixelate = useCallback((element: HTMLElement) => {
-    // 기존 인스턴스 정리
-    if (pixelateInstanceRef.current) {
-      pixelateInstanceRef.current.destroy();
-    }
-
-    // 새 인스턴스 생성
-    pixelateInstanceRef.current = createDOMPixelate({
-      element,
-      css,
-      ...options,
-      onUpdate: (style: PixelatedStyle) => {
-        setPixelatedStyle(style as any);
-      },
-      onError: (error: Error) => {
-        console.error('픽셀화 오류:', error);
-        // 오류 발생 시 원본 스타일만 사용
-        setPixelatedStyle({});
-      },
-    });
-  }, [css, options]);
-
-  // ref 콜백 함수
-  const refCallback = useCallback((element: HTMLElement | null) => {
-    elementRef.current = element;
-    
-    if (element) {
-      setupPixelate(element);
-    } else {
-      // 요소가 제거될 때 정리
-      if (pixelateInstanceRef.current) {
-        pixelateInstanceRef.current.destroy();
-        pixelateInstanceRef.current = null;
-      }
-    }
-  }, [setupPixelate]);
-
-  // 옵션이나 CSS가 변경될 때 업데이트
-  useEffect(() => {
-    if (pixelateInstanceRef.current && elementRef.current) {
-      pixelateInstanceRef.current.updateOptions({
-        element: elementRef.current,
-        css,
-        ...options,
-      });
-    }
-  }, [css, options]);
-
-  // 컴포넌트 언마운트 시 정리
-  useEffect(() => {
-    return () => {
-      if (pixelateInstanceRef.current) {
-        pixelateInstanceRef.current.destroy();
-      }
-    };
-  }, []);
-
-  // 원본 스타일과 픽셀화된 스타일을 합성
-  const combinedStyle = {
-    ...originalStyle,
-    ...pixelatedStyle,
-  };
-
-  return [combinedStyle, refCallback];
+export interface UsePixelCSSOptions extends Partial<SimplePixelOptions> {
+  // 추가 옵션들
 }
 
 /**
- * 간단한 CSS 픽셀화 훅 (DOM 연결 없이 CSS만 처리)
- * 
- * @deprecated DOM 기반 usePixelCSS 사용을 권장합니다
+ * CSS 문자열을 픽셀화하는 훅
  */
-export function useSimplePixelCSS(
+export function usePixelCSS(
   css: string,
-  options: PixelOptions = {}
-): React.CSSProperties {
-  const [style, setStyle] = useState<React.CSSProperties>({});
+  options: UsePixelCSSOptions = {}
+): {
+  backgroundImage: string;
+  textStyle: React.CSSProperties;
+  containerStyle: React.CSSProperties;
+  pixelStyle: React.CSSProperties; // 호환성을 위한 통합 스타일
+} {
+  // 기본 옵션
+  const pixelOptions: SimplePixelOptions = useMemo(() => ({
+    width: 200,
+    height: 100,
+    pixelSize: 4,
+    ...options
+  }), [options]);
 
-  useEffect(() => {
+  // 픽셀화 처리
+  const result = useMemo(() => {
     try {
-      const parsedCSS = parseCSS(css);
-      // CSS Filter 기반 간단한 픽셀화
-      const pixelStyle = {
-        ...parsedCSS,
-        imageRendering: options.smooth ? 'auto' : 'pixelated',
-        filter: options.smooth ? 'none' : 'blur(0.5px) contrast(120%)',
+      const pixelized = pixelizeCSS(css, pixelOptions);
+      
+      // 호환성을 위한 통합 스타일
+      const pixelStyle: React.CSSProperties = {
+        ...pixelized.containerStyle,
+        ...pixelized.textStyle
       };
-      setStyle(pixelStyle as any);
-    } catch (error) {
-      console.error('CSS 파싱 오류:', error);
-      setStyle({});
-    }
-  }, [css, options]);
 
-  return style;
-} 
+      return {
+        backgroundImage: pixelized.backgroundImage,
+        textStyle: pixelized.textStyle,
+        containerStyle: pixelized.containerStyle,
+        pixelStyle
+      };
+    } catch (error) {
+      console.error('픽셀 CSS 렌더링 오류:', error);
+      return {
+        backgroundImage: '',
+        textStyle: {},
+        containerStyle: {},
+        pixelStyle: {}
+      };
+    }
+  }, [css, pixelOptions]);
+
+  return result;
+}
+
+/**
+ * React CSSProperties를 픽셀화하는 훅
+ */
+export function usePixelCSSProperties(
+  cssProps: React.CSSProperties,
+  options: UsePixelCSSOptions = {}
+): {
+  backgroundImage: string;
+  textStyle: React.CSSProperties;
+  containerStyle: React.CSSProperties;
+  pixelStyle: React.CSSProperties; // 호환성을 위한 통합 스타일
+} {
+  // 기본 옵션
+  const pixelOptions: SimplePixelOptions = useMemo(() => ({
+    width: 200,
+    height: 100,
+    pixelSize: 4,
+    ...options
+  }), [options]);
+
+  // 픽셀화 처리
+  const result = useMemo(() => {
+    try {
+      const pixelized = pixelizeCSSProperties(cssProps, pixelOptions);
+      
+      // 호환성을 위한 통합 스타일
+      const pixelStyle: React.CSSProperties = {
+        ...pixelized.containerStyle,
+        ...pixelized.textStyle
+      };
+
+      return {
+        backgroundImage: pixelized.backgroundImage,
+        textStyle: pixelized.textStyle,
+        containerStyle: pixelized.containerStyle,
+        pixelStyle
+      };
+    } catch (error) {
+      console.error('픽셀 CSS Properties 렌더링 오류:', error);
+      return {
+        backgroundImage: '',
+        textStyle: {},
+        containerStyle: {},
+        pixelStyle: {}
+      };
+    }
+  }, [cssProps, pixelOptions]);
+
+  return result;
+}

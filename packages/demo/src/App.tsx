@@ -1,118 +1,125 @@
 import React, { useState } from 'react';
-import { usePixelCSS, PixelCSSProvider } from '@react-pixel-ui/react';
+import { usePixelCSS } from '@react-pixel-ui/react';
 import './App.css';
 
-function PixelatedBox() {
-  const [css, setCSS] = useState(`
-    background: linear-gradient(45deg, #ff0000, #00ff00);
-    border: 2px solid #000;
-    border-radius: 8px;
-    padding: 20px;
-    color: white;
-    font-size: 16px;
-    width: 200px;
-    height: 100px;
-  `);
+function App() {
+  const [pixelSize, setPixelSize] = useState(4);
+  const [content, setContent] = useState('픽셀 렌더링!');
 
-  const [unitPixel, setUnitPixel] = useState(4);
-  const [smooth, setSmooth] = useState(false);
-  const [updateMode, setUpdateMode] = useState<'realtime' | 'debounced' | 'manual'>('debounced');
-
-  const [pixelCSS, pixelRef] = usePixelCSS(css, {
-    unitPixel,
-    smooth,
-    quality: 'medium',
-    updateMode,
-    fallbackToCSSFilter: true,
-  });
+  // CSS 문자열을 픽셀화하는 훅 (새로운 방식: 배경만 픽셀화)
+  const { pixelStyle } = usePixelCSS(
+    `
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 20px;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+    `,
+    {
+      width: 300,
+      height: 150,
+      pixelSize
+    }
+  );
 
   return (
     <div className="demo-container">
-      <h1>React Pixel UI Demo</h1>
+      <h1>🎨 React Pixel UI - 배경 픽셀화 데모</h1>
       
       <div className="controls">
-        <div className="control-group">
-          <label>CSS:</label>
-          <textarea
-            value={css}
-            onChange={(e) => setCSS(e.target.value)}
-            rows={8}
-            cols={50}
-          />
-        </div>
-        
-        <div className="control-group">
-          <label>Pixel 크기: {unitPixel}</label>
+        <label>
+          픽셀 크기: {pixelSize}px
           <input
             type="range"
             min="1"
-            max="10"
-            value={unitPixel}
-            onChange={(e) => setUnitPixel(Number(e.target.value))}
+            max="16"
+            value={pixelSize}
+            onChange={(e) => setPixelSize(Number(e.target.value))}
           />
+        </label>
+        
+        <label>
+          텍스트:
+          <input
+            type="text"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+          />
+        </label>
+      </div>
+
+      <div className="demo-section">
+        <h2>🎯 배경만 픽셀화, 텍스트는 선명하게!</h2>
+        
+        <div className="result-container">
+          <div style={pixelStyle} className="pixel-result">
+            {content}
+          </div>
         </div>
         
-        <div className="control-group">
-          <label>
-            <input
-              type="checkbox"
-              checked={smooth}
-              onChange={(e) => setSmooth(e.target.checked)}
-            />
-            부드러운 렌더링
-          </label>
+        <div className="info">
+          <p>✅ <strong>배경 픽셀화</strong>: 그라디언트와 테두리가 픽셀 아트로 변환</p>
+          <p>✅ <strong>텍스트 선명도</strong>: 글자는 완벽하게 읽기 쉬움</p>
+          <p>⚡ <strong>실시간 조정</strong>: 픽셀 크기 슬라이더로 즉시 변경</p>
         </div>
+      </div>
+
+      <div className="comparison">
+        <h2>비교: 원본 vs 픽셀화</h2>
+        <div className="comparison-grid">
+          <div>
+            <h3>원본</h3>
+            <div
+              style={{
+                background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
+                border: '2px solid #333',
+                borderRadius: '10px',
+                padding: '20px',
+                color: 'white',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                width: '300px',
+                height: '150px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              {content}
+            </div>
+          </div>
+          
+          <div>
+            <h3>픽셀화 (픽셀 크기: {pixelSize}px)</h3>
+            <div style={pixelStyle} className="pixel-result">
+              {content}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="features">
+        <h2>💡 핵심 특징</h2>
+        <ul>
+          <li>🎯 <strong>배경만 픽셀화</strong> - 텍스트는 선명하게 유지</li>
+          <li>⚡ <strong>성능 최적화</strong> - 복잡한 텍스트 렌더링 제거</li>
+          <li>📖 <strong>가독성 보장</strong> - 실용적인 픽셀 아트 효과</li>
+          <li>🔧 <strong>간단한 구현</strong> - 저화질→고화질 확대 방식</li>
+          <li>🚫 <strong>iframe 없음</strong> - 안정적이고 가벼운 렌더링</li>
+        </ul>
         
-        <div className="control-group">
-          <label>업데이트 모드:</label>
-          <select
-            value={updateMode}
-            onChange={(e) => setUpdateMode(e.target.value as any)}
-          >
-            <option value="realtime">실시간</option>
-            <option value="debounced">디바운스</option>
-            <option value="manual">수동</option>
-          </select>
-        </div>
-      </div>
-      
-      <div className="result">
-        <h3>Pixelated Result:</h3>
-        <div ref={pixelRef} style={pixelCSS}>
-          Pixelated Content
-        </div>
-      </div>
-      
-      <div className="original">
-        <h3>Original CSS:</h3>
-        <div style={parseCSS(css)}>
-          Original Content
+        <div className="highlight">
+          <strong>💡 핵심 아이디어:</strong> 
+          <p>
+            폰트는 픽셀화하지 않고, CSS의 시각적 요소들(배경, 테두리, 그라디언트)만 
+            저화질 Canvas로 렌더링한 후 확대하여 backgroundImage로 사용하는 방식
+          </p>
         </div>
       </div>
     </div>
   );
 }
 
-function parseCSS(cssString: string): React.CSSProperties {
-  const styles: React.CSSProperties = {};
-  const styleRegex = /([a-zA-Z-]+)\s*:\s*([^;]+);/g;
-  let match;
-  
-  while ((match = styleRegex.exec(cssString)) !== null) {
-    const [, property, value] = match;
-    const camelCaseProperty = property.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-    styles[camelCaseProperty as keyof React.CSSProperties] = value.trim() as any;
-  }
-  
-  return styles;
-}
-
-function App() {
-  return (
-    <PixelCSSProvider>
-      <PixelatedBox />
-    </PixelCSSProvider>
-  );
-}
-
-export default App; 
+export default App;
