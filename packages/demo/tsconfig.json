@@ -1,0 +1,11 @@
+{
+  "extends": "@react-pixel-ui/typescript-config/react-app.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
+  }
+}

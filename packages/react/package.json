@@ -1,0 +1,33 @@
+{
+  "name": "@react-pixel-ui/react",
+  "version": "1.0.0",
+  "description": "React hooks for pixelating CSS styles",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-pixel-ui/core": "workspace:*",
+    "react": "^18.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@react-pixel-ui/typescript-config": "workspace:*",
+    "@react-pixel-ui/eslint-config": "workspace:*",
+    "@types/react": "^18.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}

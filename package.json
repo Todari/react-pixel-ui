@@ -1,24 +1,36 @@
 {
+  "name": "react-pixel-ui",
+  "version": "1.0.0",
+  "description": "React library for pixelating CSS styles",
+  "private": true,
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "type-check": "turbo run type-check",
     "clean": "turbo run clean && rm -rf node_modules",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "changeset": "changeset",
-    "version-packages": "changeset version",
-    "release": "turbo run build --filter=docs^... && changeset publish"
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
+    "test": "turbo run test",
+    "storybook": "turbo run storybook --filter=storybook",
+    "build-storybook": "turbo run build-storybook --filter=storybook",
+    "config:update": "node scripts/update-configs.js",
+    "config:sync": "pnpm config:update && pnpm install && pnpm type-check",
+    "setup": "pnpm install && pnpm config:update && pnpm build"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.1",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
     "prettier": "^3.2.5",
-    "turbo": "^2.3.3"
+    "turbo": "^2.3.3",
+    "typescript": "^5.0.0"
   },
   "packageManager": "pnpm@8.15.6",
-  "name": "react-pixel-ui",
-  "publishConfig": {
-    "latest": true,
-    "access": "public",
-    "@react-pixel-ui:registry": "https://registry.npmjs.org"
-  }
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
 }

@@ -1,17 +1,29 @@
 {
   "name": "@react-pixel-ui/eslint-config",
-  "version": "0.1.5",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Shared ESLint configuration for React Pixel UI",
+  "main": "index.js",
   "files": [
     "library.js",
     "react.js",
     "storybook.js"
   ],
+  "scripts": {
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "eslint-plugin-react": "^7.0.0",
+    "eslint-plugin-react-hooks": "^4.0.0",
+    "eslint-plugin-import": "^2.0.0",
+    "eslint-plugin-jsx-a11y": "^6.0.0"
+  },
   "devDependencies": {
-    "@vercel/style-guide": "^5.2.0",
-    "eslint-config-turbo": "^2.0.0",
-    "eslint-plugin-mdx": "^3.1.5",
-    "eslint-plugin-only-warn": "^1.1.0",
-    "eslint-plugin-storybook": "^0.8.0"
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "eslint": "^8.0.0"
   }
 }

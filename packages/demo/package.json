@@ -1,0 +1,27 @@
+{
+  "name": "@react-pixel-ui/demo",
+  "version": "1.0.0",
+  "description": "Demo app for React Pixel UI",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-pixel-ui/react": "workspace:*",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@react-pixel-ui/typescript-config": "workspace:*",
+    "@react-pixel-ui/eslint-config": "workspace:*",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0"
+  }
+}
