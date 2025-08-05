@@ -58,17 +58,24 @@ function renderBackgroundToLowRes(
   options: BackgroundRenderOptions
 ): HTMLCanvasElement {
   const { width, height, pixelSize } = options;
-  
+
   // 저화질 Canvas 생성 (픽셀 크기만큼 축소)
   const lowResWidth = Math.ceil(width / pixelSize);
   const lowResHeight = Math.ceil(height / pixelSize);
-  
+
   const canvas = document.createElement('canvas');
   canvas.width = lowResWidth;
   canvas.height = lowResHeight;
-  
+
   const ctx = canvas.getContext('2d')!;
   ctx.imageSmoothingEnabled = false;
+  
+  // 둥근 모서리가 있는 경우 먼저 클리핑 패스 설정
+  if (style.borderRadius) {
+    const radius = unitToPixels(style.borderRadius, Math.min(width, height)) / pixelSize;
+    createRoundedPath(ctx, lowResWidth, lowResHeight, radius);
+    ctx.clip();
+  }
   
   // 배경색 렌더링
   if (style.backgroundColor) {
@@ -82,15 +89,9 @@ function renderBackgroundToLowRes(
     renderGradientLowRes(ctx, style.backgroundImage, lowResWidth, lowResHeight);
   }
   
-  // 테두리 렌더링
+  // 테두리 렌더링 (둥근 모서리 고려)
   if (style.border && style.border.width.value > 0) {
-    renderBorderLowRes(ctx, style.border, lowResWidth, lowResHeight, width, height);
-  }
-  
-  // 둥근 모서리 처리 (borderRadius가 있으면 마스킹)
-  if (style.borderRadius) {
-    const radius = unitToPixels(style.borderRadius, Math.min(width, height)) / pixelSize;
-    applyRoundedMask(ctx, lowResWidth, lowResHeight, radius);
+    renderBorderLowRes(ctx, style.border, lowResWidth, lowResHeight, width, height, style.borderRadius);
   }
   
   return canvas;
@@ -128,50 +129,14 @@ function renderGradientLowRes(
 }
 
 /**
- * 저화질 Canvas에 테두리 렌더링
+ * 둥근 사각형 패스 생성
  */
-function renderBorderLowRes(
-  ctx: CanvasRenderingContext2D,
-  border: NonNullable<BackgroundStyle['border']>,
-  lowResWidth: number,
-  lowResHeight: number,
-  originalWidth: number,
-  originalHeight: number
-): void {
-  const borderWidth = unitToPixels(border.width, Math.min(originalWidth, originalHeight));
-  const scaledBorderWidth = Math.max(1, borderWidth / (originalWidth / lowResWidth));
-  
-  const { r, g, b, a } = border.color;
-  ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
-  ctx.lineWidth = scaledBorderWidth;
-  
-  // 테두리 스타일에 따른 렌더링
-  if (border.style === 'dashed') {
-    ctx.setLineDash([scaledBorderWidth * 2, scaledBorderWidth]);
-  } else if (border.style === 'dotted') {
-    ctx.setLineDash([scaledBorderWidth, scaledBorderWidth]);
-  }
-  
-  const halfBorder = scaledBorderWidth / 2;
-  ctx.strokeRect(halfBorder, halfBorder, lowResWidth - scaledBorderWidth, lowResHeight - scaledBorderWidth);
-}
-
-/**
- * 둥근 모서리 마스크 적용
- */
-function applyRoundedMask(
+function createRoundedPath(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
   radius: number
 ): void {
-  // 현재 내용을 임시로 저장
-  const imageData = ctx.getImageData(0, 0, width, height);
-  
-  // Canvas 클리어
-  ctx.clearRect(0, 0, width, height);
-  
-  // 둥근 사각형 패스 생성
   ctx.beginPath();
   ctx.moveTo(radius, 0);
   ctx.lineTo(width - radius, 0);
@@ -183,13 +148,61 @@ function applyRoundedMask(
   ctx.lineTo(0, radius);
   ctx.quadraticCurveTo(0, 0, radius, 0);
   ctx.closePath();
-  
-  // 클리핑 적용
-  ctx.clip();
-  
-  // 원본 이미지 복원
-  ctx.putImageData(imageData, 0, 0);
 }
+
+/**
+ * 저화질 Canvas에 테두리 렌더링
+ */
+function renderBorderLowRes(
+  ctx: CanvasRenderingContext2D,
+  border: NonNullable<BackgroundStyle['border']>,
+  lowResWidth: number,
+  lowResHeight: number,
+  originalWidth: number,
+  originalHeight: number,
+  borderRadius?: BackgroundStyle['borderRadius']
+): void {
+  const borderWidth = unitToPixels(border.width, Math.min(originalWidth, originalHeight));
+  // 픽셀 크기에 맞게 스케일링하되, 최소 1픽셀은 보장하고 더 두껍게 표현
+  const pixelSize = originalWidth / lowResWidth;
+  let scaledBorderWidth = borderWidth / pixelSize;
+  
+  // 얇은 테두리도 픽셀화에서 잘 보이도록 조정
+  if (scaledBorderWidth < 1) {
+    scaledBorderWidth = Math.max(0.5, scaledBorderWidth);
+  } else if (scaledBorderWidth < 2) {
+    scaledBorderWidth = Math.ceil(scaledBorderWidth);
+  }
+  
+  const { r, g, b, a } = border.color;
+  ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+  ctx.lineWidth = scaledBorderWidth;
+  
+  // 테두리 스타일에 따른 렌더링
+  if (border.style === 'dashed') {
+    ctx.setLineDash([scaledBorderWidth * 2, scaledBorderWidth]);
+  } else if (border.style === 'dotted') {
+    ctx.setLineDash([scaledBorderWidth, scaledBorderWidth]);
+  } else {
+    ctx.setLineDash([]);
+  }
+  
+  // 둥근 모서리가 있는 경우 둥근 테두리, 없으면 직사각형 테두리
+  if (borderRadius) {
+    const radius = unitToPixels(borderRadius, Math.min(originalWidth, originalHeight)) / pixelSize;
+    const adjustedRadius = Math.max(0, radius - scaledBorderWidth / 2);
+    
+    ctx.save();
+    createRoundedPath(ctx, lowResWidth, lowResHeight, adjustedRadius);
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    const halfBorder = scaledBorderWidth / 2;
+    ctx.strokeRect(halfBorder, halfBorder, lowResWidth - scaledBorderWidth, lowResHeight - scaledBorderWidth);
+  }
+}
+
+
 
 /**
  * 저화질 Canvas를 고화질로 확대하여 픽셀화 효과 생성

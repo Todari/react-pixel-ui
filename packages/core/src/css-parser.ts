@@ -76,7 +76,7 @@ export function parseColor(color: string): PixelColor {
  * linear-gradient 파싱
  */
 export function parseGradient(gradient: string): PixelGradient | null {
-  const linearMatch = gradient.match(/linear-gradient\\(([^)]+)\\)/);
+  const linearMatch = gradient.match(/linear-gradient\(([^)]+)\)/);
   if (!linearMatch) return null;
   
   const parts = linearMatch[1].split(',').map(s => s.trim());
@@ -136,10 +136,30 @@ export function parseCSS(cssString: string): PixelStyle {
       case 'backgroundColor':
         style.backgroundColor = parseColor(value);
         break;
+      case 'background':
+        // background 속성은 여러 값을 가질 수 있음 (color, image, etc.)
+        if (value.includes('gradient')) {
+          style.backgroundImage = parseGradient(value) || undefined;
+        } else {
+          // 단색 배경으로 처리
+          style.backgroundColor = parseColor(value);
+        }
+        break;
       case 'background-image':
       case 'backgroundImage':
         if (value.includes('gradient')) {
           style.backgroundImage = parseGradient(value) || undefined;
+        }
+        break;
+      case 'border':
+        // border: "2px solid #333" 형태 파싱
+        const borderParts = value.split(/\s+/);
+        if (borderParts.length >= 3) {
+          style.border = {
+            width: parseUnit(borderParts[0]),
+            style: borderParts[1] as 'solid' | 'dashed' | 'dotted',
+            color: parseColor(borderParts[2])
+          };
         }
         break;
       case 'color':
@@ -195,8 +215,25 @@ export function cssPropertiesToPixelStyle(cssProps: any): PixelStyle {
   if (cssProps.width) style.width = parseUnit(cssProps.width);
   if (cssProps.height) style.height = parseUnit(cssProps.height);
   if (cssProps.backgroundColor) style.backgroundColor = parseColor(cssProps.backgroundColor);
+  if (cssProps.background) {
+    if (cssProps.background.includes('gradient')) {
+      style.backgroundImage = parseGradient(cssProps.background) || undefined;
+    } else {
+      style.backgroundColor = parseColor(cssProps.background);
+    }
+  }
   if (cssProps.backgroundImage && cssProps.backgroundImage.includes('gradient')) {
     style.backgroundImage = parseGradient(cssProps.backgroundImage) || undefined;
+  }
+  if (cssProps.border) {
+    const borderParts = cssProps.border.split(/\s+/);
+    if (borderParts.length >= 3) {
+      style.border = {
+        width: parseUnit(borderParts[0]),
+        style: borderParts[1] as 'solid' | 'dashed' | 'dotted',
+        color: parseColor(borderParts[2])
+      };
+    }
   }
   if (cssProps.color) style.color = parseColor(cssProps.color);
   if (cssProps.fontSize) style.fontSize = parseUnit(cssProps.fontSize);

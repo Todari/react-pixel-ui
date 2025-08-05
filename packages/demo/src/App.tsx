@@ -10,12 +10,16 @@ function App() {
   const { pixelStyle } = usePixelCSS(
     `
       background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-      border: 2px solid #333;
-      border-radius: 10px;
+      border: 16px solid #333;
+      border-radius: 48px;
       padding: 20px;
       color: white;
       font-size: 18px;
       font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
     `,
     {
       width: 300,
@@ -74,8 +78,8 @@ function App() {
             <div
               style={{
                 background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
-                border: '2px solid #333',
-                borderRadius: '10px',
+                border: '16px solid #333',
+                borderRadius: '48px',
                 padding: '20px',
                 color: 'white',
                 fontSize: '18px',
