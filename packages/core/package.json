@@ -1,6 +1,6 @@
 {
   "name": "@react-pixel-ui/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core pixelation logic for React Pixel UI",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
