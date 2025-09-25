@@ -20,6 +20,7 @@
     "setup": "pnpm install && pnpm config:update && pnpm build"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.7",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
