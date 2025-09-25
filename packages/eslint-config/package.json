@@ -8,6 +8,9 @@
     "react.js",
     "storybook.js"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "clean": "rm -rf dist"
   },

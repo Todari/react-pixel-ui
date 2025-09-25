@@ -17,7 +17,9 @@
     "build-storybook": "turbo run build-storybook --filter=storybook",
     "config:update": "node scripts/update-configs.js",
     "config:sync": "pnpm config:update && pnpm install && pnpm type-check",
-    "setup": "pnpm install && pnpm config:update && pnpm build"
+    "setup": "pnpm install && pnpm config:update && pnpm build",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",

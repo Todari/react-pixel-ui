@@ -1,6 +1,6 @@
 {
   "name": "@react-pixel-ui/core",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Core pixelation logic for React Pixel UI",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -8,6 +8,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

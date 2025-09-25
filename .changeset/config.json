@@ -1,14 +1,18 @@
 {
-  "$schema": "https://unpkg.com/@changesets/config@2.0.0/schema.json",
-  "changelog": "@changesets/cli/changelog",
-  "commit": true,
+  "$schema": "https://unpkg.com/@changesets/config/schema.json",
+  "changelog": [
+    "@changesets/changelog-git",
+    {
+      "repo": ""
+    }
+  ],
+  "commit": false,
   "fixed": [],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
-  "latest": true,
   "updateInternalDependencies": "patch",
   "ignore": [
-    "docs"
+    "@react-pixel-ui/demo"
   ]
 }

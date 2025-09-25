@@ -1,6 +1,6 @@
 {
   "name": "@react-pixel-ui/react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React hooks for pixelating CSS styles",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -8,6 +8,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
