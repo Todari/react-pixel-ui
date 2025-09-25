@@ -2,6 +2,23 @@
   "name": "@react-pixel-ui/core",
   "version": "1.0.2",
   "description": "Core pixelation logic for React Pixel UI",
+  "keywords": [
+    "pixel",
+    "pixelated",
+    "canvas",
+    "rendering",
+    "graphics",
+    "css"
+  ],
+  "homepage": "https://github.com/Todari/react-pixel-ui#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Todari/react-pixel-ui.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/Todari/react-pixel-ui/issues"
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

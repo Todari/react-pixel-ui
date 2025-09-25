@@ -2,6 +2,25 @@
   "name": "@react-pixel-ui/react",
   "version": "1.0.1",
   "description": "React hooks for pixelating CSS styles",
+  "keywords": [
+    "react",
+    "pixel",
+    "pixelated",
+    "css",
+    "canvas",
+    "ui",
+    "hooks",
+    "graphics"
+  ],
+  "homepage": "https://github.com/Todari/react-pixel-ui#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Todari/react-pixel-ui.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/Todari/react-pixel-ui/issues"
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
