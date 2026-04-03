@@ -1,104 +1,174 @@
 # React Pixel UI
 
-CSS를 픽셀 스타일로 변환해주는 React 훅/코어 라이브러리입니다. 배경은 픽셀화하고 텍스트는 선명하게 유지합니다.
+[![npm](https://img.shields.io/npm/v/@react-pixel-ui/react)](https://www.npmjs.com/package/@react-pixel-ui/react)
+[![npm](https://img.shields.io/npm/v/@react-pixel-ui/core)](https://www.npmjs.com/package/@react-pixel-ui/core)
 
-## 🚀 특징
+Any CSS to pixel art. Use your existing styles — Tailwind, inline, CSS modules — and wrap with `<Pixel>`. No Canvas, SSR compatible.
 
-- **간단한 훅**: `usePixelCSS(css, { width, height, pixelSize })`
-- **브라우저 Canvas 기반**: 고품질 픽셀화 배경 데이터 URL 생성
-- **TypeScript 지원**: 엄격한 타입과 DX
-
-## 📦 설치
+## Install
 
 ```bash
-pnpm add @react-pixel-ui/react
-# 또는
-npm i @react-pixel-ui/react
+npm install @react-pixel-ui/react
 ```
 
-## 🎯 빠른 시작
+## Quick Start
 
 ```tsx
-import { usePixelCSS } from '@react-pixel-ui/react';
+import { Pixel } from '@react-pixel-ui/react';
 
-export default function Card() {
-  const { pixelStyle } = usePixelCSS(`
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-    border: 2px solid #333;
-    border-radius: 12px;
-    padding: 16px;
-  `, { width: 260, height: 120, pixelSize: 6 });
+// Tailwind
+<Pixel size={4}>
+  <div className="bg-gradient-to-r from-red-500 to-blue-500 rounded-xl border-2 border-black p-4">
+    Automatically pixelated!
+  </div>
+</Pixel>
 
-  return <div style={pixelStyle}>Pixelated Content</div>;
+// Inline styles
+<Pixel size={6}>
+  <div style={{ background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)', borderRadius: 16, border: '3px solid #333' }}>
+    Works too!
+  </div>
+</Pixel>
+```
+
+The `<Pixel>` component reads the child's computed CSS and converts it to pixel art automatically.
+
+## API
+
+### `<Pixel>` — Auto-pixelate any element
+
+Wrap any single element. Its CSS styles are automatically converted to pixel art.
+
+```tsx
+<Pixel size={4}>
+  <button className="bg-purple-500 rounded-lg border-2 border-purple-800 px-6 py-3 text-white">
+    Click me
+  </button>
+</Pixel>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `number` | `4` | Pixel block size |
+| `enabled` | `boolean` | `true` | Toggle pixelation on/off |
+| `observeHover` | `boolean` | `true` | Re-compute on hover state change |
+| `observeFocus` | `boolean` | `true` | Re-compute on focus state change |
+| `observeActive` | `boolean` | `true` | Re-compute on active state change |
+
+Supports: `background-color`, `background-image` (gradients), `border-radius`, `border`, `box-shadow`.
+
+### `usePixelRef` — Ref-based hook
+
+For maximum flexibility. Attach to any element without a wrapper component.
+
+```tsx
+import { usePixelRef } from '@react-pixel-ui/react';
+
+function MyComponent() {
+  const pixelRef = usePixelRef({ pixelSize: 4 });
+
+  return (
+    <div ref={pixelRef} className="bg-red-500 rounded-xl border-2 border-black">
+      Any element works
+    </div>
+  );
 }
 ```
 
-## 📚 API
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `pixelSize` | `number` | `4` | Pixel block size |
+| `enabled` | `boolean` | `true` | Toggle pixelation |
+| `observeHover` | `boolean` | `true` | Watch hover changes |
+| `observeFocus` | `boolean` | `true` | Watch focus changes |
+| `observeActive` | `boolean` | `true` | Watch active changes |
 
-### usePixelCSS
+### `PixelBox` — Explicit prop-based component
 
-```ts
-function usePixelCSS(
-  css: string,
-  options?: { width?: number; height?: number; pixelSize?: number }
-): {
-  backgroundImage: string;
-  textStyle: React.CSSProperties;
-  containerStyle: React.CSSProperties;
-  pixelStyle: React.CSSProperties;
-}
-```
-
-- **css**: 픽셀화할 CSS 문자열
-- **options.width/height**: 컨테이너 크기(px). 미지정 시 기본값(300×150)
-- **options.pixelSize**: 픽셀 블록 크기. 기본 4
-- 반환된 **pixelStyle**을 그대로 `style`에 바인딩하면 됩니다.
-
-## 🧭 환경/SSR 가이드 (Next.js 등)
-
-- 내부적으로 Canvas와 `document`/`window`를 사용합니다. 서버 사이드 렌더링(SSR)에서는 클라이언트에서만 실행되도록 보호하세요.
-- Next.js 예시: 클라이언트 전용 컴포넌트로 분리하거나 `dynamic(() => import(...), { ssr: false })`를 사용하세요.
-
-## 🏗️ 프로젝트 구조
-
-```
-react-pixel-ui/
-├── packages/
-│   ├── core/   # 코어 픽셀화 로직 (브라우저 전용 API 포함)
-│   └── react/  # React 훅 래퍼
-└── apps/
-    └── demo/   # 데모 앱
-```
-
-## 🛠️ 개발
-
-```bash
-# 초기셋업
-pnpm setup
-
-# 데모 실행
-pnpm dev --filter=@react-pixel-ui/demo
-
-# 전체 빌드/검증
-pnpm build && pnpm type-check && pnpm lint
-```
-
-## 🎨 추가 예시
+When you prefer explicit configuration over CSS reading.
 
 ```tsx
-const { pixelStyle } = usePixelCSS(`
-  background: radial-gradient(circle, #ff6b6b, #4ecdc4);
-  border: 1px solid #666;
-  border-radius: 20px;
-  padding: 24px;
-  color: white;
-`, { width: 200, height: 100, pixelSize: 4 });
+import { PixelBox } from '@react-pixel-ui/react';
+
+<PixelBox
+  width={280} height={120} pixelSize={4}
+  borderRadius={16} borderWidth={3} borderColor="#333"
+  background="linear-gradient(45deg, #ff6b6b, #4ecdc4)"
+  shadow={{ x: 4, y: 4, color: 'rgba(0,0,0,0.3)' }}
+>
+  Pixel Art!
+</PixelBox>
 ```
 
-## 🤝 기여
+<details>
+<summary>PixelBox Props</summary>
 
-PR 환영합니다. 브랜치를 생성해 변경 후 PR을 올려주세요.
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `width` | `number` | `200` | Width in px |
+| `height` | `number` | `100` | Height in px |
+| `pixelSize` | `number` | `4` | Pixel block size |
+| `borderRadius` | `number \| [tl, tr, br, bl]` | — | Corner radius |
+| `borderWidth` | `number` | — | Border thickness (snapped to pixelSize) |
+| `borderColor` | `string` | — | Border color |
+| `background` | `string` | — | Color or CSS gradient |
+| `shadow` | `{ x, y, color }` | — | Hard pixel shadow |
+| `responsive` | `boolean` | `false` | Auto-detect size via ResizeObserver |
 
-## 📄 라이선스
+</details>
+
+### `PixelButton` — Pre-styled button
+
+```tsx
+<PixelButton variant="primary">Primary</PixelButton>
+<PixelButton variant="secondary">Secondary</PixelButton>
+<PixelButton variant="danger">Danger</PixelButton>
+```
+
+### `PixelConfigProvider` — Global defaults
+
+```tsx
+<PixelConfigProvider config={{ pixelSize: 6 }}>
+  <App />
+</PixelConfigProvider>
+```
+
+## How It Works
+
+| Feature | Technique |
+|---------|-----------|
+| Staircase corners | `clip-path: polygon()` via Bresenham circle algorithm |
+| Pixel gradients | Tiny BMP data URL + `image-rendering: pixelated` |
+| Pixel borders | Wrapper div with outer/inner clip-path differential |
+| Hard shadows | `filter: drop-shadow(blur=0)` following clip-path contour |
+| Auto-detection | `getComputedStyle()` + MutationObserver + ResizeObserver |
+
+## Browser Compatibility
+
+| Feature | Chrome | Firefox | Safari | Edge |
+|---------|--------|---------|--------|------|
+| `clip-path: polygon()` | 55+ | 54+ | 10+ | 79+ |
+| `image-rendering: pixelated` | 41+ | 56+ | 10+ | 79+ |
+| `filter: drop-shadow()` | 18+ | 35+ | 6+ | 79+ |
+
+## License
 
 MIT
+
+---
+
+# React Pixel UI (한국어)
+
+CSS 스타일을 자동으로 픽셀아트로 변환하는 React 라이브러리.
+
+```tsx
+import { Pixel } from '@react-pixel-ui/react';
+
+<Pixel size={4}>
+  <div className="bg-red-500 rounded-xl border-2 border-black p-4">
+    자동으로 픽셀화!
+  </div>
+</Pixel>
+```
+
+Tailwind, 인라인 스타일, CSS 모듈 모두 지원. 자세한 API는 영어 섹션 참고.

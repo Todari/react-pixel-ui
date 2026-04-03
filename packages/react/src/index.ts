@@ -1,19 +1,28 @@
-/**
- * React 픽셀 렌더링 라이브러리
- */
+// Hooks
+export { usePixelArt } from './hooks/usePixelArt';
+export type { UsePixelArtResult } from './hooks/usePixelArt';
+export { usePixelRef } from './hooks/usePixelRef';
+export type { UsePixelRefOptions } from './hooks/usePixelRef';
+export { useStaircaseClip } from './hooks/useStaircaseClip';
+export { useSteppedGradient } from './hooks/useSteppedGradient';
+export { useResponsiveSize } from './hooks/useResponsiveSize';
 
-// 기본 훅들
-export { usePixelCSS } from './usePixelCSS';
+// Components
+export { Pixel } from './components/Pixel';
+export type { PixelProps } from './components/Pixel';
+export { PixelBox } from './components/PixelBox';
+export type { PixelBoxProps } from './components/PixelBox';
+export { PixelButton } from './components/PixelButton';
+export type { PixelButtonProps, PixelButtonVariant } from './components/PixelButton';
 
-// 추가 기능들 (현재 비활성화)
-// export { useAutoPixelCSS } from './useAutoPixelCSS';
-// export { useCachedPixelCSS, usePixelCacheManager } from './usePixelCache';
-// export { PixelBox, PixelButton } from './PixelBox';
+// Context
+export { PixelConfigProvider, usePixelConfig } from './context/PixelConfigProvider';
+export type { PixelConfig, PixelConfigProviderProps } from './context/PixelConfigProvider';
 
-// 타입들
+// Re-export core types
 export type {
-  PixelSizePreset
-} from './types';
-
-// Core 타입들 재export
-export type { PixelOptions, PixelizedResult } from '@react-pixel-ui/core';
+  PixelArtConfig,
+  PixelArtStyles,
+  PixelShadowConfig,
+  BorderRadii,
+} from '@react-pixel-ui/core';

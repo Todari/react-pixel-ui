@@ -1,16 +1,34 @@
-/**
- * 픽셀 렌더링 엔진 - 메인 엔트리 포인트
- * 배경만 픽셀화하고 텍스트는 선명하게 유지하는 실용적인 라이브러리
- */
+// Types
+export type {
+  PixelArtConfig,
+  PixelArtStyles,
+  PixelShadowConfig,
+  BorderRadii,
+  Point,
+  RGBAColor,
+  ParsedGradient,
+  GradientStop,
+} from './types';
 
-// 타입 정의
-export * from './types';
+export type { CSSProperties } from './css-properties';
 
-// CSS 파싱
-export * from './css-parser';
+// Main composer
+export { generatePixelArt } from './composer';
 
-// 배경 전용 픽셀 렌더러
-export * from './background-renderer';
+// Individual generators (tree-shakeable)
+export {
+  generateStaircasePolygon,
+  generatePolygonPoints,
+  parseBorderRadius,
+} from './generators/staircase-polygon';
+export { generateSteppedGradient } from './generators/stepped-gradient';
+export { generatePixelGradient } from './generators/pixel-gradient';
+export { generatePixelShadow } from './generators/pixel-shadow';
 
-// 픽셀 엔진
-export * from './pixel-engine';
+// Computed style parser
+export { parseComputedStyles } from './computed-style-parser';
+
+// Utilities
+export { parseColor, interpolateColor, colorToCSS } from './utils/color';
+export { parseGradient } from './utils/gradient-parser';
+export { snapToGrid, snapToGridCeil } from './utils/math';

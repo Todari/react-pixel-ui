@@ -1,109 +1,75 @@
-/**
- * 픽셀 렌더링 엔진의 핵심 타입 정의
- */
+import type { CSSProperties } from './css-properties';
 
-// CSS 속성을 픽셀 단위로 해석하기 위한 기본 타입들
-export interface PixelUnit {
-  value: number;
-  unit: 'px' | '%' | 'em' | 'rem' | 'vw' | 'vh';
+/** Pixel art configuration input */
+export interface PixelArtConfig {
+  /** Pixel grid size in CSS px (e.g., 4 = 4x4 pixel blocks) */
+  pixelSize: number;
+  /** Border radius to pixelate into staircase corners. Supports per-corner array [tl, tr, br, bl] */
+  borderRadius?: number | [number, number, number, number];
+  /** Pixel border thickness in CSS px */
+  borderWidth?: number;
+  /** Border color (any CSS color string) */
+  borderColor?: string;
+  /** Background color or CSS gradient string */
+  backgroundColor?: string;
+  /** Hard pixel shadow (no blur) */
+  shadow?: PixelShadowConfig;
 }
 
-export interface PixelColor {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
+export interface PixelShadowConfig {
+  /** Horizontal offset in CSS px (snapped to pixelSize grid) */
+  x: number;
+  /** Vertical offset in CSS px (snapped to pixelSize grid) */
+  y: number;
+  /** Shadow color (any CSS color string) */
+  color: string;
 }
 
-export interface PixelGradient {
+/** Generated pixel art styles for DOM application */
+export interface PixelArtStyles {
+  /** Style for the outer wrapper div (border layer). Only needed when needsWrapper is true */
+  wrapperStyle: CSSProperties;
+  /** Style for the inner content div */
+  contentStyle: CSSProperties;
+  /** Whether a wrapper div is needed (true when border is specified) */
+  needsWrapper: boolean;
+  /** Outer clip-path polygon string */
+  clipPath: string;
+  /** Inner clip-path polygon string (null if no border) */
+  innerClipPath: string | null;
+}
+
+/** Point on a 2D coordinate system */
+export interface Point {
+  x: number;
+  y: number;
+}
+
+/** Parsed border radius values for each corner */
+export interface BorderRadii {
+  topLeft: number;
+  topRight: number;
+  bottomRight: number;
+  bottomLeft: number;
+}
+
+/** Parsed CSS gradient stop */
+export interface GradientStop {
+  color: RGBAColor;
+  position: number; // 0-1
+}
+
+/** Parsed CSS gradient */
+export interface ParsedGradient {
   type: 'linear' | 'radial';
-  angle?: number; // degrees for linear
-  stops: Array<{
-    color: PixelColor;
-    position: number; // 0-1
-  }>;
+  angle: number; // degrees (CSS convention: 0=top, 90=right)
+  stops: GradientStop[];
 }
 
-// 픽셀 렌더링을 위한 CSS 스타일 정의
-export interface PixelStyle {
-  // 박스 모델
-  width?: PixelUnit;
-  height?: PixelUnit;
-  padding?: {
-    top: PixelUnit;
-    right: PixelUnit;
-    bottom: PixelUnit;
-    left: PixelUnit;
-  };
-  margin?: {
-    top: PixelUnit;
-    right: PixelUnit;
-    bottom: PixelUnit;
-    left: PixelUnit;
-  };
-  
-  // 배경
-  backgroundColor?: PixelColor;
-  backgroundImage?: PixelGradient;
-  
-  // 테두리
-  border?: {
-    width: PixelUnit;
-    color: PixelColor;
-    style: 'solid' | 'dashed' | 'dotted';
-  };
-  borderRadius?: PixelUnit;
-  
-  // 텍스트
-  color?: PixelColor;
-  fontSize?: PixelUnit;
-  fontFamily?: string;
-  fontWeight?: number | 'normal' | 'bold';
-  textAlign?: 'left' | 'center' | 'right';
-  lineHeight?: number;
-  
-  // 그림자
-  boxShadow?: {
-    offsetX: PixelUnit;
-    offsetY: PixelUnit;
-    blurRadius: PixelUnit;
-    color: PixelColor;
-  };
-  textShadow?: {
-    offsetX: PixelUnit;
-    offsetY: PixelUnit;
-    blurRadius: PixelUnit;
-    color: PixelColor;
-  };
-}
-
-// 픽셀 렌더링 옵션
-export interface PixelRenderOptions {
-  pixelSize: number; // 픽셀 크기 (1 = 실제 픽셀, 2 = 2x2 픽셀 블록)
-  antialiasing: boolean; // 안티앨리어싱 여부
-  dithering: boolean; // 디더링 여부
-  colorDepth: number; // 색상 깊이 (8, 16, 24, 32)
-}
-
-// 렌더링할 요소 정의
-export interface PixelElement {
-  type: 'div' | 'span' | 'text';
-  style: PixelStyle;
-  content?: string; // 텍스트 콘텐츠
-  children?: PixelElement[];
-  x: number; // 픽셀 좌표
-  y: number; // 픽셀 좌표
-  width: number; // 계산된 픽셀 너비
-  height: number; // 계산된 픽셀 높이
-}
-
-// 렌더링 컨텍스트
-export interface PixelRenderContext {
-  canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
-  imageData: ImageData;
-  pixels: Uint8ClampedArray;
-  width: number;
-  height: number;
-  options: PixelRenderOptions;
+/** RGBA color representation */
+export interface RGBAColor {
+  r: number; // 0-255
+  g: number; // 0-255
+  b: number; // 0-255
+  a: number; // 0-1
 }

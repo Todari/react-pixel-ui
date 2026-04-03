@@ -1,14 +1,15 @@
 {
   "name": "@react-pixel-ui/core",
-  "version": "1.0.3",
-  "description": "Core pixelation logic for React Pixel UI",
+  "version": "2.0.1",
+  "description": "CSS-based pixel art style generator using clip-path, BMP gradients, and drop-shadow. No Canvas.",
   "keywords": [
     "pixel",
+    "pixel-art",
     "pixelated",
-    "canvas",
-    "rendering",
-    "graphics",
-    "css"
+    "css",
+    "clip-path",
+    "retro",
+    "ui"
   ],
   "homepage": "https://github.com/Todari/react-pixel-ui#readme",
   "repository": {
@@ -36,13 +37,9 @@
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "type-check": "tsc --noEmit"
   },
-  "dependencies": {
-    "html2canvas": "^1.4.1"
-  },
   "devDependencies": {
     "@react-pixel-ui/typescript-config": "workspace:*",
     "@react-pixel-ui/eslint-config": "workspace:*",
-    "@types/html2canvas": "^1.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0"
   }

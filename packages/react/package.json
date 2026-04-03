@@ -1,16 +1,17 @@
 {
   "name": "@react-pixel-ui/react",
-  "version": "1.0.2",
-  "description": "React hooks for pixelating CSS styles",
+  "version": "2.0.1",
+  "description": "React components and hooks for pixel art styling. No Canvas, pure CSS.",
   "keywords": [
     "react",
     "pixel",
+    "pixel-art",
     "pixelated",
     "css",
-    "canvas",
+    "clip-path",
+    "retro",
     "ui",
-    "hooks",
-    "graphics"
+    "hooks"
   ],
   "homepage": "https://github.com/Todari/react-pixel-ui#readme",
   "repository": {
@@ -39,8 +40,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@react-pixel-ui/core": "workspace:*",
-    "react": "^18.0.0"
+    "@react-pixel-ui/core": "workspace:*"
   },
   "peerDependencies": {
     "react": "^18.0.0"

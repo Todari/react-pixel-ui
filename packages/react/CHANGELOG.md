@@ -1,5 +1,35 @@
 # @react-pixel-ui/react
 
+## 2.0.1
+
+### Patch Changes
+
+- 패키지 description 및 keywords 개선. canvas 키워드 제거, CSS 기반 설명으로 변경.
+- Updated dependencies
+  - @react-pixel-ui/core@2.0.1
+
+## 2.0.0
+
+### Major Changes
+
+- v2.0: Canvas 기반 프리렌더링을 완전히 제거하고 순수 CSS 기반으로 전면 재설계.
+  - clip-path polygon으로 계단식 모서리 (Bresenham 알고리즘)
+  - BMP data URL + image-rendering: pixelated로 2D 픽셀 그라데이션
+  - filter: drop-shadow(blur=0)로 하드 픽셀 그림자
+  - Wrapper div 구조로 픽셀 테두리
+  - html2canvas 의존성 제거
+  - SSR 완전 호환 (브라우저 API 불필요)
+  - PixelBox, PixelButton 컴포넌트
+  - PixelConfigProvider 전역 설정
+  - usePixelArt, useStaircaseClip, useSteppedGradient, useResponsiveSize 훅
+
+  BREAKING CHANGE: usePixelCSS 제거, API 전면 변경
+
+### Patch Changes
+
+- Updated dependencies
+  - @react-pixel-ui/core@2.0.0
+
 ## 1.0.2
 
 ### Patch Changes
