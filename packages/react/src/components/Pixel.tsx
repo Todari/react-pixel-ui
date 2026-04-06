@@ -8,7 +8,6 @@ import React, {
   cloneElement,
 } from 'react';
 import { generatePixelArt, parseComputedStyles } from '@react-pixel-ui/core';
-import type { PixelArtStyles } from '@react-pixel-ui/core';
 import { usePixelConfig } from '../context/PixelConfigProvider';
 import { createStyleObserver } from '../utils/style-observer';
 
@@ -30,18 +29,20 @@ export interface PixelProps {
   children: React.ReactElement;
 }
 
+// Properties managed by us — stripped before reading original styles
+const MANAGED_PROPS = [
+  'clipPath', 'background', 'backgroundColor', 'backgroundImage',
+  'backgroundSize', 'backgroundRepeat', 'imageRendering',
+  'filter', 'border', 'borderRadius', 'borderColor',
+  'borderWidth', 'borderStyle', 'position', 'boxShadow',
+] as const;
+
 /**
  * Wrapper component that automatically pixelates its child element.
  * Reads computed styles from the child and applies pixel art transformations.
  *
- * @example
- * ```tsx
- * <Pixel size={4}>
- *   <div className="bg-red-500 rounded-xl border-2 border-black p-4">
- *     Hello World
- *   </div>
- * </Pixel>
- * ```
+ * When a border is detected, renders a wrapper div for the border layer.
+ * Without border, applies pixel art directly to the child.
  */
 export function Pixel({
   size,
@@ -55,35 +56,100 @@ export function Pixel({
   const pixelSize = size ?? config.pixelSize;
 
   const childRef = useRef<HTMLElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<{ disconnect: () => void } | null>(null);
   const prevConfigKeyRef = useRef('');
+  const isApplyingRef = useRef(false);
+  const [needsWrapper, setNeedsWrapper] = useState(false);
 
-  const [pixelResult, setPixelResult] = useState<PixelArtStyles | null>(null);
-
-  const computePixelArt = useCallback(() => {
+  const applyPixelArt = useCallback(() => {
     const el = childRef.current;
-    if (!el || !enabled) {
-      setPixelResult(null);
-      return;
+    if (!el || !enabled) return;
+    if (isApplyingRef.current) return;
+    isApplyingRef.current = true;
+
+    try {
+      // 1. Strip managed styles to reveal original CSS
+      for (const prop of MANAGED_PROPS) {
+        el.style[prop as any] = '';
+      }
+
+      // 2. Read original computed styles
+      const computed = getComputedStyle(el);
+      const artConfig = parseComputedStyles(computed, pixelSize);
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
+      if (width === 0 || height === 0) return;
+
+      // 3. Diff check
+      const configKey = JSON.stringify(artConfig) + `|${width}x${height}`;
+      if (configKey === prevConfigKeyRef.current) {
+        // Re-apply cached styles (they were stripped in step 1)
+        return;
+      }
+      prevConfigKeyRef.current = configKey;
+
+      // 4. Generate pixel art
+      const result = generatePixelArt(width, height, artConfig);
+
+      // 5. Apply — update wrapper state if needed
+      if (result.needsWrapper !== needsWrapper) {
+        setNeedsWrapper(result.needsWrapper);
+      }
+
+      // Apply styles directly to DOM
+      if (result.needsWrapper && wrapperRef.current) {
+        // Wrapper = border layer
+        const w = wrapperRef.current;
+        w.style.position = 'relative';
+        w.style.width = `${width}px`;
+        w.style.height = `${height}px`;
+        w.style.backgroundColor = artConfig.borderColor || '';
+        if (result.clipPath !== 'none') w.style.clipPath = result.clipPath;
+        if (result.wrapperStyle.filter) w.style.filter = result.wrapperStyle.filter as string;
+
+        // Child = content layer
+        el.style.position = 'absolute';
+        el.style.inset = `${result.contentStyle.inset}`;
+        el.style.border = 'none';
+        el.style.borderRadius = '0';
+        el.style.boxShadow = 'none';
+        if (result.innerClipPath && result.innerClipPath !== 'none') {
+          el.style.clipPath = result.innerClipPath;
+        }
+        if (result.contentStyle.backgroundImage) {
+          el.style.backgroundImage = result.contentStyle.backgroundImage as string;
+          el.style.backgroundSize = '100% 100%';
+          el.style.backgroundRepeat = 'no-repeat';
+          el.style.imageRendering = 'pixelated';
+        } else if (result.contentStyle.background) {
+          el.style.background = result.contentStyle.background as string;
+        }
+      } else if (!result.needsWrapper) {
+        // No border — direct apply
+        el.style.border = 'none';
+        el.style.borderRadius = '0';
+        el.style.boxShadow = 'none';
+        if (result.clipPath !== 'none') el.style.clipPath = result.clipPath;
+        if (result.contentStyle.backgroundImage) {
+          el.style.backgroundImage = result.contentStyle.backgroundImage as string;
+          el.style.backgroundSize = '100% 100%';
+          el.style.backgroundRepeat = 'no-repeat';
+          el.style.imageRendering = 'pixelated';
+        } else if (result.contentStyle.background) {
+          el.style.background = result.contentStyle.background as string;
+        }
+        if (result.contentStyle.filter) {
+          el.style.filter = result.contentStyle.filter as string;
+        }
+      }
+    } finally {
+      Promise.resolve().then(() => {
+        isApplyingRef.current = false;
+      });
     }
+  }, [pixelSize, enabled, needsWrapper]);
 
-    const width = el.offsetWidth;
-    const height = el.offsetHeight;
-    if (width === 0 || height === 0) return;
-
-    const computed = getComputedStyle(el);
-    const artConfig = parseComputedStyles(computed, pixelSize);
-
-    // Diff check
-    const key = JSON.stringify(artConfig) + `|${width}x${height}`;
-    if (key === prevConfigKeyRef.current) return;
-    prevConfigKeyRef.current = key;
-
-    const result = generatePixelArt(width, height, artConfig);
-    setPixelResult(result);
-  }, [pixelSize, enabled]);
-
-  // Set up observers when child element mounts
   const setRef = useCallback(
     (node: HTMLElement | null) => {
       observerRef.current?.disconnect();
@@ -91,32 +157,32 @@ export function Pixel({
 
       if (!node || !enabled) return;
 
-      // Initial computation
-      computePixelArt();
+      // Defer initial apply to allow browser to compute styles
+      requestAnimationFrame(() => applyPixelArt());
 
       observerRef.current = createStyleObserver(node, {
-        onUpdate: computePixelArt,
+        onUpdate: applyPixelArt,
         hover: observeHover,
         focus: observeFocus,
         active: observeActive,
       });
     },
-    [computePixelArt, enabled, observeHover, observeFocus, observeActive],
+    [applyPixelArt, enabled, observeHover, observeFocus, observeActive],
   );
 
-  // Cleanup
   useEffect(() => {
     return () => observerRef.current?.disconnect();
   }, []);
 
-  // Re-compute when pixelSize changes
+  // Re-apply when pixelSize changes
   useIsomorphicLayoutEffect(() => {
-    computePixelArt();
-  }, [computePixelArt]);
+    prevConfigKeyRef.current = ''; // force recompute
+    applyPixelArt();
+  }, [pixelSize]);
 
   if (!isValidElement(children)) return children;
 
-  // Merge ref with child's existing ref
+  // Merge ref
   const mergedRef = (node: HTMLElement | null) => {
     setRef(node);
     const childRefProp = (children as any).ref;
@@ -126,42 +192,11 @@ export function Pixel({
     }
   };
 
-  // Not yet computed — render child as-is with ref
-  if (!pixelResult) {
-    return cloneElement(children, { ref: mergedRef } as any);
-  }
-
-  const { wrapperStyle, contentStyle, needsWrapper } = pixelResult;
-
-  // Build content style (override original CSS with pixel art)
-  const pixelContentStyle: React.CSSProperties = {
-    ...(contentStyle as React.CSSProperties),
-    border: 'none',
-    borderRadius: 0,
-    boxShadow: 'none',
-  };
+  const child = cloneElement(children, { ref: mergedRef } as any);
 
   if (needsWrapper) {
-    // Render wrapper div for border + cloned child for content
-    return (
-      <div style={wrapperStyle as React.CSSProperties}>
-        {cloneElement(children, {
-          ref: mergedRef,
-          style: {
-            ...((children.props as any).style || {}),
-            ...pixelContentStyle,
-          },
-        } as any)}
-      </div>
-    );
+    return <div ref={wrapperRef}>{child}</div>;
   }
 
-  // No border — apply directly to child
-  return cloneElement(children, {
-    ref: mergedRef,
-    style: {
-      ...((children.props as any).style || {}),
-      ...pixelContentStyle,
-    },
-  } as any);
+  return child;
 }
