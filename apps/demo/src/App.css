@@ -277,9 +277,89 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--text-muted);
 }
 
+/* --- Playground --- */
+.playground {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: start;
+}
+
+.playground-preview {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.playground-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.playground-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.playground-controls span {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.playground-controls select,
+.playground-controls input[type="color"] {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.playground-controls input[type="range"] {
+  width: 100%;
+}
+
+/* --- Documentation --- */
+.subsection-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 28px 0 8px;
+}
+
+.subsection-title:first-of-type {
+  margin-top: 0;
+}
+
+.doc-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.doc-text code {
+  background: var(--bg-card);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--accent);
+}
+
 /* --- Responsive --- */
 @media (max-width: 700px) {
   .comparison-grid { grid-template-columns: 1fr; }
+  .playground { grid-template-columns: 1fr; }
   .controls { flex-direction: column; align-items: stretch; }
   input[type="range"] { width: 100%; }
   .hero { padding: 48px 20px 40px; }
