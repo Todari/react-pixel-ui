@@ -11,13 +11,15 @@ export interface UsePixelRefOptions {
   observeActive?: boolean;
 }
 
-// Only shorthand properties — longhand (borderColor, borderWidth, borderStyle)
-// would override the shorthand during restore.
+// Longhand-only to avoid shorthand/longhand conflicts during capture/restore.
+// e.g., restoring `background` then `backgroundImage=''` would clear the gradient.
 const MANAGED_PROPS = [
-  'clipPath', 'background', 'backgroundColor', 'backgroundImage',
-  'backgroundSize', 'backgroundRepeat', 'imageRendering',
-  'backgroundOrigin', 'backgroundClip',
-  'filter', 'border', 'borderRadius', 'boxShadow', 'padding',
+  'clipPath',
+  'backgroundColor', 'backgroundImage', 'backgroundSize',
+  'backgroundRepeat', 'backgroundPosition', 'imageRendering',
+  'filter',
+  'borderWidth', 'borderStyle', 'borderColor', 'borderRadius',
+  'boxShadow',
 ] as const;
 
 /**
@@ -79,7 +81,7 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
       const result = generatePixelArt(width, height, artConfig);
 
       // Always apply directly — no wrapper div, no pseudo-elements
-      el.style.border = 'none';
+      el.style.borderStyle = 'none';
       el.style.borderRadius = '0';
       el.style.boxShadow = 'none';
 
@@ -89,24 +91,20 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
 
       // Apply gradient or solid background
       const cs = result.needsWrapper ? result.contentStyle : result.contentStyle;
-      if (result.needsWrapper) {
-        // Border: use box-shadow inset for the border color
-        // and apply the content background with padding
-        const bw = artConfig.borderWidth || 0;
-        el.style.padding = `${bw}px`;
+      const bw = result.needsWrapper ? (artConfig.borderWidth || 0) : 0;
+
+      if (bw > 0) {
+        // Border mode: backgroundColor = border color,
+        // BMP positioned/sized to inner area
         el.style.backgroundColor = artConfig.borderColor || '';
-        // Apply the content gradient as background but clipped by padding area
         if (cs.backgroundImage) {
           el.style.backgroundImage = cs.backgroundImage as string;
-          el.style.backgroundSize = '100% 100%';
+          el.style.backgroundSize = `calc(100% - ${bw * 2}px) calc(100% - ${bw * 2}px)`;
+          el.style.backgroundPosition = `${bw}px ${bw}px`;
           el.style.backgroundRepeat = 'no-repeat';
           el.style.imageRendering = 'pixelated';
-          el.style.backgroundOrigin = 'content-box';
-          el.style.backgroundClip = 'content-box';
         } else if (cs.background) {
-          el.style.background = `${cs.background}`;
-          el.style.backgroundOrigin = 'content-box';
-          el.style.backgroundClip = 'content-box';
+          el.style.background = cs.background as string;
         }
       } else {
         if (cs.backgroundImage) {
