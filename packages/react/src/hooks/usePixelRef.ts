@@ -92,30 +92,14 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
 
       // Apply gradient or solid background
       const cs = result.needsWrapper ? result.contentStyle : result.contentStyle;
-      const bw = result.needsWrapper ? (parseFloat(result.contentStyle.inset as string) || 0) : 0;
-
-      if (bw > 0) {
-        // Border mode: backgroundColor = border color,
-        // BMP positioned/sized to inner area
-        el.style.backgroundColor = artConfig.borderColor || '';
-        if (cs.backgroundImage) {
-          el.style.backgroundImage = cs.backgroundImage as string;
-          el.style.backgroundSize = `calc(100% - ${bw * 2}px) calc(100% - ${bw * 2}px)`;
-          el.style.backgroundPosition = `${bw}px ${bw}px`;
-          el.style.backgroundRepeat = 'no-repeat';
-          el.style.imageRendering = 'pixelated';
-        } else if (cs.background) {
-          el.style.background = cs.background as string;
-        }
-      } else {
-        if (cs.backgroundImage) {
-          el.style.backgroundImage = cs.backgroundImage as string;
-          el.style.backgroundSize = '100% 100%';
-          el.style.backgroundRepeat = 'no-repeat';
-          el.style.imageRendering = 'pixelated';
-        } else if (cs.background) {
-          el.style.background = cs.background as string;
-        }
+      // Use composite image (border + gradient baked into one BMP)
+      if (result.compositeImage) {
+        el.style.backgroundImage = result.compositeImage;
+        el.style.backgroundSize = '100% 100%';
+        el.style.backgroundRepeat = 'no-repeat';
+        el.style.imageRendering = 'pixelated';
+      } else if (cs.background) {
+        el.style.background = cs.background as string;
       }
 
       if (result.wrapperStyle.filter) {

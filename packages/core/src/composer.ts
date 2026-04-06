@@ -5,6 +5,7 @@ import {
   parseBorderRadius,
 } from './generators/staircase-polygon';
 import { generatePixelGradient } from './generators/pixel-gradient';
+import { generateCompositePixelImage } from './generators/composite-pixel-image';
 import { generatePixelShadow } from './generators/pixel-shadow';
 
 /**
@@ -137,12 +138,21 @@ export function generatePixelArt(
     }
   }
 
+  // Generate composite BMP with border + gradient baked in (for single-element use)
+  const compositeImage = generateCompositePixelImage(
+    width, height, pixelSize, radii,
+    needsWrapper ? borderWidth : 0,
+    needsWrapper ? borderColor : undefined,
+    backgroundColor,
+  );
+
   return {
     wrapperStyle,
     contentStyle,
     needsWrapper,
     clipPath: outerClipPath,
     innerClipPath,
+    compositeImage,
   };
 }
 

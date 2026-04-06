@@ -86,12 +86,8 @@ export function Pixel({
 
   // Phase 2: generate pixel art and apply via style override
   const result = generatePixelArt(artState.width, artState.height, artState.config);
-  const bw = result.needsWrapper ? (parseFloat(result.contentStyle.inset as string) || 0) : 0;
 
   const pixelStyle: React.CSSProperties = {
-    // Clear shorthands first — user's `background` shorthand sets
-    // backgroundSize:auto and backgroundRepeat:repeat which would
-    // override our longhand values if not cleared.
     background: 'none',
     border: 'none',
     borderRadius: 0,
@@ -102,28 +98,14 @@ export function Pixel({
     pixelStyle.clipPath = result.clipPath;
   }
 
-  if (bw > 0) {
-    // Border mode: backgroundColor = border color, gradient sized to inner area
-    pixelStyle.backgroundColor = artState.config.borderColor;
-    if (result.contentStyle.backgroundImage) {
-      pixelStyle.backgroundImage = result.contentStyle.backgroundImage as string;
-      pixelStyle.backgroundSize = `calc(100% - ${bw * 2}px) calc(100% - ${bw * 2}px)`;
-      pixelStyle.backgroundPosition = `${bw}px ${bw}px`;
-      pixelStyle.backgroundRepeat = 'no-repeat';
-      pixelStyle.imageRendering = 'pixelated';
-    } else if (result.contentStyle.background) {
-      pixelStyle.background = result.contentStyle.background as string;
-    }
-  } else {
-    // No border
-    if (result.contentStyle.backgroundImage) {
-      pixelStyle.backgroundImage = result.contentStyle.backgroundImage as string;
-      pixelStyle.backgroundSize = '100% 100%';
-      pixelStyle.backgroundRepeat = 'no-repeat';
-      pixelStyle.imageRendering = 'pixelated';
-    } else if (result.contentStyle.background) {
-      pixelStyle.background = result.contentStyle.background as string;
-    }
+  // Use composite image (border + gradient baked into one BMP)
+  if (result.compositeImage) {
+    pixelStyle.backgroundImage = result.compositeImage;
+    pixelStyle.backgroundSize = '100% 100%';
+    pixelStyle.backgroundRepeat = 'no-repeat';
+    pixelStyle.imageRendering = 'pixelated';
+  } else if (result.contentStyle.background) {
+    pixelStyle.background = result.contentStyle.background as string;
   }
 
   if (result.wrapperStyle.filter) {

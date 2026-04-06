@@ -23,6 +23,7 @@ export {
 } from './generators/staircase-polygon';
 export { generateSteppedGradient } from './generators/stepped-gradient';
 export { generatePixelGradient } from './generators/pixel-gradient';
+export { generateCompositePixelImage } from './generators/composite-pixel-image';
 export { generatePixelShadow } from './generators/pixel-shadow';
 
 // Computed style parser
