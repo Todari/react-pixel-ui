@@ -74,8 +74,9 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
 
       const computed = getComputedStyle(el);
       const artConfig = parseComputedStyles(computed, pixelSize);
-      const width = el.offsetWidth;
-      const height = el.offsetHeight;
+      const boxSizing = computed.boxSizing;
+      const width = boxSizing === 'border-box' ? el.offsetWidth : el.clientWidth;
+      const height = boxSizing === 'border-box' ? el.offsetHeight : el.clientHeight;
       if (width === 0 || height === 0) return;
 
       const result = generatePixelArt(width, height, artConfig);

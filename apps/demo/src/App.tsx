@@ -6,6 +6,7 @@ function App() {
   const [pixelSize, setPixelSize] = useState(6);
 
   // Playground state
+  const [pgPixelSize, setPgPixelSize] = useState(6);
   const [pgBg, setPgBg] = useState('linear-gradient(135deg, #ff6b6b, #4ecdc4)');
   const [pgRadius, setPgRadius] = useState(20);
   const [pgBorder, setPgBorder] = useState(3);
@@ -153,7 +154,7 @@ function App() {
           <h2 className="section-title">Playground</h2>
           <div className="playground">
             <div className="playground-preview">
-              <Pixel size={pixelSize} key={`${pgBg}-${pgRadius}-${pgBorder}-${pgBorderColor}-${pgWidth}-${pgHeight}`}>
+              <Pixel size={pgPixelSize} key={`${pgPixelSize}-${pgBg}-${pgRadius}-${pgBorder}-${pgBorderColor}-${pgWidth}-${pgHeight}`}>
                 <div style={{
                   background: pgBg,
                   borderRadius: pgRadius,
@@ -168,6 +169,10 @@ function App() {
               </Pixel>
             </div>
             <div className="playground-controls">
+              <label>
+                <span>Pixel Size: {pgPixelSize}px</span>
+                <input type="range" min="2" max="20" value={pgPixelSize} onChange={e => setPgPixelSize(Number(e.target.value))} />
+              </label>
               <label>
                 <span>Background</span>
                 <select value={pgBg} onChange={e => setPgBg(e.target.value)}>

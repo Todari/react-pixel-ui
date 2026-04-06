@@ -55,8 +55,12 @@ export function Pixel({
 
     const computed = getComputedStyle(el);
     const artConfig = parseComputedStyles(computed, pixelSize);
-    const width = el.offsetWidth;
-    const height = el.offsetHeight;
+    // Compute the dimensions the element WILL have after we remove its border.
+    // border-box: element keeps its offsetWidth (border is inside the box)
+    // content-box: element shrinks to clientWidth (border was outside the box)
+    const boxSizing = computed.boxSizing;
+    const width = boxSizing === 'border-box' ? el.offsetWidth : el.clientWidth;
+    const height = boxSizing === 'border-box' ? el.offsetHeight : el.clientHeight;
 
     if (width > 0 && height > 0) {
       setArtState({ config: artConfig, width, height });
