@@ -15,7 +15,7 @@ function App() {
   const [pgHeight, setPgHeight] = useState(120);
   const [pgShadowX, setPgShadowX] = useState(4);
   const [pgShadowY, setPgShadowY] = useState(4);
-  const [pgShadowColor, setPgShadowColor] = useState('#000000');
+  const [pgShadowColor, setPgShadowColor] = useState('#2d3436');
 
   return (
     <PixelConfigProvider config={{ pixelSize }}>
@@ -164,7 +164,7 @@ yarn add @react-pixel-ui/react`}</Code>
                   width: pgWidth, height: pgHeight,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: '#fff', fontWeight: 700, fontSize: 16,
-                  boxShadow: pgShadowX || pgShadowY ? `${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}40` : 'none',
+                  boxShadow: pgShadowX || pgShadowY ? `${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}` : 'none',
                 }}>
                   Playground
                 </div>
@@ -229,7 +229,7 @@ yarn add @react-pixel-ui/react`}</Code>
     borderRadius: ${pgRadius},
     border: '${pgBorder}px solid ${pgBorderColor}',
     width: ${pgWidth},
-    height: ${pgHeight},${pgShadowX || pgShadowY ? `\n    boxShadow: '${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}40',` : ''}
+    height: ${pgHeight},${pgShadowX || pgShadowY ? `\n    boxShadow: '${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}',` : ''}
   }}>
     Content
   </div>
