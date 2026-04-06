@@ -13,6 +13,9 @@ function App() {
   const [pgBorderColor, setPgBorderColor] = useState('#2d3436');
   const [pgWidth, setPgWidth] = useState(300);
   const [pgHeight, setPgHeight] = useState(120);
+  const [pgShadowX, setPgShadowX] = useState(4);
+  const [pgShadowY, setPgShadowY] = useState(4);
+  const [pgShadowColor, setPgShadowColor] = useState('#000000');
 
   return (
     <PixelConfigProvider config={{ pixelSize }}>
@@ -153,7 +156,7 @@ yarn add @react-pixel-ui/react`}</Code>
           <h2 className="section-title">Playground</h2>
           <div className="playground">
             <div className="playground-preview">
-              <Pixel size={pgPixelSize} key={`${pgPixelSize}-${pgBg}-${pgRadius}-${pgBorder}-${pgBorderColor}-${pgWidth}-${pgHeight}`}>
+              <Pixel size={pgPixelSize} key={`${pgPixelSize}-${pgBg}-${pgRadius}-${pgBorder}-${pgBorderColor}-${pgWidth}-${pgHeight}-${pgShadowX}-${pgShadowY}-${pgShadowColor}`}>
                 <div style={{
                   background: pgBg,
                   borderRadius: pgRadius,
@@ -161,7 +164,7 @@ yarn add @react-pixel-ui/react`}</Code>
                   width: pgWidth, height: pgHeight,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: '#fff', fontWeight: 700, fontSize: 16,
-                  boxShadow: '4px 4px 0 rgba(0,0,0,0.3)',
+                  boxShadow: pgShadowX || pgShadowY ? `${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}40` : 'none',
                 }}>
                   Playground
                 </div>
@@ -206,6 +209,18 @@ yarn add @react-pixel-ui/react`}</Code>
                 <span>Height: {pgHeight}px</span>
                 <input type="range" min="40" max="200" value={pgHeight} onChange={e => setPgHeight(Number(e.target.value))} />
               </label>
+              <label>
+                <span>Shadow X: {pgShadowX}px</span>
+                <input type="range" min="0" max="20" value={pgShadowX} onChange={e => setPgShadowX(Number(e.target.value))} />
+              </label>
+              <label>
+                <span>Shadow Y: {pgShadowY}px</span>
+                <input type="range" min="0" max="20" value={pgShadowY} onChange={e => setPgShadowY(Number(e.target.value))} />
+              </label>
+              <label>
+                <span>Shadow Color</span>
+                <input type="color" value={pgShadowColor} onChange={e => setPgShadowColor(e.target.value)} />
+              </label>
             </div>
           </div>
           <Code>{`<Pixel size={${pgPixelSize}}>
@@ -214,7 +229,7 @@ yarn add @react-pixel-ui/react`}</Code>
     borderRadius: ${pgRadius},
     border: '${pgBorder}px solid ${pgBorderColor}',
     width: ${pgWidth},
-    height: ${pgHeight},
+    height: ${pgHeight},${pgShadowX || pgShadowY ? `\n    boxShadow: '${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}40',` : ''}
   }}>
     Content
   </div>
