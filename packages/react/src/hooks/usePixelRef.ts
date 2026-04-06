@@ -1,44 +1,31 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { generatePixelArt, parseComputedStyles } from '@react-pixel-ui/core';
 import { usePixelConfig } from '../context/PixelConfigProvider';
-import { allocateId, setRule, removeRule } from '../utils/style-manager';
 import { createStyleObserver } from '../utils/style-observer';
 
 export interface UsePixelRefOptions {
-  /** Pixel block size (default: from PixelConfigProvider or 4) */
   pixelSize?: number;
-  /** Enable/disable pixelation (default: true) */
   enabled?: boolean;
-  /** Re-compute on hover state change (default: true) */
   observeHover?: boolean;
-  /** Re-compute on focus state change (default: true) */
   observeFocus?: boolean;
-  /** Re-compute on active state change (default: true) */
   observeActive?: boolean;
 }
 
-// Properties managed by the hook — stripped before reading, set after generating
+// Only shorthand properties — longhand (borderColor, borderWidth, borderStyle)
+// would override the shorthand during restore.
 const MANAGED_PROPS = [
-  'clipPath',
-  'background',
-  'backgroundColor',
-  'backgroundImage',
-  'backgroundSize',
-  'backgroundRepeat',
-  'imageRendering',
-  'filter',
-  'border',
-  'borderRadius',
-  'borderColor',
-  'borderWidth',
-  'borderStyle',
-  'position',
-  'boxShadow',
+  'clipPath', 'background', 'backgroundColor', 'backgroundImage',
+  'backgroundSize', 'backgroundRepeat', 'imageRendering',
+  'backgroundOrigin', 'backgroundClip',
+  'filter', 'border', 'borderRadius', 'boxShadow', 'padding',
 ] as const;
 
 /**
  * Hook that automatically pixelates any HTML element.
- * Reads computed styles and applies pixel art transformations.
+ *
+ * Applies staircase clip-path, pixel gradient, and hard shadow.
+ * For borders, uses the outer clip-path with padding to simulate
+ * the border (no wrapper div or pseudo-element needed).
  */
 export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
   options: UsePixelRefOptions = {},
@@ -48,139 +35,102 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
   const enabled = options.enabled ?? true;
 
   const elementRef = useRef<T | null>(null);
-  const uidRef = useRef<string | null>(null);
   const observerRef = useRef<{ disconnect: () => void } | null>(null);
-  const prevConfigRef = useRef<string>('');
   const isApplyingRef = useRef(false);
-  // Cache the last generated result for re-application on no-change diff
-  const cachedResultRef = useRef<ReturnType<typeof generatePixelArt> | null>(null);
-  const cachedBorderColorRef = useRef<string>('');
+  const originalStylesRef = useRef<Record<string, string> | null>(null);
+  const originalPaddingRef = useRef<string>('');
+
+  const captureOriginals = useCallback((el: HTMLElement) => {
+    const originals: Record<string, string> = {};
+    for (const prop of MANAGED_PROPS) {
+      originals[prop] = el.style[prop as any] || '';
+    }
+    originalStylesRef.current = originals;
+    originalPaddingRef.current = el.style.padding || '';
+  }, []);
+
+  const restoreOriginals = useCallback((el: HTMLElement) => {
+    const originals = originalStylesRef.current;
+    if (!originals) return;
+    for (const prop of MANAGED_PROPS) {
+      el.style[prop as any] = originals[prop] || '';
+    }
+    el.style.padding = originalPaddingRef.current;
+  }, []);
 
   const applyPixelArt = useCallback(() => {
     const el = elementRef.current;
     if (!el || !enabled) return;
-
     if (isApplyingRef.current) return;
     isApplyingRef.current = true;
 
     try {
-      // 1. Strip ALL managed styles to reveal original CSS
-      for (const prop of MANAGED_PROPS) {
-        el.style[prop as any] = '';
-      }
-      // Also clear pseudo-element rule temporarily
-      if (uidRef.current) removeRule(uidRef.current);
+      if (!originalStylesRef.current) captureOriginals(el);
 
-      // 2. Read ORIGINAL computed styles (with our styles stripped)
+      // Restore originals for reading
+      restoreOriginals(el);
+
       const computed = getComputedStyle(el);
       const artConfig = parseComputedStyles(computed, pixelSize);
       const width = el.offsetWidth;
       const height = el.offsetHeight;
       if (width === 0 || height === 0) return;
 
-      // 3. Diff check on original config
-      const configKey = JSON.stringify(artConfig) + `|${width}x${height}`;
-      if (configKey === prevConfigRef.current && cachedResultRef.current) {
-        // Same config — re-apply cached result
-        applyResult(el, cachedResultRef.current, cachedBorderColorRef.current);
-        return;
-      }
-      prevConfigRef.current = configKey;
-
-      // 4. Generate pixel art from original styles
       const result = generatePixelArt(width, height, artConfig);
-      cachedResultRef.current = result;
-      cachedBorderColorRef.current = artConfig.borderColor || '';
 
-      // 5. Apply result to element
-      applyResult(el, result, artConfig.borderColor || '');
-    } finally {
-      Promise.resolve().then(() => {
-        isApplyingRef.current = false;
-      });
-    }
-  }, [pixelSize, enabled]);
+      // Always apply directly — no wrapper div, no pseudo-elements
+      el.style.border = 'none';
+      el.style.borderRadius = '0';
+      el.style.boxShadow = 'none';
 
-  /** Apply a pixel art result to the DOM element */
-  const applyResult = useCallback(
-    (
-      el: HTMLElement,
-      result: ReturnType<typeof generatePixelArt>,
-      borderColor: string,
-    ) => {
+      if (result.clipPath !== 'none') {
+        el.style.clipPath = result.clipPath;
+      }
+
+      // Apply gradient or solid background
+      const cs = result.needsWrapper ? result.contentStyle : result.contentStyle;
       if (result.needsWrapper) {
-        // Border mode: element = border layer, ::before = content layer
-        const uid = uidRef.current!;
-        el.style.position = 'relative';
-        el.style.backgroundColor = borderColor;
-        el.style.border = 'none';
-        el.style.borderRadius = '0';
-        el.style.boxShadow = 'none';
-        if (result.clipPath !== 'none') {
-          el.style.clipPath = result.clipPath;
-        }
-        if (result.wrapperStyle.filter) {
-          el.style.filter = result.wrapperStyle.filter as string;
-        }
-
-        // Inject ::before pseudo-element for content background
-        const cs = result.contentStyle;
-        const cssProps: string[] = [
-          `content: ''`,
-          `position: absolute`,
-          `inset: ${cs.inset}`,
-          `pointer-events: none`,
-          `z-index: 0`,
-        ];
-        if (result.innerClipPath && result.innerClipPath !== 'none') {
-          cssProps.push(`clip-path: ${result.innerClipPath}`);
-        }
+        // Border: use box-shadow inset for the border color
+        // and apply the content background with padding
+        const bw = artConfig.borderWidth || 0;
+        el.style.padding = `${bw}px`;
+        el.style.backgroundColor = artConfig.borderColor || '';
+        // Apply the content gradient as background but clipped by padding area
         if (cs.backgroundImage) {
-          cssProps.push(`background-image: ${cs.backgroundImage}`);
-          cssProps.push(`background-size: 100% 100%`);
-          cssProps.push(`background-repeat: no-repeat`);
-          cssProps.push(`image-rendering: pixelated`);
-          cssProps.push(`image-rendering: crisp-edges`);
-        } else if (cs.background) {
-          cssProps.push(`background: ${cs.background}`);
-        }
-
-        setRule(
-          uid,
-          `[data-pixel-uid="${uid}"]::before { ${cssProps.join('; ')} }`,
-        );
-      } else {
-        // No border: apply directly to element
-        el.style.border = 'none';
-        el.style.borderRadius = '0';
-        el.style.boxShadow = 'none';
-        if (result.clipPath !== 'none') {
-          el.style.clipPath = result.clipPath;
-        }
-        if (result.contentStyle.backgroundImage) {
-          el.style.backgroundImage = result.contentStyle
-            .backgroundImage as string;
+          el.style.backgroundImage = cs.backgroundImage as string;
           el.style.backgroundSize = '100% 100%';
           el.style.backgroundRepeat = 'no-repeat';
           el.style.imageRendering = 'pixelated';
-        } else if (result.contentStyle.background) {
-          el.style.background = result.contentStyle.background as string;
+          el.style.backgroundOrigin = 'content-box';
+          el.style.backgroundClip = 'content-box';
+        } else if (cs.background) {
+          el.style.background = `${cs.background}`;
+          el.style.backgroundOrigin = 'content-box';
+          el.style.backgroundClip = 'content-box';
         }
-        if (result.contentStyle.filter) {
-          el.style.filter = result.contentStyle.filter as string;
+      } else {
+        if (cs.backgroundImage) {
+          el.style.backgroundImage = cs.backgroundImage as string;
+          el.style.backgroundSize = '100% 100%';
+          el.style.backgroundRepeat = 'no-repeat';
+          el.style.imageRendering = 'pixelated';
+        } else if (cs.background) {
+          el.style.background = cs.background as string;
         }
-        // Clear any pseudo-element rule
-        if (uidRef.current) removeRule(uidRef.current);
       }
-    },
-    [],
-  );
+
+      if (result.wrapperStyle.filter) {
+        el.style.filter = result.wrapperStyle.filter as string;
+      } else if (result.contentStyle.filter) {
+        el.style.filter = result.contentStyle.filter as string;
+      }
+    } finally {
+      Promise.resolve().then(() => { isApplyingRef.current = false; });
+    }
+  }, [pixelSize, enabled, captureOriginals, restoreOriginals]);
 
   useEffect(() => {
-    return () => {
-      observerRef.current?.disconnect();
-      if (uidRef.current) removeRule(uidRef.current);
-    };
+    return () => { observerRef.current?.disconnect(); };
   }, []);
 
   useEffect(() => {
@@ -190,33 +140,26 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
   return useCallback(
     (node: T | null) => {
       observerRef.current?.disconnect();
-      if (elementRef.current && uidRef.current) {
-        elementRef.current.removeAttribute('data-pixel-uid');
-        removeRule(uidRef.current);
-      }
-
+      if (elementRef.current) restoreOriginals(elementRef.current);
       elementRef.current = node;
+      originalStylesRef.current = null;
 
       if (!node || !enabled) return;
 
-      if (!uidRef.current) uidRef.current = allocateId();
-      node.setAttribute('data-pixel-uid', uidRef.current);
-
+      captureOriginals(node);
       applyPixelArt();
 
       observerRef.current = createStyleObserver(node, {
-        onUpdate: applyPixelArt,
+        onUpdate: () => {
+          if (isApplyingRef.current) return;
+          applyPixelArt();
+        },
         hover: options.observeHover ?? true,
         focus: options.observeFocus ?? true,
         active: options.observeActive ?? true,
       });
     },
-    [
-      applyPixelArt,
-      enabled,
-      options.observeHover,
-      options.observeFocus,
-      options.observeActive,
-    ],
+    [applyPixelArt, enabled, captureOriginals, restoreOriginals,
+     options.observeHover, options.observeFocus, options.observeActive],
   );
 }

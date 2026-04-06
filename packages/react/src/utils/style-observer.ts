@@ -26,11 +26,12 @@ export function createStyleObserver(
     });
   };
 
-  // MutationObserver — class and style attribute changes
+  // MutationObserver — class attribute changes only
+  // (not 'style' — the hook manages inline styles directly, watching them causes loops)
   const mutationObserver = new MutationObserver(schedule);
   mutationObserver.observe(element, {
     attributes: true,
-    attributeFilter: ['class', 'style'],
+    attributeFilter: ['class'],
   });
 
   // ResizeObserver — dimension changes
