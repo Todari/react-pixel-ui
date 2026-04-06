@@ -97,10 +97,10 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
         el.style.background = result.contentStyle.background as string;
       }
 
-      if (result.wrapperStyle.filter) {
-        el.style.filter = result.wrapperStyle.filter as string;
-      } else if (result.contentStyle.filter) {
-        el.style.filter = result.contentStyle.filter as string;
+      // drop-shadow must be on a PARENT element — clip-path clips filter on same element.
+      // Apply to parentElement if available, otherwise skip shadow.
+      if (result.wrapperStyle.filter && el.parentElement) {
+        el.parentElement.style.filter = result.wrapperStyle.filter as string;
       }
     } catch {
       // Silently recover — element keeps original styles

@@ -115,6 +115,22 @@ export function Pixel({
   }
 
   const childProps = children.props as any;
+
+  // drop-shadow on the SAME element as clip-path gets clipped.
+  // Move shadow to a wrapper div so it renders outside the clip.
+  const shadowFilter = pixelStyle.filter;
+  if (shadowFilter) {
+    delete pixelStyle.filter;
+    return (
+      <div style={{ filter: shadowFilter as string, display: 'inline-block' }}>
+        {cloneElement(children, {
+          ref: mergedRef,
+          style: { ...(childProps.style || {}), ...pixelStyle },
+        } as any)}
+      </div>
+    );
+  }
+
   return cloneElement(children, {
     ref: mergedRef,
     style: { ...(childProps.style || {}), ...pixelStyle },
