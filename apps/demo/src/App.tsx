@@ -329,6 +329,65 @@ function MyComponent() {
 />`}</Code>
         </section>
 
+        {/* When to use what */}
+        <section className="section">
+          <div className="section-label">Guide</div>
+          <h2 className="section-title">When to use what</h2>
+          <div className="guide-table">
+            <div className="guide-row guide-header">
+              <span>Use case</span><span>API</span><span>Why</span>
+            </div>
+            <div className="guide-row">
+              <span>Existing styled elements</span>
+              <span><code>&lt;Pixel&gt;</code></span>
+              <span>Reads CSS automatically, zero config</span>
+            </div>
+            <div className="guide-row">
+              <span>Third-party components</span>
+              <span><code>usePixelRef</code></span>
+              <span>Attach via ref, no wrapper div</span>
+            </div>
+            <div className="guide-row">
+              <span>Full manual control</span>
+              <span><code>PixelBox</code></span>
+              <span>Explicit props, no CSS reading</span>
+            </div>
+            <div className="guide-row">
+              <span>Quick buttons</span>
+              <span><code>PixelButton</code></span>
+              <span>Ready-to-use variants</span>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="section">
+          <div className="section-label">Help</div>
+          <h2 className="section-title">FAQ</h2>
+          <div className="faq-list">
+            <details className="faq-item">
+              <summary>Gradient looks smooth, not pixelated?</summary>
+              <p>Increase <code>pixelSize</code>. At size 2, blocks are 2x2 CSS pixels — too small on Retina screens. Try 6 or higher.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Does it work with Tailwind CSS?</summary>
+              <p>Yes. <code>&lt;Pixel&gt;</code> reads <code>getComputedStyle</code> which resolves Tailwind classes into final CSS values. Just wrap your element.</p>
+            </details>
+            <details className="faq-item">
+              <summary>What CSS properties are converted?</summary>
+              <p><code>background</code>, <code>background-image</code> (linear/radial/repeating gradients), <code>border-radius</code>, <code>border</code>, <code>box-shadow</code>. Other properties (color, font, padding) are preserved as-is.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Is it SSR / Next.js compatible?</summary>
+              <p>Yes. Core uses pure math (no Canvas/DOM). Elements render normally on the server and pixelate after hydration.</p>
+            </details>
+            <details className="faq-item">
+              <summary>TypeScript support?</summary>
+              <p>Fully typed. Import types: <code>PixelArtConfig</code>, <code>PixelShadowConfig</code>, <code>BorderRadii</code>, etc.</p>
+            </details>
+          </div>
+        </section>
+
         {/* How it works */}
         <section className="section">
           <div className="section-label">Under the hood</div>
@@ -336,7 +395,7 @@ function MyComponent() {
           <div className="features-grid">
             <FeatureCard icon="auto" title="Auto-detection" desc="getComputedStyle reads your CSS. Tailwind, inline, CSS modules — all work." />
             <FeatureCard icon="clip" title="Staircase Corners" desc="clip-path: polygon() via Bresenham circle algorithm." />
-            <FeatureCard icon="image" title="Pixel Gradients" desc="Tiny BMP + image-rendering: pixelated. True square blocks." />
+            <FeatureCard icon="image" title="Pixel Gradients" desc="Composite BMP with staircase borders baked in + image-rendering: pixelated." />
             <FeatureCard icon="shadow" title="Hard Shadows" desc="drop-shadow(blur=0) follows the clip-path contour." />
             <FeatureCard icon="observe" title="Live Updates" desc="MutationObserver + ResizeObserver track style changes." />
             <FeatureCard icon="ssr" title="SSR Compatible" desc="Pure math. Zero browser APIs in core." />

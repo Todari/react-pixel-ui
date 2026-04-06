@@ -1,7 +1,7 @@
 {
   "name": "@react-pixel-ui/react",
   "version": "2.0.1",
-  "description": "React components and hooks for pixel art styling. No Canvas, pure CSS.",
+  "description": "Wrap any element with <Pixel> and your CSS becomes pixel art. Tailwind, inline styles, CSS modules — all supported. No Canvas, SSR compatible.",
   "keywords": [
     "react",
     "pixel",
