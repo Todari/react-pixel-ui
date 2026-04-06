@@ -292,11 +292,12 @@ input[type="range"]::-webkit-slider-thumb {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 32px;
+  padding: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 200px;
+  overflow: visible;
 }
 
 .playground-controls {
