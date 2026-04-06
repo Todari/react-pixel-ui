@@ -42,8 +42,15 @@ export function Pixel({
     height: number;
   } | null>(null);
 
-  // Read computed styles on mount (before pixel art is applied)
+  // Reset when pixelSize changes — forces re-read of original styles
+  // (without this, the layout effect reads already-pixelated styles)
+  useEffect(() => {
+    setArtState(null);
+  }, [pixelSize]);
+
+  // Read computed styles when artState is null (before pixel art is applied)
   useIsomorphicLayoutEffect(() => {
+    if (artState !== null) return; // already computed
     const el = childRef.current;
     if (!el || !enabled) return;
 
@@ -55,7 +62,7 @@ export function Pixel({
     if (width > 0 && height > 0) {
       setArtState({ config: artConfig, width, height });
     }
-  }, [pixelSize, enabled]);
+  }, [artState, pixelSize, enabled]);
 
   if (!isValidElement(children) || !enabled) return children;
 
@@ -76,7 +83,7 @@ export function Pixel({
 
   // Phase 2: generate pixel art and apply via style override
   const result = generatePixelArt(artState.width, artState.height, artState.config);
-  const bw = result.needsWrapper ? (artState.config.borderWidth || 0) : 0;
+  const bw = result.needsWrapper ? (parseFloat(result.contentStyle.inset as string) || 0) : 0;
 
   const pixelStyle: React.CSSProperties = {
     borderStyle: 'none',

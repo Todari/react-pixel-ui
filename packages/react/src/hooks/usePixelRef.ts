@@ -91,7 +91,7 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
 
       // Apply gradient or solid background
       const cs = result.needsWrapper ? result.contentStyle : result.contentStyle;
-      const bw = result.needsWrapper ? (artConfig.borderWidth || 0) : 0;
+      const bw = result.needsWrapper ? (parseFloat(result.contentStyle.inset as string) || 0) : 0;
 
       if (bw > 0) {
         // Border mode: backgroundColor = border color,
