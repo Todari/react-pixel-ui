@@ -49,11 +49,15 @@ export function generatePixelArt(
   height: number,
   config: PixelArtConfig,
 ): PixelArtStyles {
-  const { pixelSize, borderColor, backgroundColor, shadow } = config;
+  const { borderColor, backgroundColor, shadow } = config;
 
-  // Snap border width to pixel grid for clean alignment
+  // Validate pixelSize — prevent division by zero / infinite loops
+  const pixelSize = Math.max(1, Math.floor(config.pixelSize || 4));
+
+  // Snap border width to pixel grid, clamp to half element size
+  const maxBorderWidth = Math.floor(Math.min(width, height) / 2);
   const borderWidth = config.borderWidth
-    ? snapToPixel(config.borderWidth, pixelSize)
+    ? Math.min(snapToPixel(config.borderWidth, pixelSize), maxBorderWidth)
     : 0;
 
   // Snap radii to pixel grid and clamp to element dimensions

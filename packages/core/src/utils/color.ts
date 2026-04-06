@@ -32,16 +32,35 @@ export function parseColor(color: string): RGBAColor | null {
     return parseHexColor(trimmed);
   }
 
-  // rgb() / rgba()
-  const rgbMatch = trimmed.match(
+  // rgb() / rgba() — comma syntax: rgb(255, 0, 0) or rgba(255, 0, 0, 0.5)
+  const rgbComma = trimmed.match(
     /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)/,
   );
-  if (rgbMatch) {
+  if (rgbComma) {
     return {
-      r: clamp(parseInt(rgbMatch[1], 10), 0, 255),
-      g: clamp(parseInt(rgbMatch[2], 10), 0, 255),
-      b: clamp(parseInt(rgbMatch[3], 10), 0, 255),
-      a: rgbMatch[4] !== undefined ? clamp(parseFloat(rgbMatch[4]), 0, 1) : 1,
+      r: clamp(parseInt(rgbComma[1], 10), 0, 255),
+      g: clamp(parseInt(rgbComma[2], 10), 0, 255),
+      b: clamp(parseInt(rgbComma[3], 10), 0, 255),
+      a: rgbComma[4] !== undefined ? clamp(parseFloat(rgbComma[4]), 0, 1) : 1,
+    };
+  }
+
+  // Modern CSS space syntax: rgb(255 0 0) or rgb(255 0 0 / 0.5)
+  const rgbSpace = trimmed.match(
+    /rgba?\(\s*(\d+)\s+(\d+)\s+(\d+)\s*(?:\/\s*([\d.]+%?)\s*)?\)/,
+  );
+  if (rgbSpace) {
+    let a = 1;
+    if (rgbSpace[4] !== undefined) {
+      a = rgbSpace[4].endsWith('%')
+        ? parseFloat(rgbSpace[4]) / 100
+        : parseFloat(rgbSpace[4]);
+    }
+    return {
+      r: clamp(parseInt(rgbSpace[1], 10), 0, 255),
+      g: clamp(parseInt(rgbSpace[2], 10), 0, 255),
+      b: clamp(parseInt(rgbSpace[3], 10), 0, 255),
+      a: clamp(a, 0, 1),
     };
   }
 

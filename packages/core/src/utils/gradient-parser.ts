@@ -19,12 +19,16 @@ const DIRECTION_MAP: Record<string, number> = {
 export function parseGradient(cssGradient: string): ParsedGradient | null {
   const trimmed = cssGradient.trim();
 
-  if (trimmed.startsWith('linear-gradient')) {
-    return parseLinearGradient(trimmed);
+  // Support repeating-linear-gradient and repeating-radial-gradient
+  // by stripping the "repeating-" prefix (pixel art inherently doesn't repeat)
+  const normalized = trimmed.replace(/^repeating-/, '');
+
+  if (normalized.startsWith('linear-gradient')) {
+    return parseLinearGradient(normalized);
   }
 
-  if (trimmed.startsWith('radial-gradient')) {
-    return parseRadialGradient(trimmed);
+  if (normalized.startsWith('radial-gradient')) {
+    return parseRadialGradient(normalized);
   }
 
   return null;

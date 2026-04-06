@@ -69,7 +69,6 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
     try {
       if (!originalStylesRef.current) captureOriginals(el);
 
-      // Restore originals for reading
       restoreOriginals(el);
 
       const computed = getComputedStyle(el);
@@ -81,7 +80,6 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
 
       const result = generatePixelArt(width, height, artConfig);
 
-      // Always apply directly — no wrapper div, no pseudo-elements
       el.style.borderStyle = 'none';
       el.style.borderRadius = '0';
       el.style.boxShadow = 'none';
@@ -90,16 +88,13 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
         el.style.clipPath = result.clipPath;
       }
 
-      // Apply gradient or solid background
-      const cs = result.needsWrapper ? result.contentStyle : result.contentStyle;
-      // Use composite image (border + gradient baked into one BMP)
       if (result.compositeImage) {
         el.style.backgroundImage = result.compositeImage;
         el.style.backgroundSize = '100% 100%';
         el.style.backgroundRepeat = 'no-repeat';
         el.style.imageRendering = 'pixelated';
-      } else if (cs.background) {
-        el.style.background = cs.background as string;
+      } else if (result.contentStyle.background) {
+        el.style.background = result.contentStyle.background as string;
       }
 
       if (result.wrapperStyle.filter) {
@@ -107,8 +102,10 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
       } else if (result.contentStyle.filter) {
         el.style.filter = result.contentStyle.filter as string;
       }
+    } catch {
+      // Silently recover — element keeps original styles
     } finally {
-      Promise.resolve().then(() => { isApplyingRef.current = false; });
+      isApplyingRef.current = false;
     }
   }, [pixelSize, enabled, captureOriginals, restoreOriginals]);
 
