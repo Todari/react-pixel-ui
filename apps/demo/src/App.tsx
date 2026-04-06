@@ -60,14 +60,14 @@ function App() {
         <section className="section">
           <div className="section-label">Get Started</div>
           <h2 className="section-title">Installation</h2>
-          <div className="code-block">
-            <span className="comment"># npm</span>{'\n'}
-            npm install @react-pixel-ui/react{'\n\n'}
-            <span className="comment"># pnpm</span>{'\n'}
-            pnpm add @react-pixel-ui/react{'\n\n'}
-            <span className="comment"># yarn</span>{'\n'}
-            yarn add @react-pixel-ui/react
-          </div>
+          <Code>{`# npm
+npm install @react-pixel-ui/react
+
+# pnpm
+pnpm add @react-pixel-ui/react
+
+# yarn
+yarn add @react-pixel-ui/react`}</Code>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 12 }}>
             Requires React 18+. <code>@react-pixel-ui/core</code> is installed automatically.
           </p>
@@ -110,7 +110,7 @@ function App() {
               </Pixel>
             </div>
           </div>
-          <div className="code-block">{`import { Pixel } from '@react-pixel-ui/react';
+          <Code>{`import { Pixel } from '@react-pixel-ui/react';
 
 <Pixel size={6}>
   <div style={{
@@ -120,7 +120,7 @@ function App() {
   }}>
     Pixel Art!
   </div>
-</Pixel>`}</div>
+</Pixel>`}</Code>
         </section>
 
         {/* Hook API */}
@@ -133,7 +133,7 @@ function App() {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
             <RefHookDemo pixelSize={pixelSize} />
           </div>
-          <div className="code-block">{`const pixelRef = usePixelRef({ pixelSize: 6 });
+          <Code>{`const pixelRef = usePixelRef({ pixelSize: 6 });
 
 <div
   ref={pixelRef}
@@ -144,7 +144,7 @@ function App() {
   }}
 >
   Content
-</div>`}</div>
+</div>`}</Code>
         </section>
 
         {/* Playground */}
@@ -208,7 +208,7 @@ function App() {
               </label>
             </div>
           </div>
-          <div className="code-block">{`<Pixel size={${pgPixelSize}}>
+          <Code>{`<Pixel size={${pgPixelSize}}>
   <div style={{
     background: '${pgBg}',
     borderRadius: ${pgRadius},
@@ -218,7 +218,7 @@ function App() {
   }}>
     Content
   </div>
-</Pixel>`}</div>
+</Pixel>`}</Code>
         </section>
 
         {/* Showcase */}
@@ -274,19 +274,19 @@ function App() {
             Wrap any element with <code>&lt;Pixel&gt;</code>. It reads computed CSS and converts
             {' '}<code>background</code>, <code>border-radius</code>, <code>border</code>, and <code>box-shadow</code> to pixel art.
           </p>
-          <div className="code-block">{`import { Pixel } from '@react-pixel-ui/react';
+          <Code>{`import { Pixel } from '@react-pixel-ui/react';
 
 <Pixel size={6}>
   <div className="your-existing-classes">
     Works with Tailwind, CSS modules, inline styles
   </div>
-</Pixel>`}</div>
+</Pixel>`}</Code>
 
           <h3 className="subsection-title">2. Hook API</h3>
           <p className="doc-text">
             Use <code>usePixelRef</code> when you need a ref-based approach without wrapping.
           </p>
-          <div className="code-block">{`import { usePixelRef } from '@react-pixel-ui/react';
+          <Code>{`import { usePixelRef } from '@react-pixel-ui/react';
 
 function MyComponent() {
   const ref = usePixelRef({ pixelSize: 6 });
@@ -300,23 +300,23 @@ function MyComponent() {
       Content
     </div>
   );
-}`}</div>
+}`}</Code>
 
           <h3 className="subsection-title">3. Global Config</h3>
           <p className="doc-text">
             Set defaults for all <code>&lt;Pixel&gt;</code> and <code>usePixelRef</code> instances.
           </p>
-          <div className="code-block">{`import { PixelConfigProvider } from '@react-pixel-ui/react';
+          <Code>{`import { PixelConfigProvider } from '@react-pixel-ui/react';
 
 <PixelConfigProvider config={{ pixelSize: 6 }}>
   <App />
-</PixelConfigProvider>`}</div>
+</PixelConfigProvider>`}</Code>
 
           <h3 className="subsection-title">4. Explicit Components</h3>
           <p className="doc-text">
             <code>PixelBox</code> and <code>PixelButton</code> take explicit props instead of reading CSS.
           </p>
-          <div className="code-block">{`import { PixelBox } from '@react-pixel-ui/react';
+          <Code>{`import { PixelBox } from '@react-pixel-ui/react';
 
 <PixelBox
   width={280}
@@ -326,7 +326,7 @@ function MyComponent() {
   borderWidth={3}
   borderColor="#333"
   background="linear-gradient(45deg, #ff6b6b, #4ecdc4)"
-/>`}</div>
+/>`}</Code>
         </section>
 
         {/* How it works */}
@@ -379,6 +379,40 @@ function FeatureCard({ icon, title, desc }: { icon: string; title: string; desc:
       <div className="feature-icon">{icons[icon] || '\u25A0'}</div>
       <h3>{title}</h3>
       <p>{desc}</p>
+    </div>
+  );
+}
+
+/** Simple JSX/TS syntax highlighter */
+function Code({ children }: { children: string }) {
+  const highlight = (code: string) => {
+    const tokens: Array<{ text: string; cls: string }> = [];
+    const re = /(\/\/[^\n]*|'[^']*'|"[^"]*"|`[^`]*`|\b(?:import|from|export|default|const|let|var|function|return|if|else)\b|<\/?[A-Z]\w*|<\/?[a-z]\w*|\b\d+\b|\w+(?==))/g;
+    let last = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(code)) !== null) {
+      if (m.index > last) tokens.push({ text: code.slice(last, m.index), cls: '' });
+      const t = m[0];
+      let cls = '';
+      if (t.startsWith('//')) cls = 'comment';
+      else if (t.startsWith("'") || t.startsWith('"') || t.startsWith('`')) cls = 'string';
+      else if (/^<\/?\s*[A-Z]/.test(t)) cls = 'component';
+      else if (/^<\/?\s*[a-z]/.test(t)) cls = 'tag';
+      else if (/^(import|from|export|default|const|let|var|function|return|if|else)$/.test(t)) cls = 'keyword';
+      else if (/^\d+$/.test(t)) cls = 'number';
+      else if (re.lastIndex < code.length && code[re.lastIndex] === '=') cls = 'prop';
+      tokens.push({ text: t, cls });
+      last = re.lastIndex;
+    }
+    if (last < code.length) tokens.push({ text: code.slice(last), cls: '' });
+    return tokens;
+  };
+
+  return (
+    <div className="code-block">
+      {highlight(children).map((t, i) =>
+        t.cls ? <span key={i} className={t.cls}>{t.text}</span> : t.text
+      )}
     </div>
   );
 }

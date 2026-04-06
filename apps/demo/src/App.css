@@ -215,9 +215,10 @@ input[type="range"]::-webkit-slider-thumb {
 .code-block .keyword { color: #c792ea; }
 .code-block .string { color: #c3e88d; }
 .code-block .component { color: #82aaff; }
+.code-block .tag { color: #f07178; }
 .code-block .prop { color: #ffcb6b; }
 .code-block .number { color: #f78c6c; }
-.code-block .comment { color: #546e7a; }
+.code-block .comment { color: #546e7a; font-style: italic; }
 
 /* --- Features grid --- */
 .features-grid {
