@@ -16,13 +16,24 @@ function snapToPixel(value: number, pixelSize: number): number {
   return Math.max(pixelSize, Math.round(value / pixelSize) * pixelSize);
 }
 
-/** Snap border radii so staircase grids align cleanly to the pixel grid */
-function snapRadii(radii: BorderRadii, pixelSize: number): BorderRadii {
+/**
+ * Snap border radii to pixel grid and clamp so corners don't overlap.
+ * Same behavior as CSS: radius is clamped to min(width/2, height/2).
+ */
+function snapRadii(
+  radii: BorderRadii,
+  pixelSize: number,
+  width: number,
+  height: number,
+): BorderRadii {
+  const maxR = Math.min(width / 2, height / 2);
+  const snap = (r: number) =>
+    r > 0 ? Math.min(snapToPixel(r, pixelSize), maxR) : 0;
   return {
-    topLeft: radii.topLeft > 0 ? snapToPixel(radii.topLeft, pixelSize) : 0,
-    topRight: radii.topRight > 0 ? snapToPixel(radii.topRight, pixelSize) : 0,
-    bottomRight: radii.bottomRight > 0 ? snapToPixel(radii.bottomRight, pixelSize) : 0,
-    bottomLeft: radii.bottomLeft > 0 ? snapToPixel(radii.bottomLeft, pixelSize) : 0,
+    topLeft: snap(radii.topLeft),
+    topRight: snap(radii.topRight),
+    bottomRight: snap(radii.bottomRight),
+    bottomLeft: snap(radii.bottomLeft),
   };
 }
 
@@ -44,9 +55,9 @@ export function generatePixelArt(
     ? snapToPixel(config.borderWidth, pixelSize)
     : 0;
 
-  // Snap radii to pixel grid
+  // Snap radii to pixel grid and clamp to element dimensions
   const rawRadii = parseBorderRadius(config.borderRadius);
-  const radii = snapRadii(rawRadii, pixelSize);
+  const radii = snapRadii(rawRadii, pixelSize, width, height);
 
   const needsWrapper = borderWidth > 0 && !!borderColor;
 
