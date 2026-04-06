@@ -1,6 +1,6 @@
 {
   "name": "@react-pixel-ui/core",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "CSS-based pixel art style generator using clip-path, BMP gradients, and drop-shadow. No Canvas.",
   "keywords": [
     "pixel",

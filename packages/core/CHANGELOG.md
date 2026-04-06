@@ -1,5 +1,19 @@
 # @react-pixel-ui/core
 
+## 2.0.2
+
+### Patch Changes
+
+- - Composite BMP: border + gradient baked into single image with staircase corners
+  - Fix box-sizing handling (border-box vs content-box)
+  - Clamp borderRadius to min(width/2, height/2)
+  - Validate pixelSize (min 1), clamp borderWidth
+  - Support modern CSS rgb() space syntax
+  - Support repeating-linear/radial-gradient
+  - Fix isApplyingRef error recovery
+  - Clear background shorthand before applying pixel styles
+  - Fix Pixel component artState reset on pixelSize change
+
 ## 2.0.1
 
 ### Patch Changes
