@@ -86,7 +86,11 @@ export function Pixel({
   const bw = result.needsWrapper ? (parseFloat(result.contentStyle.inset as string) || 0) : 0;
 
   const pixelStyle: React.CSSProperties = {
-    borderStyle: 'none',
+    // Clear shorthands first — user's `background` shorthand sets
+    // backgroundSize:auto and backgroundRepeat:repeat which would
+    // override our longhand values if not cleared.
+    background: 'none',
+    border: 'none',
     borderRadius: 0,
     boxShadow: 'none',
   };
