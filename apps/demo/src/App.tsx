@@ -106,7 +106,7 @@ function App() {
             <span className="keyword">import</span> {'{ '}<span className="component">Pixel</span>{' }'} <span className="keyword">from</span> <span className="string">'@react-pixel-ui/react'</span>;{'\n\n'}
             <span className="comment">{'// Just wrap your existing element'}</span>{'\n'}
             &lt;<span className="component">Pixel</span> <span className="prop">size</span>=<span className="number">{'{4}'}</span>&gt;{'\n'}
-            {'  '}&lt;<span className="component">div</span> <span className="prop">style</span>={'{{ '}background: <span className="string">'linear-gradient(...)'</span>, borderRadius: <span className="number">24</span>, border: <span className="string">'4px solid #333'</span>{' }}'}>{'\n'}
+            {'  '}&lt;<span className="component">div</span> <span className="prop">style</span>={'{{ '}background: <span className="string">'linear-gradient(...)'</span>, borderRadius: <span className="number">24</span>, border: <span className="string">'4px solid #333'</span>{' }}'}&gt;{'\n'}
             {'    '}Pixel Art!{'\n'}
             {'  '}&lt;/<span className="component">div</span>&gt;{'\n'}
             &lt;/<span className="component">Pixel</span>&gt;
