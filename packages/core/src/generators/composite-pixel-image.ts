@@ -50,7 +50,6 @@ export function generateCompositePixelImage(
   };
 
   const pixels: RGBAColor[] = [];
-  const transparent: RGBAColor = { r: 0, g: 0, b: 0, a: 0 };
 
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {

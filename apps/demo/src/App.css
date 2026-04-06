@@ -208,6 +208,8 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--text-muted);
   overflow-x: auto;
   margin-top: 16px;
+  white-space: pre;
+  word-break: keep-all;
 }
 
 .code-block .keyword { color: #c792ea; }

@@ -110,18 +110,17 @@ function App() {
               </Pixel>
             </div>
           </div>
-          <div className="code-block">
-            <span className="keyword">import</span> {'{ '}<span className="component">Pixel</span>{' }'} <span className="keyword">from</span> <span className="string">'@react-pixel-ui/react'</span>;{'\n\n'}
-            &lt;<span className="component">Pixel</span> <span className="prop">size</span>={'{'}<span className="number">6</span>{'}'}&gt;{'\n'}
-            {'  '}&lt;<span className="component">div</span> <span className="prop">style</span>={'{{ '}{'\n'}
-            {'    '}background: <span className="string">'linear-gradient(135deg, #ff6b6b, #4ecdc4)'</span>,{'\n'}
-            {'    '}borderRadius: <span className="number">24</span>,{'\n'}
-            {'    '}border: <span className="string">'4px solid #333'</span>,{'\n'}
-            {'  }}'}&gt;{'\n'}
-            {'    '}Pixel Art!{'\n'}
-            {'  '}&lt;/<span className="component">div</span>&gt;{'\n'}
-            &lt;/<span className="component">Pixel</span>&gt;
-          </div>
+          <div className="code-block">{`import { Pixel } from '@react-pixel-ui/react';
+
+<Pixel size={6}>
+  <div style={{
+    background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)',
+    borderRadius: 24,
+    border: '4px solid #333',
+  }}>
+    Pixel Art!
+  </div>
+</Pixel>`}</div>
         </section>
 
         {/* Hook API */}
@@ -134,18 +133,18 @@ function App() {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
             <RefHookDemo pixelSize={pixelSize} />
           </div>
-          <div className="code-block">
-            <span className="keyword">const</span> pixelRef = <span className="component">usePixelRef</span>({'{ '}<span className="prop">pixelSize</span>: <span className="number">6</span>{' }'});{'\n\n'}
-            &lt;<span className="component">div</span> <span className="prop">ref</span>={'{pixelRef}'}{'\n'}
-            {'  '}<span className="prop">style</span>={'{{ '}{'\n'}
-            {'    '}background: <span className="string">'linear-gradient(...)'</span>,{'\n'}
-            {'    '}borderRadius: <span className="number">20</span>,{'\n'}
-            {'    '}border: <span className="string">'3px solid #b8256e'</span>,{'\n'}
-            {'  }}'}{'\n'}
-            &gt;{'\n'}
-            {'  '}Content{'\n'}
-            &lt;/<span className="component">div</span>&gt;
-          </div>
+          <div className="code-block">{`const pixelRef = usePixelRef({ pixelSize: 6 });
+
+<div
+  ref={pixelRef}
+  style={{
+    background: 'linear-gradient(135deg, #fd79a8, #e84393)',
+    borderRadius: 20,
+    border: '3px solid #b8256e',
+  }}
+>
+  Content
+</div>`}</div>
         </section>
 
         {/* Playground */}
@@ -209,6 +208,17 @@ function App() {
               </label>
             </div>
           </div>
+          <div className="code-block">{`<Pixel size={${pgPixelSize}}>
+  <div style={{
+    background: '${pgBg}',
+    borderRadius: ${pgRadius},
+    border: '${pgBorder}px solid ${pgBorderColor}',
+    width: ${pgWidth},
+    height: ${pgHeight},
+  }}>
+    Content
+  </div>
+</Pixel>`}</div>
         </section>
 
         {/* Showcase */}
@@ -262,52 +272,61 @@ function App() {
           <h3 className="subsection-title">1. Basic Usage</h3>
           <p className="doc-text">
             Wrap any element with <code>&lt;Pixel&gt;</code>. It reads computed CSS and converts
-            <code>background</code>, <code>border-radius</code>, <code>border</code>, and <code>box-shadow</code> to pixel art.
+            {' '}<code>background</code>, <code>border-radius</code>, <code>border</code>, and <code>box-shadow</code> to pixel art.
           </p>
-          <div className="code-block">
-            <span className="keyword">import</span> {'{ '}<span className="component">Pixel</span>{' }'} <span className="keyword">from</span> <span className="string">'@react-pixel-ui/react'</span>;{'\n\n'}
-            &lt;<span className="component">Pixel</span> <span className="prop">size</span>={'{'}<span className="number">6</span>{'}'}&gt;{'\n'}
-            {'  '}&lt;<span className="component">div</span> <span className="prop">className</span>=<span className="string">"your-existing-classes"</span>&gt;{'\n'}
-            {'    '}Works with Tailwind, CSS modules, inline styles{'\n'}
-            {'  '}&lt;/<span className="component">div</span>&gt;{'\n'}
-            &lt;/<span className="component">Pixel</span>&gt;
-          </div>
+          <div className="code-block">{`import { Pixel } from '@react-pixel-ui/react';
+
+<Pixel size={6}>
+  <div className="your-existing-classes">
+    Works with Tailwind, CSS modules, inline styles
+  </div>
+</Pixel>`}</div>
 
           <h3 className="subsection-title">2. Hook API</h3>
           <p className="doc-text">
             Use <code>usePixelRef</code> when you need a ref-based approach without wrapping.
           </p>
-          <div className="code-block">
-            <span className="keyword">import</span> {'{ '}<span className="component">usePixelRef</span>{' }'} <span className="keyword">from</span> <span className="string">'@react-pixel-ui/react'</span>;{'\n\n'}
-            <span className="keyword">function</span> <span className="component">MyComponent</span>() {'{'}{'\n'}
-            {'  '}<span className="keyword">const</span> ref = <span className="component">usePixelRef</span>({'{ '}<span className="prop">pixelSize</span>: <span className="number">6</span>{' }'});{'\n'}
-            {'  '}<span className="keyword">return</span> &lt;<span className="component">div</span> <span className="prop">ref</span>={'{ref}'} <span className="prop">style</span>={'{{ ... }}'}&gt;...&lt;/<span className="component">div</span>&gt;{'\n'}
-            {'}'}
-          </div>
+          <div className="code-block">{`import { usePixelRef } from '@react-pixel-ui/react';
+
+function MyComponent() {
+  const ref = usePixelRef({ pixelSize: 6 });
+
+  return (
+    <div ref={ref} style={{
+      background: 'linear-gradient(135deg, #fd79a8, #e84393)',
+      borderRadius: 20,
+      border: '3px solid #b8256e',
+    }}>
+      Content
+    </div>
+  );
+}`}</div>
 
           <h3 className="subsection-title">3. Global Config</h3>
           <p className="doc-text">
             Set defaults for all <code>&lt;Pixel&gt;</code> and <code>usePixelRef</code> instances.
           </p>
-          <div className="code-block">
-            <span className="keyword">import</span> {'{ '}<span className="component">PixelConfigProvider</span>{' }'} <span className="keyword">from</span> <span className="string">'@react-pixel-ui/react'</span>;{'\n\n'}
-            &lt;<span className="component">PixelConfigProvider</span> <span className="prop">config</span>={'{{ '}<span className="prop">pixelSize</span>: <span className="number">6</span>{' }}'}&gt;{'\n'}
-            {'  '}&lt;<span className="component">App</span> /&gt;{'\n'}
-            &lt;/<span className="component">PixelConfigProvider</span>&gt;
-          </div>
+          <div className="code-block">{`import { PixelConfigProvider } from '@react-pixel-ui/react';
+
+<PixelConfigProvider config={{ pixelSize: 6 }}>
+  <App />
+</PixelConfigProvider>`}</div>
 
           <h3 className="subsection-title">4. Explicit Components</h3>
           <p className="doc-text">
             <code>PixelBox</code> and <code>PixelButton</code> take explicit props instead of reading CSS.
           </p>
-          <div className="code-block">
-            &lt;<span className="component">PixelBox</span>{'\n'}
-            {'  '}<span className="prop">width</span>={'{'}<span className="number">280</span>{'}'} <span className="prop">height</span>={'{'}<span className="number">120</span>{'}'} <span className="prop">pixelSize</span>={'{'}<span className="number">6</span>{'}'}{'\n'}
-            {'  '}<span className="prop">borderRadius</span>={'{'}<span className="number">16</span>{'}'} <span className="prop">borderWidth</span>={'{'}<span className="number">3</span>{'}'}{'\n'}
-            {'  '}<span className="prop">borderColor</span>=<span className="string">"#333"</span>{'\n'}
-            {'  '}<span className="prop">background</span>=<span className="string">"linear-gradient(45deg, #ff6b6b, #4ecdc4)"</span>{'\n'}
-            /&gt;
-          </div>
+          <div className="code-block">{`import { PixelBox } from '@react-pixel-ui/react';
+
+<PixelBox
+  width={280}
+  height={120}
+  pixelSize={6}
+  borderRadius={16}
+  borderWidth={3}
+  borderColor="#333"
+  background="linear-gradient(45deg, #ff6b6b, #4ecdc4)"
+/>`}</div>
         </section>
 
         {/* How it works */}
