@@ -1,5 +1,11 @@
 # @react-pixel-ui/core
 
+## 2.0.3
+
+### Patch Changes
+
+- Update package description to direct users to @react-pixel-ui/react.
+
 ## 2.0.2
 
 ### Patch Changes

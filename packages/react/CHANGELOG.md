@@ -1,5 +1,12 @@
 # @react-pixel-ui/react
 
+## 2.0.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @react-pixel-ui/core@2.0.3
+
 ## 2.0.2
 
 ### Patch Changes

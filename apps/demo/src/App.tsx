@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pixel, usePixelRef, PixelButton, PixelConfigProvider } from '@react-pixel-ui/react';
+import { trackEvent } from './ga';
 import './App.css';
 
 function App() {
@@ -173,11 +174,11 @@ yarn add @react-pixel-ui/react`}</Code>
             <div className="playground-controls">
               <label>
                 <span>Pixel Size: {pgPixelSize}px</span>
-                <input type="range" min="2" max="20" value={pgPixelSize} onChange={e => setPgPixelSize(Number(e.target.value))} />
+                <input type="range" min="2" max="20" value={pgPixelSize} onChange={e => { setPgPixelSize(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'pixel_size' }); }} />
               </label>
               <label>
                 <span>Background</span>
-                <select value={pgBg} onChange={e => setPgBg(e.target.value)}>
+                <select value={pgBg} onChange={e => { setPgBg(e.target.value); trackEvent('interact_playground', { changed_property: 'background' }); }}>
                   <option value="linear-gradient(135deg, #ff6b6b, #4ecdc4)">Red → Teal</option>
                   <option value="linear-gradient(180deg, #a29bfe, #6c5ce7)">Purple vertical</option>
                   <option value="linear-gradient(45deg, #ff8906, #e53170)">Orange → Pink</option>
@@ -191,35 +192,35 @@ yarn add @react-pixel-ui/react`}</Code>
               </label>
               <label>
                 <span>Border Radius: {pgRadius}px</span>
-                <input type="range" min="0" max="60" value={pgRadius} onChange={e => setPgRadius(Number(e.target.value))} />
+                <input type="range" min="0" max="60" value={pgRadius} onChange={e => { setPgRadius(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'border_radius' }); }} />
               </label>
               <label>
                 <span>Border Width: {pgBorder}px</span>
-                <input type="range" min="0" max="12" value={pgBorder} onChange={e => setPgBorder(Number(e.target.value))} />
+                <input type="range" min="0" max="12" value={pgBorder} onChange={e => { setPgBorder(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'border_width' }); }} />
               </label>
               <label>
                 <span>Border Color</span>
-                <input type="color" value={pgBorderColor} onChange={e => setPgBorderColor(e.target.value)} />
+                <input type="color" value={pgBorderColor} onChange={e => { setPgBorderColor(e.target.value); trackEvent('interact_playground', { changed_property: 'border_color' }); }} />
               </label>
               <label>
                 <span>Width: {pgWidth}px</span>
-                <input type="range" min="120" max="500" value={pgWidth} onChange={e => setPgWidth(Number(e.target.value))} />
+                <input type="range" min="120" max="500" value={pgWidth} onChange={e => { setPgWidth(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'width' }); }} />
               </label>
               <label>
                 <span>Height: {pgHeight}px</span>
-                <input type="range" min="40" max="200" value={pgHeight} onChange={e => setPgHeight(Number(e.target.value))} />
+                <input type="range" min="40" max="200" value={pgHeight} onChange={e => { setPgHeight(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'height' }); }} />
               </label>
               <label>
                 <span>Shadow X: {pgShadowX}px</span>
-                <input type="range" min="0" max="20" value={pgShadowX} onChange={e => setPgShadowX(Number(e.target.value))} />
+                <input type="range" min="0" max="20" value={pgShadowX} onChange={e => { setPgShadowX(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'shadow_x' }); }} />
               </label>
               <label>
                 <span>Shadow Y: {pgShadowY}px</span>
-                <input type="range" min="0" max="20" value={pgShadowY} onChange={e => setPgShadowY(Number(e.target.value))} />
+                <input type="range" min="0" max="20" value={pgShadowY} onChange={e => { setPgShadowY(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'shadow_y' }); }} />
               </label>
               <label>
                 <span>Shadow Color</span>
-                <input type="color" value={pgShadowColor} onChange={e => setPgShadowColor(e.target.value)} />
+                <input type="color" value={pgShadowColor} onChange={e => { setPgShadowColor(e.target.value); trackEvent('interact_playground', { changed_property: 'shadow_color' }); }} />
               </label>
             </div>
           </div>
@@ -380,23 +381,23 @@ function MyComponent() {
           <div className="section-label">Help</div>
           <h2 className="section-title">FAQ</h2>
           <div className="faq-list">
-            <details className="faq-item">
+            <details className="faq-item" onToggle={() => trackEvent('toggle_faq', { question: 'gradient not pixelated' })}>
               <summary>Gradient looks smooth, not pixelated?</summary>
               <p>Increase <code>pixelSize</code>. At size 2, blocks are 2x2 CSS pixels — too small on Retina screens. Try 6 or higher.</p>
             </details>
-            <details className="faq-item">
+            <details className="faq-item" onToggle={() => trackEvent('toggle_faq', { question: 'tailwind support' })}>
               <summary>Does it work with Tailwind CSS?</summary>
               <p>Yes. <code>&lt;Pixel&gt;</code> reads <code>getComputedStyle</code> which resolves Tailwind classes into final CSS values. Just wrap your element.</p>
             </details>
-            <details className="faq-item">
+            <details className="faq-item" onToggle={() => trackEvent('toggle_faq', { question: 'supported css properties' })}>
               <summary>What CSS properties are converted?</summary>
               <p><code>background</code>, <code>background-image</code> (linear/radial/repeating gradients), <code>border-radius</code>, <code>border</code>, <code>box-shadow</code>. Other properties (color, font, padding) are preserved as-is.</p>
             </details>
-            <details className="faq-item">
+            <details className="faq-item" onToggle={() => trackEvent('toggle_faq', { question: 'ssr nextjs compatible' })}>
               <summary>Is it SSR / Next.js compatible?</summary>
               <p>Yes. Core uses pure math (no Canvas/DOM). Elements render normally on the server and pixelate after hydration.</p>
             </details>
-            <details className="faq-item">
+            <details className="faq-item" onToggle={() => trackEvent('toggle_faq', { question: 'typescript support' })}>
               <summary>TypeScript support?</summary>
               <p>Fully typed. Import types: <code>PixelArtConfig</code>, <code>PixelShadowConfig</code>, <code>BorderRadii</code>, etc.</p>
             </details>
@@ -421,11 +422,11 @@ function MyComponent() {
         <div className="install-bar">
           <code>npm install @react-pixel-ui/react</code>
           <span style={{ color: 'var(--text-muted)' }}>|</span>
-          <a href="https://github.com/Todari/react-pixel-ui" target="_blank" rel="noopener" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }}>
+          <a href="https://github.com/Todari/react-pixel-ui" target="_blank" rel="noopener" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_github_link')}>
             GitHub
           </a>
           <span style={{ color: 'var(--text-muted)' }}>|</span>
-          <a href="https://www.npmjs.com/package/@react-pixel-ui/react" target="_blank" rel="noopener" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }}>
+          <a href="https://www.npmjs.com/package/@react-pixel-ui/react" target="_blank" rel="noopener" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_npm_link')}>
             npm
           </a>
         </div>
