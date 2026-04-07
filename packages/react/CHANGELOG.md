@@ -1,5 +1,11 @@
 # @react-pixel-ui/react
 
+## 2.0.4
+
+### Patch Changes
+
+- Include updated README in npm package (was showing old v1 docs).
+
 ## 2.0.3
 
 ### Patch Changes

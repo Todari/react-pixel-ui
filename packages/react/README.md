@@ -1,64 +1,353 @@
-# @react-pixel-ui/react
+# React Pixel UI
 
-React에서 CSS를 픽셀화된 배경으로 렌더링하는 훅과 유틸을 제공합니다.
+[![npm version](https://img.shields.io/npm/v/@react-pixel-ui/react)](https://www.npmjs.com/package/@react-pixel-ui/react)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@react-pixel-ui/react)](https://bundlephobia.com/package/@react-pixel-ui/react)
+[![license](https://img.shields.io/npm/l/@react-pixel-ui/react)](https://github.com/Todari/react-pixel-ui/blob/main/LICENSE)
 
-## 설치
+Any CSS to pixel art. Wrap your element with `<Pixel>` — Tailwind, inline styles, CSS modules all work. No Canvas, SSR compatible.
+
+[Demo](https://react-pixel-ui.vercel.app) | [npm](https://www.npmjs.com/package/@react-pixel-ui/react) | [GitHub](https://github.com/Todari/react-pixel-ui)
+
+## Install
 
 ```bash
+npm install @react-pixel-ui/react
+# or
 pnpm add @react-pixel-ui/react
+# or
+yarn add @react-pixel-ui/react
 ```
 
-## 빠른 시작
+Requires **React 18+**. `@react-pixel-ui/core` is installed automatically.
+
+## Quick Start
 
 ```tsx
-import { usePixelCSS } from '@react-pixel-ui/react';
+import { Pixel } from '@react-pixel-ui/react';
 
-export default function Example() {
-  const { pixelStyle } = usePixelCSS(`
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    border: 2px solid #333;
-    border-radius: 12px;
-    padding: 16px;
-  `, { width: 240, height: 120, pixelSize: 6 });
-
-  return <div style={pixelStyle}>Hello</div>;
+function App() {
+  return (
+    <Pixel size={6}>
+      <div style={{
+        background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)',
+        borderRadius: 16,
+        border: '3px solid #333',
+        padding: 20,
+      }}>
+        Pixel Art!
+      </div>
+    </Pixel>
+  );
 }
 ```
 
-## API
+That's it. `<Pixel>` reads your CSS and converts `background`, `border-radius`, `border`, and `box-shadow` into pixel art.
 
-### usePixelCSS
+## APIs
 
-```ts
-function usePixelCSS(
-  css: string,
-  options?: { width?: number; height?: number; pixelSize?: number }
-): {
-  backgroundImage: string;
-  textStyle: React.CSSProperties;
-  containerStyle: React.CSSProperties;
-  pixelStyle: React.CSSProperties;
+### `<Pixel>` — Wrap any element (Recommended)
+
+```tsx
+import { Pixel } from '@react-pixel-ui/react';
+
+// Tailwind
+<Pixel size={6}>
+  <div className="bg-gradient-to-r from-red-500 to-blue-500 rounded-xl border-2 border-black">
+    Works with Tailwind
+  </div>
+</Pixel>
+
+// Inline styles
+<Pixel size={6}>
+  <div style={{ background: '#ff6b6b', borderRadius: 12, border: '2px solid #333' }}>
+    Works with inline styles
+  </div>
+</Pixel>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `number` | `4` | Pixel block size in CSS px. Larger = blockier. |
+| `enabled` | `boolean` | `true` | Toggle pixelation on/off |
+| `children` | `ReactElement` | required | Single child element to pixelate |
+
+**Supported CSS properties:**
+- `background` / `background-color` — solid colors and gradients (`linear-gradient`, `radial-gradient`, `repeating-*`)
+- `border-radius` — converted to staircase corners (supports per-corner `[tl, tr, br, bl]`)
+- `border` — pixel art border with staircase corners
+- `box-shadow` — converted to hard drop-shadow (no blur)
+
+### `usePixelRef` — Ref-based hook
+
+Attach to any element without wrapping. Best for third-party components or when you can't use a wrapper.
+
+```tsx
+import { usePixelRef } from '@react-pixel-ui/react';
+
+function MyComponent() {
+  const pixelRef = usePixelRef({ pixelSize: 6 });
+
+  return (
+    <div
+      ref={pixelRef}
+      style={{
+        background: 'linear-gradient(135deg, #fd79a8, #e84393)',
+        borderRadius: 20,
+        border: '3px solid #b8256e',
+        padding: 16,
+      }}
+    >
+      Pixelated via ref
+    </div>
+  );
 }
 ```
 
-반환된 `pixelStyle`은 컨테이너와 텍스트 스타일을 합친 값으로, 그대로 `style`에 바인딩해 사용할 수 있습니다.
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `pixelSize` | `number` | `4` | Pixel block size |
+| `enabled` | `boolean` | `true` | Toggle pixelation |
+| `observeHover` | `boolean` | `true` | Re-compute on `:hover` |
+| `observeFocus` | `boolean` | `true` | Re-compute on `:focus` |
+| `observeActive` | `boolean` | `true` | Re-compute on `:active` |
 
-### usePixelPreset
+### `PixelConfigProvider` — Global defaults
 
-프리셋(`button` | `card` | `badge`)을 빠르게 적용하는 훅입니다.
+Set default `pixelSize` for all `<Pixel>` and `usePixelRef` instances in the tree.
 
 ```tsx
-import { usePixelPreset } from '@react-pixel-ui/react';
+import { PixelConfigProvider } from '@react-pixel-ui/react';
 
-const style = usePixelPreset('button', undefined, { width: 200, height: 64, pixelSize: 4 });
+function App() {
+  return (
+    <PixelConfigProvider config={{ pixelSize: 6 }}>
+      {/* All <Pixel> components default to size 6 */}
+      <MyPage />
+    </PixelConfigProvider>
+  );
+}
 ```
 
-## SSR/Next.js 안내
+| Config Key | Type | Default | Description |
+|------------|------|---------|-------------|
+| `pixelSize` | `number` | `4` | Default pixel block size |
+| `borderColor` | `string` | — | Default border color |
 
-이 패키지는 Canvas 및 `window`/`document`에 의존합니다. SSR 환경에서는 클라이언트 전용으로 로드하거나 `dynamic(() => import(...), { ssr: false })`를 사용하세요.
+### `PixelBox` — Explicit props
 
-## 라이선스
+Use when you want direct control instead of auto-reading CSS.
+
+```tsx
+import { PixelBox } from '@react-pixel-ui/react';
+
+<PixelBox
+  width={280}
+  height={120}
+  pixelSize={6}
+  borderRadius={16}
+  borderWidth={3}
+  borderColor="#333"
+  background="linear-gradient(45deg, #ff6b6b, #4ecdc4)"
+  shadow={{ x: 4, y: 4, color: 'rgba(0,0,0,0.3)' }}
+>
+  Content
+</PixelBox>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `width` | `number` | `200` | Element width in px |
+| `height` | `number` | `100` | Element height in px |
+| `pixelSize` | `number` | `4` | Pixel block size |
+| `borderRadius` | `number \| [number, number, number, number]` | — | Corner radius. Array = `[topLeft, topRight, bottomRight, bottomLeft]` |
+| `borderWidth` | `number` | — | Border thickness (auto-snapped to pixelSize grid) |
+| `borderColor` | `string` | — | Any CSS color |
+| `background` | `string` | — | CSS color or gradient string |
+| `shadow` | `{ x: number, y: number, color: string }` | — | Hard pixel shadow |
+| `responsive` | `boolean` | `false` | Auto-detect size via ResizeObserver |
+
+### `PixelButton` — Pre-styled button
+
+```tsx
+import { PixelButton } from '@react-pixel-ui/react';
+
+<PixelButton variant="primary" width={160} height={48}>Click me</PixelButton>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `'primary' \| 'secondary' \| 'danger'` | `'primary'` | Color theme |
+| `width` | `number` | `160` | Button width |
+| `height` | `number` | `48` | Button height |
+| `borderRadius` | `number` | `8` | Corner radius |
+| `pixelSize` | `number` | from context | Pixel block size |
+| `shadow` | `{ x, y, color }` | auto | Pixel shadow |
+
+## When to use what
+
+| Use case | API | Why |
+|----------|-----|-----|
+| Existing styled elements | `<Pixel>` | Reads CSS automatically, zero config |
+| Third-party components | `usePixelRef` | Attach via ref, no wrapper div |
+| Full manual control | `PixelBox` | Explicit props, no CSS reading |
+| Pre-built buttons | `PixelButton` | Ready-to-use with variants |
+
+## How It Works
+
+| Feature | CSS Technique |
+|---------|---------------|
+| Staircase corners | `clip-path: polygon()` — Bresenham circle algorithm generates stepped polygon |
+| Pixel gradients | Composite BMP data URL + `image-rendering: pixelated` — 2D grid sampling per block |
+| Pixel borders | Border color + gradient baked into single BMP with staircase shapes |
+| Hard shadows | `filter: drop-shadow(blur=0)` — follows clip-path contour |
+| Auto-detection | `getComputedStyle()` reads any CSS → converted to pixel art config |
+
+## Recipes
+
+### Dynamic pixel size
+
+```tsx
+function PixelSlider() {
+  const [size, setSize] = useState(6);
+
+  return (
+    <>
+      <input type="range" min={2} max={16} value={size} onChange={e => setSize(+e.target.value)} />
+      <Pixel size={size}>
+        <div style={{ background: '#ff6b6b', borderRadius: 12, border: '2px solid #333' }}>
+          Size: {size}px
+        </div>
+      </Pixel>
+    </>
+  );
+}
+```
+
+### Per-corner radius
+
+```tsx
+<Pixel size={6}>
+  <div style={{
+    background: '#ffeaa7',
+    borderRadius: '24px 4px 24px 4px', // TL TR BR BL
+    border: '3px solid #e17055',
+    width: 200, height: 80,
+  }}>
+    Asymmetric corners
+  </div>
+</Pixel>
+```
+
+### Next.js (App Router)
+
+```tsx
+// app/page.tsx — works directly, no 'use client' needed for <Pixel>
+import { Pixel } from '@react-pixel-ui/react';
+
+export default function Page() {
+  return (
+    <Pixel size={6}>
+      <div style={{ background: '#6c5ce7', borderRadius: 12, padding: 20, color: '#fff' }}>
+        SSR compatible
+      </div>
+    </Pixel>
+  );
+}
+```
+
+> Note: `<Pixel>` renders normally on the server. Pixel art is applied after hydration with no layout shift.
+
+## FAQ
+
+**Q: Why does my gradient look smooth instead of pixelated?**
+A: Check that `pixelSize` is large enough to see distinct blocks. At `size={2}`, blocks are 2x2 CSS pixels — very small on high-DPI screens. Try `size={6}` or higher.
+
+**Q: Why is the border missing at diagonal corners?**
+A: Make sure you're using `<Pixel>` or `usePixelRef` (v2.0.1+). These use composite BMP rendering where border + gradient are baked together with correct staircase shapes.
+
+**Q: Does it work with Tailwind CSS?**
+A: Yes. `<Pixel>` reads `getComputedStyle` which resolves Tailwind classes into final CSS values.
+
+**Q: What CSS properties are supported?**
+A: `background-color`, `background-image` (linear/radial/repeating gradients), `border-radius`, `border`, `box-shadow`. Other properties (color, font, padding, etc.) are preserved as-is.
+
+**Q: Is it SSR compatible?**
+A: Yes. The core package uses pure math (no Canvas, no DOM APIs). Elements render normally on the server and get pixelated on hydration.
+
+## Browser Compatibility
+
+| Feature | Chrome | Firefox | Safari | Edge |
+|---------|--------|---------|--------|------|
+| `clip-path: polygon()` | 55+ | 54+ | 10+ | 79+ |
+| `image-rendering: pixelated` | 41+ | 56+ (`crisp-edges`) | 10+ | 79+ |
+| `filter: drop-shadow()` | 18+ | 35+ | 6+ | 79+ |
+
+**Overall: 97%+** global browser coverage.
+
+## TypeScript
+
+Fully typed. All components, hooks, and config objects have TypeScript definitions.
+
+```tsx
+import type {
+  PixelArtConfig,
+  PixelArtStyles,
+  PixelShadowConfig,
+  BorderRadii,
+} from '@react-pixel-ui/react';
+```
+
+## Project Structure
+
+```
+packages/
+  core/     # Pure CSS generators (zero browser dependency, SSR safe)
+  react/    # React hooks & components
+apps/
+  demo/     # Interactive demo + documentation site
+```
+
+## Development
+
+```bash
+pnpm setup                              # Install + build
+pnpm dev --filter=@react-pixel-ui/demo  # Run demo at localhost:3000
+pnpm build && pnpm type-check           # Build & verify
+```
+
+## Contributing
+
+PRs welcome. Please open an issue first to discuss larger changes.
+
+## License
 
 MIT
 
+---
 
+# React Pixel UI (한국어)
+
+CSS 스타일을 자동으로 픽셀아트로 변환하는 React 라이브러리.
+
+```bash
+npm install @react-pixel-ui/react
+```
+
+```tsx
+import { Pixel } from '@react-pixel-ui/react';
+
+// 어떤 스타일이든 <Pixel>로 감싸면 픽셀 아트로 변환
+<Pixel size={6}>
+  <div style={{
+    background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)',
+    borderRadius: 16,
+    border: '3px solid #333',
+  }}>
+    자동으로 픽셀화!
+  </div>
+</Pixel>
+```
+
+Tailwind, 인라인 스타일, CSS 모듈 모두 지원. Canvas 없음, SSR 호환.
+
+자세한 API 문서는 영어 섹션을 참고하세요.
