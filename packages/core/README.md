@@ -72,10 +72,11 @@ import { Pixel } from '@react-pixel-ui/react';
 | `children` | `ReactElement` | required | Single child element to pixelate |
 
 **Supported CSS properties:**
-- `background` / `background-color` — solid colors and gradients (`linear-gradient`, `radial-gradient`, `repeating-*`)
+- `background` / `background-color` — solid colors and gradients (`linear-gradient`, `radial-gradient`, `repeating-*`). Alpha-preserving.
 - `border-radius` — converted to staircase corners (supports per-corner `[tl, tr, br, bl]`)
-- `border` — pixel art border with staircase corners
+- `border` — pixel art border with staircase corners. Box size is preserved via `border-color: transparent` (no layout shift, even with `box-sizing: content-box`).
 - `box-shadow` — converted to hard drop-shadow (no blur)
+- **Reactive updates**: the child's `className` / `style` props and theme classes on `<html>` / `<body>` (Tailwind dark mode, etc.) are automatically observed — no manual re-render needed.
 
 ### `usePixelRef` — Ref-based hook
 
@@ -197,8 +198,8 @@ import { PixelButton } from '@react-pixel-ui/react';
 | Feature | CSS Technique |
 |---------|---------------|
 | Staircase corners | `clip-path: polygon()` — Bresenham circle algorithm generates stepped polygon |
-| Pixel gradients | Composite BMP data URL + `image-rendering: pixelated` — 2D grid sampling per block |
-| Pixel borders | Border color + gradient baked into single BMP with staircase shapes |
+| Pixel gradients | Composite PNG data URL + `image-rendering: pixelated` — 2D grid sampling per block with full RGBA alpha |
+| Pixel borders | Border color + gradient baked into single PNG with staircase shapes |
 | Hard shadows | `filter: drop-shadow(blur=0)` — follows clip-path contour |
 | Auto-detection | `getComputedStyle()` reads any CSS → converted to pixel art config |
 
@@ -238,10 +239,53 @@ function PixelSlider() {
 </Pixel>
 ```
 
+### Modern color spaces (oklch / hsl)
+
+```tsx
+// Gradient stops can use any supported color form.
+<Pixel size={6}>
+  <div style={{
+    background: 'linear-gradient(135deg, oklch(0.75 0.2 30), oklch(0.6 0.25 280))',
+    borderRadius: 16,
+    border: '3px solid hsl(220 40% 20%)',
+    padding: 20,
+  }}>
+    oklch + hsl
+  </div>
+</Pixel>
+```
+
+### Translucent gradients
+
+```tsx
+// Alpha is preserved end-to-end via the RGBA composite PNG.
+<Pixel size={6}>
+  <div style={{
+    background: 'linear-gradient(to right, rgba(255,107,107,0.2), rgba(78,205,196,1))',
+    borderRadius: 12,
+  }}>
+    Fades from translucent to opaque
+  </div>
+</Pixel>
+```
+
+### Tailwind dark mode
+
+```tsx
+// <Pixel> watches <html> / <body> class changes automatically.
+// Toggle a `.dark` class on <html> and the pixel art re-renders
+// with the new computed colors.
+<Pixel size={6}>
+  <div className="bg-white dark:bg-gray-900 border-2 border-black dark:border-white rounded-xl px-4 py-3">
+    Auto-adapts to theme
+  </div>
+</Pixel>
+```
+
 ### Next.js (App Router)
 
 ```tsx
-// app/page.tsx — works directly, no 'use client' needed for <Pixel>
+// app/page.tsx — server component importing <Pixel> works out of the box
 import { Pixel } from '@react-pixel-ui/react';
 
 export default function Page() {
@@ -255,7 +299,9 @@ export default function Page() {
 }
 ```
 
-> Note: `<Pixel>` renders normally on the server. Pixel art is applied after hydration with no layout shift.
+> The published bundle starts with `"use client"`, so Next.js treats `@react-pixel-ui/react`
+> as a client module automatically — you don't need to add the directive yourself.
+> `<Pixel>` renders its child on the server and upgrades to pixel art after hydration.
 
 ## FAQ
 
@@ -263,16 +309,46 @@ export default function Page() {
 A: Check that `pixelSize` is large enough to see distinct blocks. At `size={2}`, blocks are 2x2 CSS pixels — very small on high-DPI screens. Try `size={6}` or higher.
 
 **Q: Why is the border missing at diagonal corners?**
-A: Make sure you're using `<Pixel>` or `usePixelRef` (v2.0.1+). These use composite BMP rendering where border + gradient are baked together with correct staircase shapes.
+A: Make sure you're using `<Pixel>` or `usePixelRef` (v2.0.1+). These use composite PNG rendering where border + gradient are baked together with correct staircase shapes.
 
 **Q: Does it work with Tailwind CSS?**
-A: Yes. `<Pixel>` reads `getComputedStyle` which resolves Tailwind classes into final CSS values.
+A: Yes. `<Pixel>` reads `getComputedStyle` which resolves Tailwind classes into final CSS values. Tailwind dark mode toggling a class on `<html>` is detected automatically and the pixel art re-renders.
 
 **Q: What CSS properties are supported?**
 A: `background-color`, `background-image` (linear/radial/repeating gradients), `border-radius`, `border`, `box-shadow`. Other properties (color, font, padding, etc.) are preserved as-is.
 
 **Q: Is it SSR compatible?**
 A: Yes. The core package uses pure math (no Canvas, no DOM APIs). Elements render normally on the server and get pixelated on hydration.
+
+## Supported CSS values
+
+- **Colors**: named colors, `#rgb[a]` / `#rrggbb[aa]`, `rgb[a]()` (comma or
+  modern slash syntax), `hsl[a]()` (comma or slash), and `oklch()` / `oklab()`
+  are all parsed natively. `color-mix()` and `var(--token)` rely on the
+  browser normalizing them to `rgb()` via `getComputedStyle` — which works
+  transparently on the `<Pixel>` / `usePixelRef` path since those read
+  computed styles from the DOM.
+- **Gradients**: `linear-gradient`, `radial-gradient`, and their
+  `repeating-*` variants. Stops may use any supported color form including
+  `oklch()`.
+- **`box-shadow`**: the *first* non-inset shadow is converted into a hard
+  pixel `drop-shadow`. Additional shadows and inset shadows are ignored by
+  design (pixel art uses a single hard shadow).
+- **Alpha**: translucent colors and gradient stops are preserved end-to-end
+  via the composite PNG RGBA encoder.
+
+## Known limitations
+
+- **`<PixelBox>` explicit `background` prop**: unlike `<Pixel>` which reads
+  computed styles, `<PixelBox>` takes the raw string you pass. It understands
+  hex, named, `rgb()`, `hsl()`, and `oklch()` but not `color-mix()` or
+  `var(--token)` (there's no DOM resolution step).
+- **Dynamic children via ancestor selectors**: `<Pixel>` observes the child's
+  React props (`className`, `style`) and the `<html>` / `<body>` theme
+  classes. If an unrelated *middle* ancestor toggles a class that changes
+  the child via descendant selectors, trigger a parent re-render or use
+  `usePixelRef`, which listens to `style` mutations on the managed element
+  directly in addition to hover / focus / active / resize.
 
 ## Browser Compatibility
 

@@ -151,13 +151,56 @@ yarn add @react-pixel-ui/react`}</Code>
 </div>`}</Code>
         </section>
 
+        {/* Modern color spaces */}
+        <section className="section">
+          <div className="section-label">Color</div>
+          <h2 className="section-title">oklch, hsl, and translucency</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>
+            Full RGBA alpha preserved end-to-end. Any CSS color form (including
+            CSS Color 4 <code>oklch()</code>) works in gradients and borders.
+          </p>
+          <div className="comparison-grid">
+            <div className="comparison-card">
+              <h3>oklch gradient</h3>
+              <Pixel size={pixelSize}>
+                <div style={{
+                  background: 'linear-gradient(135deg, oklch(0.75 0.2 30), oklch(0.6 0.25 280))',
+                  border: '4px solid hsl(220 40% 15%)',
+                  borderRadius: 20,
+                  width: 260, height: 110,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontWeight: 700, fontSize: 18,
+                }}>
+                  oklch + hsl
+                </div>
+              </Pixel>
+            </div>
+            <div className="comparison-card">
+              <h3>Translucent fade</h3>
+              <Pixel size={pixelSize}>
+                <div style={{
+                  background: 'linear-gradient(to right, rgba(255,107,107,0.15), rgba(78,205,196,1))',
+                  borderRadius: 20,
+                  width: 260, height: 110,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#2d3436', fontWeight: 700, fontSize: 18,
+                }}>
+                  RGBA preserved
+                </div>
+              </Pixel>
+            </div>
+          </div>
+        </section>
+
         {/* Playground */}
         <section className="section">
           <div className="section-label">Interactive</div>
           <h2 className="section-title">Playground</h2>
           <div className="playground">
             <div className="playground-preview">
-              <Pixel size={pgPixelSize} key={`${pgPixelSize}-${pgBg}-${pgRadius}-${pgBorder}-${pgBorderColor}-${pgWidth}-${pgHeight}-${pgShadowX}-${pgShadowY}-${pgShadowColor}`}>
+              {/* No `key` hack needed — <Pixel> now re-measures when the
+                  child's style prop changes via useLayoutEffect deps. */}
+              <Pixel size={pgPixelSize}>
                 <div style={{
                   background: pgBg,
                   borderRadius: pgRadius,
@@ -422,11 +465,11 @@ function MyComponent() {
         <div className="install-bar">
           <code>npm install @react-pixel-ui/react</code>
           <span style={{ color: 'var(--text-muted)' }}>|</span>
-          <a href="https://github.com/Todari/react-pixel-ui" target="_blank" rel="noopener" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_github_link')}>
+          <a href="https://github.com/Todari/react-pixel-ui" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_github_link')}>
             GitHub
           </a>
           <span style={{ color: 'var(--text-muted)' }}>|</span>
-          <a href="https://www.npmjs.com/package/@react-pixel-ui/react" target="_blank" rel="noopener" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_npm_link')}>
+          <a href="https://www.npmjs.com/package/@react-pixel-ui/react" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_npm_link')}>
             npm
           </a>
         </div>
