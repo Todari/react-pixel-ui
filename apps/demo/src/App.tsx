@@ -37,7 +37,7 @@ function App() {
             <Pixel size={pixelSize} key={i}>
               <div style={{
                 background: item.bg, border: `3px solid ${item.bc}`, borderRadius: 12,
-                width: 140, height: 56,
+                width: 'min(140px, 100%)', height: 56,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#fff', fontWeight: 700, fontSize: 13,
                 boxShadow: i === 2 ? '4px 4px 0 rgba(0,0,0,0.3)' : undefined,
@@ -91,7 +91,7 @@ yarn add @react-pixel-ui/react`}</Code>
               <div style={{
                 background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)',
                 border: '4px solid #2d3436', borderRadius: 24,
-                width: 260, height: 110,
+                width: 'min(260px, 100%)', height: 110,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#fff', fontWeight: 700, fontSize: 18,
               }}>
@@ -104,7 +104,7 @@ yarn add @react-pixel-ui/react`}</Code>
                 <div style={{
                   background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)',
                   border: '4px solid #2d3436', borderRadius: 24,
-                  width: 260, height: 110,
+                  width: 'min(260px, 100%)', height: 110,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: '#fff', fontWeight: 700, fontSize: 18,
                   boxShadow: '6px 6px 0 rgba(0,0,0,0.3)',
@@ -167,7 +167,7 @@ yarn add @react-pixel-ui/react`}</Code>
                   background: 'linear-gradient(135deg, oklch(0.75 0.2 30), oklch(0.6 0.25 280))',
                   border: '4px solid hsl(220 40% 15%)',
                   borderRadius: 20,
-                  width: 260, height: 110,
+                  width: 'min(260px, 100%)', height: 110,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: '#fff', fontWeight: 700, fontSize: 18,
                 }}>
@@ -181,7 +181,7 @@ yarn add @react-pixel-ui/react`}</Code>
                 <div style={{
                   background: 'linear-gradient(to right, rgba(255,107,107,0.15), rgba(78,205,196,1))',
                   borderRadius: 20,
-                  width: 260, height: 110,
+                  width: 'min(260px, 100%)', height: 110,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: '#2d3436', fontWeight: 700, fontSize: 18,
                 }}>
@@ -205,7 +205,10 @@ yarn add @react-pixel-ui/react`}</Code>
                   background: pgBg,
                   borderRadius: pgRadius,
                   border: `${pgBorder}px solid ${pgBorderColor}`,
-                  width: pgWidth, height: pgHeight,
+                  // Cap width at the container's actual width on narrow viewports
+                  // so the preview never overflows its card.
+                  width: `min(${pgWidth}px, 100%)`,
+                  height: pgHeight,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: '#fff', fontWeight: 700, fontSize: 16,
                   boxShadow: pgShadowX || pgShadowY ? `${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}` : 'none',
@@ -299,7 +302,7 @@ yarn add @react-pixel-ui/react`}</Code>
                 <Pixel size={pixelSize}>
                   <div style={{
                     background: item.bg, border: `${item.bw}px solid ${item.bc}`,
-                    borderRadius: item.r, width: 150, height: 60,
+                    borderRadius: item.r, width: 'min(150px, 100%)', height: 60,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: item.color, fontWeight: 600, fontSize: 13,
                     boxShadow: item.shadow ? '4px 4px 0 rgba(0,0,0,0.3)' : undefined,
@@ -548,7 +551,7 @@ function RefHookDemo({ pixelSize }: { pixelSize: number }) {
     <div ref={pixelRef} style={{
       background: 'linear-gradient(135deg, #fd79a8, #e84393)',
       border: '3px solid #b8256e', borderRadius: 20,
-      width: 240, height: 80,
+      width: 'min(240px, 100%)', height: 80,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       color: '#fff', fontWeight: 700, fontSize: 15,
       boxShadow: '4px 4px 0 rgba(0,0,0,0.3)',

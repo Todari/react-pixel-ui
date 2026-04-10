@@ -262,6 +262,7 @@ input[type="range"]::-webkit-slider-thumb {
   align-items: center;
   justify-content: center;
   gap: 12px;
+  flex-wrap: wrap;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -273,6 +274,7 @@ input[type="range"]::-webkit-slider-thumb {
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-size: 14px;
   color: var(--accent);
+  word-break: break-all;
 }
 
 .install-bar span {
@@ -448,9 +450,68 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* --- Responsive --- */
 @media (max-width: 700px) {
-  .comparison-grid { grid-template-columns: 1fr; }
-  .playground { grid-template-columns: 1fr; }
-  .controls { flex-direction: column; align-items: stretch; }
+  .container { padding: 0 16px 60px; }
+  .comparison-grid { grid-template-columns: 1fr; gap: 20px; }
+  .comparison-card { padding: 20px 16px; }
+  .playground { grid-template-columns: 1fr; gap: 16px; }
+  .playground-preview { padding: 24px 16px; min-height: 160px; }
+  .controls { flex-direction: column; align-items: stretch; padding: 20px; }
   input[type="range"] { width: 100%; }
-  .hero { padding: 48px 20px 40px; }
+  .hero { padding: 48px 16px 40px; }
+  .hero p { font-size: 15px; padding: 0 8px; }
+  .section { margin-bottom: 40px; }
+  .section-title { font-size: 20px; margin-bottom: 16px; }
+  .code-block { padding: 16px; font-size: 12px; }
+  .install-bar { padding: 14px 16px; margin-top: 32px; }
+  .install-bar code { font-size: 12px; }
+
+  /* Guide table: stack rows into a card-like layout */
+  .guide-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 14px 16px;
+  }
+  .guide-row.guide-header { display: none; }
+  .guide-row > span:nth-child(1) {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .guide-row > span:nth-child(2) {
+    font-size: 12px;
+  }
+  .guide-row > span:nth-child(3) {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* FAQ items tighter on mobile */
+  .faq-item summary { padding: 12px 14px; font-size: 13px; }
+  .faq-item p { padding: 0 14px 12px 30px; font-size: 12px; }
+
+  /* Features grid — single column on narrow */
+  .features-grid { grid-template-columns: 1fr; }
+  .feature-card { padding: 20px; }
+
+  /* Showcase — reduce gap */
+  .showcase-grid { gap: 16px; }
+}
+
+@media (max-width: 380px) {
+  .hero { padding: 36px 12px 32px; }
+  .hero h1 { font-size: 18px; }
+  .hero p { font-size: 13px; }
+  .container { padding: 0 12px 48px; }
+  .comparison-card { padding: 16px 12px; }
+  .playground-preview { padding: 20px 12px; }
+  .section-title { font-size: 18px; }
+  .subsection-title { font-size: 15px; }
+}
+
+/* Prevent pixel-art previews from overflowing their container on any width */
+.comparison-card > div,
+.comparison-card > [style],
+.playground-preview > div,
+.showcase-item > div {
+  max-width: 100%;
 }
