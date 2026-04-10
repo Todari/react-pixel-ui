@@ -30,12 +30,12 @@
     },
     "type-check": {
       "dependsOn": [
-        "^type-check"
+        "^build"
       ]
     },
     "test": {
       "dependsOn": [
-        "^test"
+        "^build"
       ],
       "outputs": [
         "coverage/**"
