@@ -472,6 +472,13 @@ function MyComponent() {
           <a href="https://www.npmjs.com/package/@react-pixel-ui/react" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_npm_link')}>
             npm
           </a>
+          <span style={{ color: 'var(--text-muted)' }}>|</span>
+          <a href="https://github.com/Todari/react-pixel-ui/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_license_link')}>
+            MIT License
+          </a>
+        </div>
+        <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 12, paddingBottom: 24 }}>
+          © 2025 <a href="https://github.com/Todari" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'underline' }}>Todari</a> — Released under the MIT License
         </div>
       </div>
     </PixelConfigProvider>
