@@ -106,6 +106,35 @@ describe('Pixel', () => {
     warn.mockRestore();
   });
 
+  it('pins wrapper width/height when the child has a box-shadow', () => {
+    const { container } = render(
+      <Pixel size={6}>
+        <div
+          data-testid="child"
+          style={{
+            background: '#ff0000',
+            boxShadow: '4px 4px 0 #000',
+            width: 'min(260px, 100%)',
+            height: 110,
+          }}
+        >
+          shadow
+        </div>
+      </Pixel>,
+    );
+    // With a shadow, <Pixel> wraps the child in an extra div carrying the
+    // drop-shadow filter. That wrapper must pin width/height to the
+    // measured dimensions so the child's `width: min(Xpx, 100%)` does
+    // not collapse inside a shrink-to-fit inline-block parent.
+    const wrapper = container.firstChild as HTMLElement;
+    expect(wrapper.style.display).toBe('inline-block');
+    expect(wrapper.style.filter).toContain('drop-shadow');
+    expect(wrapper.style.maxWidth).toBe('100%');
+    // width/height come from offsetWidth/offsetHeight we patched on the prototype
+    expect(wrapper.style.width).toBe('200px');
+    expect(wrapper.style.height).toBe('100px');
+  });
+
   it('re-measures when the child style prop changes', () => {
     function App() {
       const [bg, setBg] = useState('#ff0000');

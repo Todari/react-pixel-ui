@@ -219,11 +219,27 @@ export function Pixel({
 
   // drop-shadow on the SAME element as clip-path gets clipped.
   // Move shadow to a wrapper div so it renders outside the clip.
+  //
+  // The wrapper uses `display: inline-block` so it shrink-wraps to the
+  // child, but we ALSO give it the child's measured width/height. Without
+  // explicit dimensions, a child that uses `width: min(Xpx, 100%)` enters
+  // a circular size-resolution with its shrink-to-fit parent (the `100%`
+  // resolves to 0 in some browsers → the element collapses). Pinning the
+  // wrapper to the measured dimensions breaks the cycle while still
+  // allowing `max-width: 100%` to cap at the containing block.
   const shadowFilter = pixelStyle.filter;
   if (shadowFilter) {
     delete pixelStyle.filter;
     return (
-      <div style={{ filter: shadowFilter as string, display: 'inline-block' }}>
+      <div
+        style={{
+          filter: shadowFilter as string,
+          display: 'inline-block',
+          width: artState.width,
+          height: artState.height,
+          maxWidth: '100%',
+        }}
+      >
         {cloneElement(children, {
           ref: mergedRef,
           style: { ...(childProps.style || {}), ...pixelStyle },
