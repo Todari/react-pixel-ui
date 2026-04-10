@@ -39,6 +39,11 @@ export function usePixelArt(
     backgroundColor,
     shadow,
   } = config;
+  // Extract shadow fields to locals so the exhaustive-deps linter can
+  // verify the memo's dependencies.
+  const shadowX = shadow?.x;
+  const shadowY = shadow?.y;
+  const shadowColor = shadow?.color;
 
   return useMemo(() => {
     const result = generatePixelArt(width, height, {
@@ -47,7 +52,10 @@ export function usePixelArt(
       borderWidth,
       borderColor,
       backgroundColor,
-      shadow,
+      shadow:
+        shadowX !== undefined && shadowY !== undefined && shadowColor
+          ? { x: shadowX, y: shadowY, color: shadowColor }
+          : undefined,
     });
 
     return {
@@ -65,8 +73,8 @@ export function usePixelArt(
     borderWidth,
     borderColor,
     backgroundColor,
-    shadow?.x,
-    shadow?.y,
-    shadow?.color,
+    shadowX,
+    shadowY,
+    shadowColor,
   ]);
 }

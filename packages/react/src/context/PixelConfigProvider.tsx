@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
 export interface PixelConfig {
   /** Default pixel grid size (default: 4) */
@@ -26,7 +26,17 @@ export function PixelConfigProvider({
   config,
   children,
 }: PixelConfigProviderProps) {
-  const merged = { ...defaultConfig, ...config };
+  // Extract to locals so the exhaustive-deps linter can verify the memo.
+  const pixelSize = config.pixelSize;
+  const borderColor = config.borderColor;
+  const merged = useMemo<PixelConfig>(
+    () => ({
+      ...defaultConfig,
+      ...(pixelSize !== undefined ? { pixelSize } : null),
+      ...(borderColor !== undefined ? { borderColor } : null),
+    }),
+    [pixelSize, borderColor],
+  );
   return (
     <PixelConfigContext.Provider value={merged}>
       {children}
