@@ -2,6 +2,8 @@
   "name": "react-pixel-ui",
   "version": "1.0.0",
   "description": "React library for pixelating CSS styles",
+  "license": "MIT",
+  "author": "Todari",
   "private": true,
   "scripts": {
     "build": "turbo run build",

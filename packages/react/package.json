@@ -22,6 +22,8 @@
   "bugs": {
     "url": "https://github.com/Todari/react-pixel-ui/issues"
   },
+  "license": "MIT",
+  "author": "Todari",
   "sideEffects": false,
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -35,7 +37,9 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"

@@ -397,7 +397,7 @@ PRs welcome. Please open an issue first to discuss larger changes.
 
 ## License
 
-MIT
+[MIT](./LICENSE) © [Todari](https://github.com/Todari)
 
 ---
 
