@@ -7,6 +7,10 @@ declare global {
 
 const GA_ID = import.meta.env.VITE_GA_ID;
 
+function gtag(...args: unknown[]) {
+  window.dataLayer.push(args);
+}
+
 if (GA_ID) {
   const script = document.createElement('script');
   script.async = true;
@@ -14,9 +18,6 @@ if (GA_ID) {
   document.head.appendChild(script);
 
   window.dataLayer = window.dataLayer || [];
-  function gtag(...args: unknown[]) {
-    window.dataLayer.push(args);
-  }
   window.gtag = gtag;
   gtag('js', new Date());
   gtag('config', GA_ID);
