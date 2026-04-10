@@ -66,6 +66,12 @@ function parseLinearGradient(css: string): ParsedGradient | null {
   return { type: 'linear', angle, stops };
 }
 
+const FUNCTIONAL_COLOR_PREFIXES = ['rgb', 'hsl', 'oklch', 'oklab'];
+
+function isFunctionalColor(part: string): boolean {
+  return FUNCTIONAL_COLOR_PREFIXES.some((p) => part.startsWith(p));
+}
+
 function parseRadialGradient(css: string): ParsedGradient | null {
   const match = css.match(/radial-gradient\((.+)\)/s);
   if (!match) return null;
@@ -77,15 +83,19 @@ function parseRadialGradient(css: string): ParsedGradient | null {
   let colorStartIndex = 0;
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i].trim();
-    // If part looks like a color (starts with # or rgb or is a named color), start here
+    // If part looks like a color (starts with # or a functional color or
+    // is a named color), start here.
     if (
       part.startsWith('#') ||
-      part.startsWith('rgb') ||
+      isFunctionalColor(part) ||
       /^[a-z]+(\s|$)/.test(part)
     ) {
-      // Check if it's actually a color by trying to parse
-      const colorStr = part.split(/\s+/)[0];
-      if (parseColor(colorStr)) {
+      // For functional colors the whole part is the color;
+      // for named/hex, take the first whitespace-separated token.
+      const colorCandidate = isFunctionalColor(part)
+        ? part
+        : part.split(/\s+/)[0];
+      if (parseColor(colorCandidate)) {
         colorStartIndex = i;
         break;
       }
@@ -178,7 +188,7 @@ function distributePositions(stops: GradientStop[]): void {
     if (stops[i].position >= 0) {
       // Found a known position — fill in gaps before it
       const knownPos = stops[i].position;
-      let gapStart = lastKnown + 1;
+      const gapStart = lastKnown + 1;
 
       if (gapStart <= i) {
         const startPos = stops[lastKnown].position;

@@ -64,11 +64,203 @@ export function parseColor(color: string): RGBAColor | null {
     };
   }
 
+  // hsl() / hsla() — both comma and modern slash syntax
+  const hsl = parseHslColor(trimmed);
+  if (hsl) return hsl;
+
+  // oklch() / oklab() — perceptual color spaces introduced in CSS Color 4
+  const oklch = parseOklchOrOklab(trimmed);
+  if (oklch) return oklch;
+
   return null;
 }
 
+/**
+ * Parse hsl() / hsla() strings. Handles both legacy comma syntax
+ * (`hsl(120, 50%, 50%)`) and modern space syntax (`hsl(120 50% 50% / 0.5)`).
+ */
+function parseHslColor(input: string): RGBAColor | null {
+  if (!input.startsWith('hsl')) return null;
+
+  // Comma syntax: hsl(h, s%, l%) or hsla(h, s%, l%, a)
+  const comma = input.match(
+    /hsla?\(\s*([-\d.]+)(deg|rad|grad|turn)?\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%\s*(?:,\s*([\d.]+%?)\s*)?\)/,
+  );
+  if (comma) {
+    return hslToRgba(
+      normalizeHue(parseFloat(comma[1]), comma[2]),
+      parseFloat(comma[3]) / 100,
+      parseFloat(comma[4]) / 100,
+      parseAlphaToken(comma[5]),
+    );
+  }
+
+  // Space syntax: hsl(h s% l%) or hsl(h s% l% / a)
+  const space = input.match(
+    /hsla?\(\s*([-\d.]+)(deg|rad|grad|turn)?\s+([\d.]+)%\s+([\d.]+)%\s*(?:\/\s*([\d.]+%?)\s*)?\)/,
+  );
+  if (space) {
+    return hslToRgba(
+      normalizeHue(parseFloat(space[1]), space[2]),
+      parseFloat(space[3]) / 100,
+      parseFloat(space[4]) / 100,
+      parseAlphaToken(space[5]),
+    );
+  }
+
+  return null;
+}
+
+function parseAlphaToken(token: string | undefined): number {
+  if (token === undefined) return 1;
+  return token.endsWith('%')
+    ? clamp(parseFloat(token) / 100, 0, 1)
+    : clamp(parseFloat(token), 0, 1);
+}
+
+function normalizeHue(value: number, unit: string | undefined): number {
+  let deg = value;
+  if (unit === 'rad') deg = (value * 180) / Math.PI;
+  else if (unit === 'grad') deg = value * 0.9;
+  else if (unit === 'turn') deg = value * 360;
+  // Wrap into [0, 360)
+  deg = ((deg % 360) + 360) % 360;
+  return deg;
+}
+
+function hslToRgba(h: number, s: number, l: number, a: number): RGBAColor {
+  // Convert HSL → RGB via standard algorithm
+  s = clamp(s, 0, 1);
+  l = clamp(l, 0, 1);
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const hh = h / 60;
+  const x = c * (1 - Math.abs((hh % 2) - 1));
+  let r1 = 0;
+  let g1 = 0;
+  let b1 = 0;
+  if (hh >= 0 && hh < 1) { r1 = c; g1 = x; }
+  else if (hh < 2) { r1 = x; g1 = c; }
+  else if (hh < 3) { g1 = c; b1 = x; }
+  else if (hh < 4) { g1 = x; b1 = c; }
+  else if (hh < 5) { r1 = x; b1 = c; }
+  else if (hh < 6) { r1 = c; b1 = x; }
+  const m = l - c / 2;
+  return {
+    r: Math.round((r1 + m) * 255),
+    g: Math.round((g1 + m) * 255),
+    b: Math.round((b1 + m) * 255),
+    a,
+  };
+}
+
+/**
+ * Parse oklch() and oklab() functional notation.
+ *
+ *   oklch(L C H)       oklch(L C H / alpha)
+ *   oklab(L a b)       oklab(L a b / alpha)
+ *
+ * L accepts a number (0–1) or a percentage. C/a/b are numbers. H is a number
+ * in degrees (or with deg/rad/grad/turn units). Only the modern space-
+ * separated syntax is valid per spec.
+ */
+function parseOklchOrOklab(input: string): RGBAColor | null {
+  const isOklch = input.startsWith('oklch(');
+  const isOklab = input.startsWith('oklab(');
+  if (!isOklch && !isOklab) return null;
+
+  const inner = input.slice(input.indexOf('(') + 1, input.lastIndexOf(')'));
+  const slashIdx = inner.indexOf('/');
+  const head = slashIdx === -1 ? inner : inner.slice(0, slashIdx);
+  const alphaPart = slashIdx === -1 ? undefined : inner.slice(slashIdx + 1);
+
+  const tokens = head.trim().split(/\s+/).filter(Boolean);
+  if (tokens.length !== 3) return null;
+
+  const L = parsePercentOrNumber(tokens[0], 1);
+  if (L === null) return null;
+
+  let oklabL: number;
+  let oklabA: number;
+  let oklabB: number;
+
+  if (isOklch) {
+    const C = parseFloat(tokens[1]);
+    if (Number.isNaN(C)) return null;
+    const huePart = tokens[2];
+    const hueMatch = huePart.match(/^(-?[\d.]+)(deg|rad|grad|turn)?$/);
+    if (!hueMatch) return null;
+    const Hdeg = normalizeHue(parseFloat(hueMatch[1]), hueMatch[2]);
+    const hueRad = (Hdeg * Math.PI) / 180;
+    oklabL = L;
+    oklabA = C * Math.cos(hueRad);
+    oklabB = C * Math.sin(hueRad);
+  } else {
+    const a = parseFloat(tokens[1]);
+    const b = parseFloat(tokens[2]);
+    if (Number.isNaN(a) || Number.isNaN(b)) return null;
+    oklabL = L;
+    oklabA = a;
+    oklabB = b;
+  }
+
+  const alpha = parseAlphaToken(alphaPart?.trim());
+  return oklabToRgba(oklabL, oklabA, oklabB, alpha);
+}
+
+function parsePercentOrNumber(
+  token: string,
+  oneEquals: number,
+): number | null {
+  if (token.endsWith('%')) {
+    const n = parseFloat(token);
+    if (Number.isNaN(n)) return null;
+    return (n / 100) * oneEquals;
+  }
+  const n = parseFloat(token);
+  if (Number.isNaN(n)) return null;
+  return n;
+}
+
+/** Convert oklab → linear sRGB → sRGB (gamma-corrected 0-255). */
+function oklabToRgba(
+  L: number,
+  a: number,
+  b: number,
+  alpha: number,
+): RGBAColor {
+  // oklab → LMS (cube root space → linear LMS via cubing)
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+  const lLin = l_ * l_ * l_;
+  const mLin = m_ * m_ * m_;
+  const sLin = s_ * s_ * s_;
+
+  // LMS → linear sRGB
+  const rLin = +4.0767416621 * lLin - 3.3077115913 * mLin + 0.2309699292 * sLin;
+  const gLin = -1.2684380046 * lLin + 2.6097574011 * mLin - 0.3413193965 * sLin;
+  const bLin = -0.0041960863 * lLin - 0.7034186147 * mLin + 1.7076147010 * sLin;
+
+  const toSrgb = (v: number): number => {
+    const c = v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+    return Math.round(clamp(c, 0, 1) * 255);
+  };
+
+  return {
+    r: toSrgb(rLin),
+    g: toSrgb(gLin),
+    b: toSrgb(bLin),
+    a: alpha,
+  };
+}
+
+const HEX_RE = /^[0-9a-f]+$/;
+
 function parseHexColor(hex: string): RGBAColor | null {
   const h = hex.slice(1);
+
+  // Reject any non-hex characters before parseInt (which would yield NaN).
+  if (!HEX_RE.test(h)) return null;
 
   if (h.length === 3) {
     return {
