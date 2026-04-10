@@ -1,6 +1,6 @@
 {
   "name": "@react-pixel-ui/core",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "description": "Core engine for @react-pixel-ui/react. Generates pixel art styles from CSS. Install @react-pixel-ui/react directly.",
   "keywords": [
     "pixel",
