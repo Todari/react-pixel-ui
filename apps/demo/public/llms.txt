@@ -1,0 +1,42 @@
+# React Pixel UI
+
+> React Pixel UI is a pure-CSS pixel art component library for React. Wrap any element with the `<Pixel>` component and its rendered output is automatically transformed into a low-resolution pixel-art look — no Canvas, no pre-rendering, SSR compatible.
+
+## Why pure CSS
+
+The pixelation is achieved with a combination of `clip-path`, RGBA PNG gradient masks, and `drop-shadow` filters — meaning the output is real DOM/CSS, so it works under server-side rendering and is accessible.
+
+## Usage
+
+```jsx
+import { Pixel } from "@react-pixel-ui/react";
+
+<Pixel pixelSize={4}>
+  <button className="bg-orange-500 text-white p-4 rounded">
+    Click me
+  </button>
+</Pixel>
+```
+
+Anything inside `<Pixel>` (Tailwind, inline styles, CSS modules, even SVGs) is pixelated as-is.
+
+## Packages
+
+- **@react-pixel-ui/react** — React component (`<Pixel>`) and hooks. Main entry.
+- **@react-pixel-ui/core** — Framework-agnostic core (CSS generation utilities).
+
+## Links
+
+- npm (React): https://www.npmjs.com/package/@react-pixel-ui/react
+- GitHub: https://github.com/Todari/react-pixel-ui
+- Demo: https://react-pixel-ui.vercel.app
+
+## Compatibility
+
+- React 18+
+- SSR: yes (Next.js, Remix, etc.)
+- Browsers: any with `clip-path` and `drop-shadow` support (all modern browsers)
+
+## Author
+
+Todari (https://todari.dev / https://github.com/Todari)
