@@ -165,7 +165,10 @@ import { PixelBox } from '@react-pixel-ui/react';
 | `borderColor` | `string` | — | Any CSS color |
 | `background` | `string` | — | CSS color or gradient string |
 | `shadow` | `{ x: number, y: number, color: string }` | — | Hard pixel shadow |
-| `responsive` | `boolean` | `false` | Auto-detect size via ResizeObserver |
+| `responsive` | `boolean` | `false` | Follow the size your CSS gives the box (detected via ResizeObserver) instead of `width`/`height` props. Size it with `style`/`className` (e.g. `style={{ width: '100%', height: 120 }}`). |
+
+`className`, `style`, and other HTML props always land on the **root**
+element — the wrapper `<div>` when a border is used.
 
 ### `PixelButton` — Pre-styled button
 
@@ -183,6 +186,9 @@ import { PixelButton } from '@react-pixel-ui/react';
 | `borderRadius` | `number` | `8` | Corner radius |
 | `pixelSize` | `number` | from context | Pixel block size |
 | `shadow` | `{ x, y, color }` | auto | Pixel shadow |
+
+The rendered `<button>` defaults to `type="button"` (it won't submit a
+surrounding form); pass `type="submit"` explicitly when you want that.
 
 ## When to use what
 
@@ -322,27 +328,35 @@ A: Yes. The core package uses pure math (no Canvas, no DOM APIs). Elements rende
 
 ## Supported CSS values
 
-- **Colors**: named colors, `#rgb[a]` / `#rrggbb[aa]`, `rgb[a]()` (comma or
-  modern slash syntax), `hsl[a]()` (comma or slash), and `oklch()` / `oklab()`
-  are all parsed natively. `color-mix()` and `var(--token)` rely on the
-  browser normalizing them to `rgb()` via `getComputedStyle` — which works
-  transparently on the `<Pixel>` / `usePixelRef` path since those read
-  computed styles from the DOM.
+- **Colors**: all 148 CSS named colors, `#rgb[a]` / `#rrggbb[aa]`,
+  `rgb[a]()` (comma or modern slash syntax), `hsl[a]()` (comma or slash),
+  `oklch()` / `oklab()`, and `color(srgb | srgb-linear | display-p3 ...)`
+  are parsed natively. `color-mix()` and `var(--token)` are resolved by the
+  browser via `getComputedStyle` on the `<Pixel>` / `usePixelRef` path
+  (Chromium serializes `color-mix()` results as `color(srgb ...)`, which is
+  supported).
 - **Gradients**: `linear-gradient`, `radial-gradient`, and their
-  `repeating-*` variants. Stops may use any supported color form including
-  `oklch()`.
+  `repeating-*` variants — including Tailwind v4's interpolation hints
+  (`to right in oklab`), `turn`/`rad`/`grad` angle units, double-position
+  stops, and aspect-ratio-correct corner keywords (`to top right`). Stops
+  may use any supported color form including `oklch()`.
 - **`box-shadow`**: the *first* non-inset shadow is converted into a hard
   pixel `drop-shadow`. Additional shadows and inset shadows are ignored by
   design (pixel art uses a single hard shadow).
 - **Alpha**: translucent colors and gradient stops are preserved end-to-end
-  via the composite PNG RGBA encoder.
+  via the composite PNG RGBA encoder (compressed with a built-in
+  dependency-free deflate — data URLs stay in the low-KB range).
+- **Graceful degradation**: backgrounds the engine can't pixelate
+  (`url()` images, `conic-gradient()`, unresolved `var()`) are left
+  completely untouched — the element keeps its original styling and only
+  the staircase clip-path is applied.
 
 ## Known limitations
 
 - **`<PixelBox>` explicit `background` prop**: unlike `<Pixel>` which reads
   computed styles, `<PixelBox>` takes the raw string you pass. It understands
-  hex, named, `rgb()`, `hsl()`, and `oklch()` but not `color-mix()` or
-  `var(--token)` (there's no DOM resolution step).
+  hex, named, `rgb()`, `hsl()`, `oklch()`, and `color()` but not
+  `color-mix()` or `var(--token)` (there's no DOM resolution step).
 - **Dynamic children via ancestor selectors**: `<Pixel>` observes the child's
   React props (`className`, `style`) and the `<html>` / `<body>` theme
   classes. If an unrelated *middle* ancestor toggles a class that changes

@@ -59,7 +59,18 @@ export const PixelButton = forwardRef<HTMLButtonElement, PixelButtonProps>(
   ) {
     const config = usePixelConfig();
     const pixelSize = pixelSizeProp ?? config.pixelSize;
-    const variantStyle = VARIANT_STYLES[variant];
+    // Tolerate unknown variant values from plain-JS callers instead of
+    // crashing the render with a TypeError.
+    const variantStyle = VARIANT_STYLES[variant] ?? VARIANT_STYLES.primary;
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      !(variant in VARIANT_STYLES)
+    ) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[react-pixel-ui] Unknown PixelButton variant "${variant}" — falling back to "primary".`,
+      );
+    }
 
     const { wrapperStyle, contentStyle, needsWrapper } = usePixelArt(
       width,
@@ -91,11 +102,14 @@ export const PixelButton = forwardRef<HTMLButtonElement, PixelButtonProps>(
       [style],
     );
 
+    // type="button" by default so dropping a PixelButton into a <form>
+    // doesn't submit it; a user-provided type in `rest` still wins.
     if (needsWrapper) {
       return (
         <div style={wrapperStyle}>
           <button
             ref={ref}
+            type="button"
             style={{ ...contentStyle, ...buttonBaseStyle }}
             {...rest}
           >
@@ -108,6 +122,7 @@ export const PixelButton = forwardRef<HTMLButtonElement, PixelButtonProps>(
     return (
       <button
         ref={ref}
+        type="button"
         style={{ ...contentStyle, ...buttonBaseStyle }}
         {...rest}
       >
@@ -116,3 +131,5 @@ export const PixelButton = forwardRef<HTMLButtonElement, PixelButtonProps>(
     );
   },
 );
+
+PixelButton.displayName = 'PixelButton';

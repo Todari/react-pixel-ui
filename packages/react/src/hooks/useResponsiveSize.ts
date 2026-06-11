@@ -9,6 +9,9 @@ interface Size {
  * Hook that observes an element's size via ResizeObserver.
  * Debounces updates using requestAnimationFrame and snaps
  * dimensions to the nearest pixelSize multiple.
+ *
+ * Measures the BORDER box (matching clip-path's default reference box),
+ * with offsetWidth/offsetHeight as the fallback.
  */
 export function useResponsiveSize(
   pixelSize: number,
@@ -34,39 +37,48 @@ export function useResponsiveSize(
 
     const element = ref.current;
 
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-
-      // Cancel previous pending update
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
+    const measure = (entry?: ResizeObserverEntry): Size => {
+      const box = entry?.borderBoxSize?.[0];
+      if (box) {
+        return snapSize(box.inlineSize, box.blockSize);
       }
+      return snapSize(element.offsetWidth, element.offsetHeight);
+    };
 
-      // Debounce with rAF
-      rafRef.current = requestAnimationFrame(() => {
-        const { width, height } = entry.contentRect;
-        const snapped = snapSize(width, height);
-
-        setSize((prev) => {
-          if (prev && prev.width === snapped.width && prev.height === snapped.height) {
-            return prev;
-          }
-          return snapped;
-        });
-
-        rafRef.current = null;
+    const update = (next: Size) => {
+      setSize((prev) => {
+        if (prev && prev.width === next.width && prev.height === next.height) {
+          return prev;
+        }
+        return next;
       });
-    });
+    };
 
-    observer.observe(element);
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+
+        // Cancel previous pending update
+        if (rafRef.current !== null) {
+          cancelAnimationFrame(rafRef.current);
+        }
+
+        // Debounce with rAF
+        rafRef.current = requestAnimationFrame(() => {
+          update(measure(entry));
+          rafRef.current = null;
+        });
+      });
+      observer.observe(element);
+    }
 
     // Set initial size
-    const rect = element.getBoundingClientRect();
-    setSize(snapSize(rect.width, rect.height));
+    update(measure());
 
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
       }

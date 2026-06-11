@@ -14,7 +14,8 @@ const defaultConfig: PixelConfig = {
 const PixelConfigContext = createContext<PixelConfig>(defaultConfig);
 
 export interface PixelConfigProviderProps {
-  config: Partial<PixelConfig>;
+  /** Defaults to apply. Optional — omitting it just uses the built-in defaults. */
+  config?: Partial<PixelConfig>;
   children: React.ReactNode;
 }
 
@@ -23,7 +24,7 @@ export interface PixelConfigProviderProps {
  * Wrap your app or component tree to set defaults for all PixelBox/usePixelArt consumers.
  */
 export function PixelConfigProvider({
-  config,
+  config = {},
   children,
 }: PixelConfigProviderProps) {
   // Extract to locals so the exhaustive-deps linter can verify the memo.

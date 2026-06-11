@@ -1,16 +1,14 @@
 {
   "name": "@react-pixel-ui/typescript-config",
   "version": "1.0.1",
-  "description": "Shared TypeScript configuration for React Pixel UI",
+  "description": "Shared TypeScript configuration for React Pixel UI (internal)",
+  "private": true,
   "main": "index.js",
   "files": [
     "base.json",
     "react-library.json",
     "react-app.json"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "clean": "rm -rf dist"
   },

@@ -43,6 +43,13 @@ export function Pixel({
   const childRef = useRef<HTMLElement | null>(null);
   const warnedRef = useRef(false);
   const [artState, setArtState] = useState<ArtState | null>(null);
+  // Bumped to force a re-measure even when artState is already null
+  // (e.g. the child was zero-sized at mount and just became visible).
+  const [measureToken, setMeasureToken] = useState(0);
+  // Once a shadow wrapper has been rendered, keep the wrapper in the tree
+  // (display: contents when inactive) so the child DOM node is never
+  // remounted by a structure change — remounts wipe input state and focus.
+  const hadShadowWrapperRef = useRef(false);
 
   // Derive a stable signature from child props so React-driven
   // style/className changes trigger re-measurement.
@@ -103,6 +110,43 @@ export function Pixel({
     };
   }, [enabled]);
 
+  // Re-measure when the child's size changes (responsive layouts, font
+  // loads, content edits) or when it first becomes non-zero (mounted
+  // inside display:none). The generated clip-path uses absolute px
+  // coordinates, so stale art would be visibly wrong after a resize.
+  useEffect(() => {
+    if (!enabled) return;
+    if (typeof ResizeObserver === 'undefined') return;
+    const el = childRef.current;
+    if (!el) return;
+
+    let rafId: number | null = null;
+    const observer = new ResizeObserver(() => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const node = childRef.current;
+        if (!node) return;
+        const w = node.offsetWidth;
+        const h = node.offsetHeight;
+        if (artState) {
+          if (w !== artState.width || h !== artState.height) {
+            setArtState(null);
+            setMeasureToken((t) => t + 1);
+          }
+        } else if (w > 0 && h > 0) {
+          setMeasureToken((t) => t + 1);
+        }
+      });
+    });
+    observer.observe(el);
+
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      observer.disconnect();
+    };
+  }, [enabled, artState]);
+
   // Read computed styles when artState is null (before pixel art is applied)
   useIsomorphicLayoutEffect(() => {
     if (artState !== null) return; // already computed
@@ -133,25 +177,43 @@ export function Pixel({
       return;
     }
 
-    const computed = getComputedStyle(el);
-    const artConfig = parseComputedStyles(computed, pixelSize);
     // Always measure the OUTER (border-box) dimensions. We preserve the
     // border width via `border-color: transparent` below, which keeps the
     // element's outer box unchanged regardless of box-sizing.
     const width = el.offsetWidth;
     const height = el.offsetHeight;
 
+    const computed = getComputedStyle(el);
+    const artConfig = parseComputedStyles(computed, pixelSize, {
+      width,
+      height,
+    });
+
     if (width > 0 && height > 0) {
       setArtState({ config: artConfig, width, height });
     }
-  }, [artState, pixelSize, enabled]);
+  }, [artState, measureToken, pixelSize, enabled]);
 
   // Memoize the generated pixel art so parent re-renders don't regenerate
-  // the composite BMP on every frame.
+  // the composite PNG on every frame.
   const result: PixelArtStyles | null = useMemo(() => {
     if (!artState) return null;
-    return generatePixelArt(artState.width, artState.height, artState.config);
+    return generatePixelArt(artState.width, artState.height, artState.config, {
+      want: 'composite',
+    });
   }, [artState]);
+
+  // Derive the shadow filter before any early return so the
+  // wrapper-stickiness effect below can observe it.
+  const shadowFilter: string | undefined = result
+    ? ((result.wrapperStyle.filter ?? result.contentStyle.filter) as
+        | string
+        | undefined)
+    : undefined;
+
+  useEffect(() => {
+    if (shadowFilter) hadShadowWrapperRef.current = true;
+  }, [shadowFilter]);
 
   if (!isValidElement(children) || !enabled) return children;
 
@@ -176,9 +238,15 @@ export function Pixel({
     }
   };
 
+  // Keep the wrapper div in the tree once it has appeared so the child
+  // keeps its position (and DOM node) across phase changes.
+  const keepWrapper = hadShadowWrapperRef.current;
+  const passthroughWrap = (node: React.ReactElement) =>
+    keepWrapper ? <div style={{ display: 'contents' }}>{node}</div> : node;
+
   // Phase 1: no pixel art yet — render child as-is with ref to measure
   if (!artState || !result) {
-    return cloneElement(children, { ref: mergedRef } as never);
+    return passthroughWrap(cloneElement(children, { ref: mergedRef } as never));
   }
 
   // Phase 2: apply pixel art via style override.
@@ -186,19 +254,17 @@ export function Pixel({
   // layout shift), we set `border-color: transparent` to preserve the box,
   // and use `background-origin: border-box` so the composite image covers
   // the border area.
-  const pixelStyle: React.CSSProperties = {
-    background: 'none',
-    borderColor: 'transparent',
-    borderRadius: 0,
-    boxShadow: 'none',
-  };
+  const pixelStyle: React.CSSProperties = {};
 
   if (result.clipPath !== 'none') {
     pixelStyle.clipPath = result.clipPath;
   }
 
-  // Use composite image (border + gradient baked into one PNG)
   if (result.compositeImage) {
+    // Composite PNG bakes background + border into one image.
+    pixelStyle.background = 'none';
+    pixelStyle.borderColor = 'transparent';
+    pixelStyle.borderRadius = 0;
     pixelStyle.backgroundImage = result.compositeImage;
     pixelStyle.backgroundSize = '100% 100%';
     pixelStyle.backgroundRepeat = 'no-repeat';
@@ -206,13 +272,15 @@ export function Pixel({
     pixelStyle.backgroundClip = 'border-box';
     pixelStyle.imageRendering = 'pixelated';
   } else if (result.contentStyle.background) {
-    pixelStyle.background = result.contentStyle.background as string;
+    // No composite means the background couldn't be pixelated (url()
+    // image, conic-gradient, ...) — keep the original background and
+    // border so the element degrades gracefully instead of vanishing.
+    pixelStyle.borderRadius = 0;
   }
 
-  if (result.wrapperStyle.filter) {
-    pixelStyle.filter = result.wrapperStyle.filter as string;
-  } else if (result.contentStyle.filter) {
-    pixelStyle.filter = result.contentStyle.filter as string;
+  if (shadowFilter) {
+    // The author box-shadow is replaced by a pixelated drop-shadow filter.
+    pixelStyle.boxShadow = 'none';
   }
 
   const childProps = children.props as { style?: React.CSSProperties };
@@ -227,13 +295,11 @@ export function Pixel({
   // resolves to 0 in some browsers → the element collapses). Pinning the
   // wrapper to the measured dimensions breaks the cycle while still
   // allowing `max-width: 100%` to cap at the containing block.
-  const shadowFilter = pixelStyle.filter;
   if (shadowFilter) {
-    delete pixelStyle.filter;
     return (
       <div
         style={{
-          filter: shadowFilter as string,
+          filter: shadowFilter,
           display: 'inline-block',
           width: artState.width,
           height: artState.height,
@@ -248,8 +314,10 @@ export function Pixel({
     );
   }
 
-  return cloneElement(children, {
-    ref: mergedRef,
-    style: { ...(childProps.style || {}), ...pixelStyle },
-  } as never);
+  return passthroughWrap(
+    cloneElement(children, {
+      ref: mergedRef,
+      style: { ...(childProps.style || {}), ...pixelStyle },
+    } as never),
+  );
 }

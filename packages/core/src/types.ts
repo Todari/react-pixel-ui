@@ -61,11 +61,25 @@ export interface GradientStop {
   position: number; // 0-1
 }
 
+/** Corner target of a `to <corner>` linear gradient direction */
+export type GradientCorner =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-right'
+  | 'bottom-left';
+
 /** Parsed CSS gradient */
 export interface ParsedGradient {
   type: 'linear' | 'radial';
   angle: number; // degrees (CSS convention: 0=top, 90=right)
   stops: GradientStop[];
+  /**
+   * Set when the direction was a corner keyword (e.g. `to top right`).
+   * Per CSS the real angle depends on the element's aspect ratio —
+   * resolve it with resolveGradientAngle(gradient, width, height).
+   * `angle` holds the square-box (45°-multiple) approximation as fallback.
+   */
+  corner?: GradientCorner;
 }
 
 /** RGBA color representation */

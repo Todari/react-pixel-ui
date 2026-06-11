@@ -1,9 +1,9 @@
-import type { BorderRadii, RGBAColor, ParsedGradient } from '../types';
-import { isCellInsideCircle } from '../utils/math';
-import { parseColor, sampleGradient } from '../utils/color';
+import type { BorderRadii, RGBAColor } from '../types';
+import { isCellInsideCircle, sanitizePixelSize } from '../utils/math';
+import { parseColor } from '../utils/color';
 import { parseGradient } from '../utils/gradient-parser';
-import { clamp } from '../utils/math';
 import { encodePNG } from '../utils/png';
+import { sampleGradient2D } from './pixel-gradient';
 
 const TRANSPARENT: RGBAColor = { r: 0, g: 0, b: 0, a: 0 };
 
@@ -15,9 +15,16 @@ const TRANSPARENT: RGBAColor = { r: 0, g: 0, b: 0, a: 0 };
  * - Fully transparent if outside the outer staircase shape
  * - Border color if between outer and inner staircase
  * - Gradient/solid color if inside the inner staircase
+ * - Transparent in the content area when no background is specified
  *
  * This eliminates the rectangular-gradient-inside-staircase problem
  * where diagonal corner borders disappear.
+ *
+ * Returns null when there is nothing parseable to draw — including when
+ * a background is PRESENT but unsupported (url() images, conic-gradient,
+ * etc.). Consumers must treat null as "leave the element's own styles
+ * alone" so unsupported backgrounds degrade gracefully instead of being
+ * replaced by a transparent image.
  */
 export function generateCompositePixelImage(
   width: number,
@@ -30,17 +37,24 @@ export function generateCompositePixelImage(
 ): string | null {
   if (!backgroundColor && !borderColor) return null;
 
-  const cols = Math.max(1, Math.ceil(width / pixelSize));
-  const rows = Math.max(1, Math.ceil(height / pixelSize));
+  const ps = sanitizePixelSize(pixelSize);
+  const cols = Math.max(1, Math.ceil(width / ps));
+  const rows = Math.max(1, Math.ceil(height / ps));
 
   // Parse colors
   const parsedBorderColor = borderColor ? parseColor(borderColor) : null;
-  const gradient = backgroundColor
-    ? parseGradient(backgroundColor)
-    : null;
-  const solidBg = !gradient && backgroundColor
-    ? parseColor(backgroundColor)
-    : null;
+  const gradient = backgroundColor ? parseGradient(backgroundColor) : null;
+  const solidBg =
+    !gradient && backgroundColor ? parseColor(backgroundColor) : null;
+
+  // A background was specified but we can't parse it (url() image,
+  // conic-gradient, var() that didn't resolve, ...). Bail out so the
+  // caller keeps the original CSS instead of erasing it.
+  if (backgroundColor && !gradient && !solidBg) return null;
+
+  // Nothing to draw at all (e.g. border specified with unparseable color)
+  const hasBorder = borderWidth > 0 && !!parsedBorderColor;
+  if (!hasBorder && !gradient && !solidBg) return null;
 
   // Inner dimensions and radii
   const innerW = width - borderWidth * 2;
@@ -58,34 +72,36 @@ export function generateCompositePixelImage(
     for (let col = 0; col < cols; col++) {
       // Map PNG pixel to DISPLAY coordinates (not grid coordinates)
       // This prevents edge artifacts when dimensions aren't multiples of pixelSize
-      const cx = (col + 0.5) / cols * width;
-      const cy = (row + 0.5) / rows * height;
+      const cx = ((col + 0.5) / cols) * width;
+      const cy = ((row + 0.5) / rows) * height;
 
       // 1. Outside outer shape → fully transparent
-      if (!isInsideShape(cx, cy, width, height, outerRadii, pixelSize)) {
+      if (!isInsideShape(cx, cy, width, height, outerRadii, ps)) {
         pixels.push(TRANSPARENT);
         continue;
       }
 
       // 2. Border area (between outer and inner)
-      if (borderWidth > 0) {
+      if (hasBorder) {
         const innerCx = cx - borderWidth;
         const innerCy = cy - borderWidth;
 
-        if (!isInsideShape(innerCx, innerCy, innerW, innerH, innerRadii, pixelSize)) {
+        if (!isInsideShape(innerCx, innerCy, innerW, innerH, innerRadii, ps)) {
           pixels.push(parsedBorderColor || TRANSPARENT);
           continue;
         }
       }
 
-      // 3. Content area — gradient or solid
+      // 3. Content area — gradient, solid, or transparent (no background).
+      // A border-only element keeps a transparent interior so whatever is
+      // behind the element stays visible, matching CSS semantics.
       if (gradient) {
         const color = sampleGradient2D(gradient, cx, cy, width, height);
         pixels.push(color);
       } else if (solidBg) {
         pixels.push(solidBg);
       } else {
-        pixels.push(parsedBorderColor || TRANSPARENT);
+        pixels.push(TRANSPARENT);
       }
     }
   }
@@ -139,28 +155,4 @@ function isInsideShape(
 
   // Not in any corner region → inside
   return true;
-}
-
-/** Sample gradient at a 2D position */
-function sampleGradient2D(
-  gradient: ParsedGradient,
-  px: number,
-  py: number,
-  width: number,
-  height: number,
-): RGBAColor {
-  if (gradient.type === 'radial') {
-    const cx = width / 2, cy = height / 2;
-    const maxDist = Math.sqrt(cx * cx + cy * cy);
-    const dist = Math.sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy));
-    return sampleGradient(gradient.stops, clamp(dist / maxDist, 0, 1));
-  }
-  const angleRad = (gradient.angle * Math.PI) / 180;
-  const dirX = Math.sin(angleRad);
-  const dirY = -Math.cos(angleRad);
-  const gradientLength =
-    Math.abs(width * Math.sin(angleRad)) + Math.abs(height * Math.cos(angleRad));
-  if (gradientLength === 0) return sampleGradient(gradient.stops, 0.5);
-  const dot = (px - width / 2) * dirX + (py - height / 2) * dirY;
-  return sampleGradient(gradient.stops, clamp(dot / gradientLength + 0.5, 0, 1));
 }

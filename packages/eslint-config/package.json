@@ -1,16 +1,13 @@
 {
   "name": "@react-pixel-ui/eslint-config",
   "version": "1.0.0",
-  "description": "Shared ESLint configuration for React Pixel UI",
+  "description": "Shared ESLint configuration for React Pixel UI (internal)",
+  "private": true,
   "main": "index.js",
   "files": [
     "library.js",
-    "react.js",
-    "storybook.js"
+    "react.js"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "clean": "rm -rf dist"
   },

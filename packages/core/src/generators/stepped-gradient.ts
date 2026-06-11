@@ -1,5 +1,6 @@
-import { parseGradient } from '../utils/gradient-parser';
+import { parseGradient, resolveGradientAngle } from '../utils/gradient-parser';
 import { colorToCSS, sampleGradient } from '../utils/color';
+import { sanitizePixelSize } from '../utils/math';
 
 /**
  * Convert a CSS gradient string into a stepped (pixelated) version
@@ -24,17 +25,20 @@ export function generateSteppedGradient(
   const parsed = parseGradient(cssGradient);
   if (!parsed) return null;
 
+  const ps = sanitizePixelSize(pixelSize);
+
   // Compute CSS gradient line length based on angle and element dimensions.
   // CSS spec: length = abs(W * sin(angle)) + abs(H * cos(angle))
   // CSS angle convention: 0deg = to top, 90deg = to right (clockwise)
-  const angleRad = (parsed.angle * Math.PI) / 180;
+  const angle = resolveGradientAngle(parsed, width, height);
+  const angleRad = (angle * Math.PI) / 180;
   const gradientLength =
     parsed.type === 'linear'
       ? Math.abs(width * Math.sin(angleRad)) +
         Math.abs(height * Math.cos(angleRad))
       : Math.max(width, height); // radial: approximate with max dimension
 
-  const numBands = Math.max(2, Math.round(gradientLength / pixelSize));
+  const numBands = Math.max(2, Math.round(gradientLength / ps));
   const OVERLAP = 0.05; // % overlap to prevent subpixel bleeding
 
   const bandStops: string[] = [];
@@ -60,7 +64,7 @@ export function generateSteppedGradient(
   }
 
   if (parsed.type === 'linear') {
-    return `linear-gradient(${parsed.angle}deg, ${bandStops.join(', ')})`;
+    return `linear-gradient(${angle}deg, ${bandStops.join(', ')})`;
   }
 
   return `radial-gradient(${bandStops.join(', ')})`;

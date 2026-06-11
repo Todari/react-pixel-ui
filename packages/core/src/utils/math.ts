@@ -1,5 +1,14 @@
 import type { Point } from '../types';
 
+/**
+ * Sanitize a pixelSize input to a safe positive integer.
+ * Guards every generator against pixelSize <= 0 / NaN, which would
+ * otherwise cause division by zero, Infinity grid sizes, or hangs.
+ */
+export function sanitizePixelSize(pixelSize: number): number {
+  return Math.max(1, Math.floor(pixelSize || 4));
+}
+
 /** Snap a value down to the nearest multiple of pixelSize */
 export function snapToGrid(value: number, pixelSize: number): number {
   return Math.floor(value / pixelSize) * pixelSize;

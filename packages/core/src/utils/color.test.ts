@@ -266,3 +266,52 @@ describe('sampleGradient', () => {
     expect(sampleGradient([], 0.5)).toEqual({ r: 0, g: 0, b: 0, a: 1 });
   });
 });
+
+describe('parseColor — full named colors, color(), anchoring', () => {
+  it('parses the full CSS named-color set', () => {
+    expect(parseColor('lime')).toEqual({ r: 0, g: 255, b: 0, a: 1 });
+    expect(parseColor('navy')).toEqual({ r: 0, g: 0, b: 128, a: 1 });
+    expect(parseColor('teal')).toEqual({ r: 0, g: 128, b: 128, a: 1 });
+    expect(parseColor('tomato')).toEqual({ r: 255, g: 99, b: 71, a: 1 });
+    expect(parseColor('gold')).toEqual({ r: 255, g: 215, b: 0, a: 1 });
+    expect(parseColor('rebeccapurple')).toEqual({ r: 102, g: 51, b: 153, a: 1 });
+    expect(parseColor('silver')).toEqual({ r: 192, g: 192, b: 192, a: 1 });
+    expect(parseColor('TRANSPARENT')?.a).toBe(0);
+  });
+
+  it('rejects colors embedded in larger unsupported strings', () => {
+    // The rgb() inside the conic-gradient must NOT be misparsed as the color
+    expect(parseColor('conic-gradient(rgb(255, 0, 0), blue)')).toBeNull();
+    expect(parseColor('url(image.png) rgb(1, 2, 3)')).toBeNull();
+  });
+
+  it('parses color(srgb ...) — Chromium computed color-mix() output', () => {
+    expect(parseColor('color(srgb 0.5 0 0.5)')).toEqual({
+      r: 128, g: 0, b: 128, a: 1,
+    });
+    expect(parseColor('color(srgb 1 0 0 / 0.5)')).toEqual({
+      r: 255, g: 0, b: 0, a: 0.5,
+    });
+    expect(parseColor('color(srgb 100% 0% 50%)')).toEqual({
+      r: 255, g: 0, b: 128, a: 1,
+    });
+  });
+
+  it('parses color(srgb-linear ...) and color(display-p3 ...)', () => {
+    // linear 1 1 1 → white
+    expect(parseColor('color(srgb-linear 1 1 1)')).toEqual({
+      r: 255, g: 255, b: 255, a: 1,
+    });
+    // display-p3 white → sRGB white; p3 red is out of sRGB gamut → clamps
+    expect(parseColor('color(display-p3 1 1 1)')).toEqual({
+      r: 255, g: 255, b: 255, a: 1,
+    });
+    const p3red = parseColor('color(display-p3 1 0 0)');
+    expect(p3red?.r).toBe(255);
+    expect(p3red?.g).toBe(0);
+  });
+
+  it('returns null for unsupported color spaces', () => {
+    expect(parseColor('color(rec2020 1 0 0)')).toBeNull();
+  });
+});

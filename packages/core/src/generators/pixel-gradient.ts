@@ -1,7 +1,7 @@
 import type { ParsedGradient, RGBAColor } from '../types';
-import { parseGradient } from '../utils/gradient-parser';
+import { parseGradient, resolveGradientAngle } from '../utils/gradient-parser';
 import { sampleGradient } from '../utils/color';
-import { clamp } from '../utils/math';
+import { clamp, sanitizePixelSize } from '../utils/math';
 import { encodePNG } from '../utils/png';
 
 /**
@@ -25,15 +25,16 @@ export function generatePixelGradient(
   const parsed = parseGradient(cssGradient);
   if (!parsed) return null;
 
-  const cols = Math.max(1, Math.ceil(width / pixelSize));
-  const rows = Math.max(1, Math.ceil(height / pixelSize));
+  const ps = sanitizePixelSize(pixelSize);
+  const cols = Math.max(1, Math.ceil(width / ps));
+  const rows = Math.max(1, Math.ceil(height / ps));
 
   // Sample gradient at each pixel block center
   const pixels: RGBAColor[] = [];
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
-      const px = (col + 0.5) * pixelSize;
-      const py = (row + 0.5) * pixelSize;
+      const px = (col + 0.5) * ps;
+      const py = (row + 0.5) * ps;
       const color = sampleGradient2D(parsed, px, py, width, height);
       pixels.push(color);
     }
@@ -45,7 +46,7 @@ export function generatePixelGradient(
 /**
  * Sample a gradient at a 2D position within the element.
  */
-function sampleGradient2D(
+export function sampleGradient2D(
   gradient: ParsedGradient,
   px: number,
   py: number,
@@ -58,13 +59,14 @@ function sampleGradient2D(
     const cy = height / 2;
     const maxDist = Math.sqrt(cx * cx + cy * cy);
     const dist = Math.sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy));
-    const t = clamp(dist / maxDist, 0, 1);
+    const t = maxDist === 0 ? 0 : clamp(dist / maxDist, 0, 1);
     return sampleGradient(gradient.stops, t);
   }
 
   // Linear: project point onto gradient line
   // CSS convention: 0deg = to top, 90deg = to right (clockwise)
-  const angleRad = (gradient.angle * Math.PI) / 180;
+  const angle = resolveGradientAngle(gradient, width, height);
+  const angleRad = (angle * Math.PI) / 180;
   const dirX = Math.sin(angleRad);
   const dirY = -Math.cos(angleRad);
   const gradientLength =

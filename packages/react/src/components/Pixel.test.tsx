@@ -67,7 +67,7 @@ describe('Pixel', () => {
     expect(styleAttr).toContain('#f00');
   });
 
-  it('applies pixel art styles in phase 2', async () => {
+  it('applies pixel art clip-path in phase 2', async () => {
     const { getByTestId } = render(
       <Pixel size={6}>
         <div
@@ -82,10 +82,12 @@ describe('Pixel', () => {
       </Pixel>,
     );
     const el = getByTestId('child') as HTMLElement;
-    // Phase 2 applies clip-path and background image
-    expect(el.style.clipPath).toMatch(/polygon|none|/);
-    // background override is set via inline style
-    expect(el.getAttribute('style')).toContain('background');
+    // Phase 2 applies a staircase clip-path
+    expect(el.style.clipPath).toContain('polygon');
+    // When the background can't be read/pixelated (happy-dom does not
+    // surface the gradient through computed style), the original styles
+    // must NOT be destroyed with `background: none`.
+    expect(el.getAttribute('style')).not.toContain('background: none');
   });
 
   it('warns in dev when child is a function component without ref support', () => {
@@ -173,5 +175,54 @@ describe('Pixel', () => {
       <Pixel size={6}>{null}</Pixel>,
     );
     expect(container.firstChild).toBeNull();
+  });
+});
+
+describe('Pixel — DOM stability and resize', () => {
+  beforeEach(() => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      get() {
+        return 200;
+      },
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      get() {
+        return 100;
+      },
+    });
+  });
+
+  it('keeps the same child DOM node across re-measures when a shadow wrapper exists', () => {
+    function App() {
+      const [bg, setBg] = useState('#ff0000');
+      return (
+        <>
+          <button onClick={() => setBg('#00ff00')} data-testid="toggle">
+            t
+          </button>
+          <Pixel size={4}>
+            <input
+              data-testid="field"
+              style={{ background: bg, boxShadow: '4px 4px 0 #000' }}
+            />
+          </Pixel>
+        </>
+      );
+    }
+    const { getByTestId } = render(<App />);
+    const before = getByTestId('field');
+    // Type into the input — uncontrolled value lives on the DOM node
+    (before as HTMLInputElement).value = 'typed';
+
+    // Trigger a re-measure cycle (style prop change → phase 1 → phase 2)
+    act(() => {
+      getByTestId('toggle').click();
+    });
+
+    const after = getByTestId('field');
+    expect(after).toBe(before); // same DOM node — no remount
+    expect((after as HTMLInputElement).value).toBe('typed');
   });
 });

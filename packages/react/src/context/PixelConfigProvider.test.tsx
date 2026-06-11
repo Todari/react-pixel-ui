@@ -72,3 +72,18 @@ describe('PixelConfigProvider', () => {
     expect(configs[0]).toBe(configs[1]);
   });
 });
+
+describe('PixelConfigProvider — optional config', () => {
+  it('renders with built-in defaults when config is omitted', () => {
+    function Probe() {
+      const cfg = usePixelConfig();
+      return <span data-testid="px">{cfg.pixelSize}</span>;
+    }
+    const { getByTestId } = render(
+      <PixelConfigProvider>
+        <Probe />
+      </PixelConfigProvider>,
+    );
+    expect(getByTestId('px').textContent).toBe('4');
+  });
+});

@@ -1,20 +1,61 @@
 import type { PixelArtConfig } from './types';
 import { parseBoxShadow } from './utils/box-shadow-parser';
 
+/** Element size used to resolve percentage-based computed values */
+export interface ElementSize {
+  width: number;
+  height: number;
+}
+
+/**
+ * Resolve a computed border-*-radius longhand to a single px number.
+ *
+ * Computed radii are usually px, but percentages stay percentages
+ * (`border-radius: 50%` computes to "50%"), and elliptical radii have
+ * two components ("10px 20px"). Percentages resolve against the border
+ * box (horizontal → width, vertical → height); since the staircase model
+ * uses one radius per corner, the smaller resolved component is used.
+ */
+function resolveRadius(value: string, size?: ElementSize): number {
+  if (!value) return 0;
+  const components = value.trim().split(/\s+/).slice(0, 2);
+
+  const resolved = components.map((component, i) => {
+    const n = parseFloat(component);
+    if (Number.isNaN(n)) return 0;
+    if (component.endsWith('%')) {
+      if (!size) return n; // no size available — legacy px fallback
+      const reference = i === 0 ? size.width : size.height;
+      // A single "50%" component applies to both axes — use the smaller
+      // reference so the radius fits the element.
+      const ref =
+        components.length === 1 ? Math.min(size.width, size.height) : reference;
+      return (n / 100) * ref;
+    }
+    return n;
+  });
+
+  return Math.max(0, Math.min(...resolved));
+}
+
 /**
  * Parse computed CSS styles (from getComputedStyle) into a PixelArtConfig.
  * This bridges arbitrary CSS styling (Tailwind, inline, CSS modules)
  * to the pixel art generation pipeline.
+ *
+ * @param size - The element's border-box size, used to resolve
+ *   percentage border-radius values. When omitted, percentages are
+ *   treated as px (legacy behavior).
  */
 export function parseComputedStyles(
   computed: CSSStyleDeclaration,
   pixelSize: number,
+  size?: ElementSize,
 ): PixelArtConfig {
-  // Border radius — computed values are always in px
-  const tlr = parseFloat(computed.borderTopLeftRadius) || 0;
-  const trr = parseFloat(computed.borderTopRightRadius) || 0;
-  const brr = parseFloat(computed.borderBottomRightRadius) || 0;
-  const blr = parseFloat(computed.borderBottomLeftRadius) || 0;
+  const tlr = resolveRadius(computed.borderTopLeftRadius, size);
+  const trr = resolveRadius(computed.borderTopRightRadius, size);
+  const brr = resolveRadius(computed.borderBottomRightRadius, size);
+  const blr = resolveRadius(computed.borderBottomLeftRadius, size);
 
   const allSame = tlr === trr && trr === brr && brr === blr;
   const borderRadius = allSame
