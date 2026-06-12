@@ -39,24 +39,41 @@ export function usePixelArt(
     backgroundColor,
     shadow,
   } = config;
-  // Extract shadow fields to locals so the exhaustive-deps linter can
-  // verify the memo's dependencies.
+  // Extract shadow and radius fields to primitive locals so the memo
+  // compares by value — an inline per-corner array (`borderRadius={[8,8,
+  // 0,0]}`) is a fresh reference every render and would otherwise defeat
+  // the memo, regenerating the PNG on every parent re-render. This also
+  // lets the exhaustive-deps linter verify the dependencies.
   const shadowX = shadow?.x;
   const shadowY = shadow?.y;
   const shadowColor = shadow?.color;
+  const [radiusTL, radiusTR, radiusBR, radiusBL] = Array.isArray(borderRadius)
+    ? borderRadius
+    : [borderRadius, borderRadius, borderRadius, borderRadius];
 
   return useMemo(() => {
-    const result = generatePixelArt(width, height, {
-      pixelSize,
-      borderRadius,
-      borderWidth,
-      borderColor,
-      backgroundColor,
-      shadow:
-        shadowX !== undefined && shadowY !== undefined && shadowColor
-          ? { x: shadowX, y: shadowY, color: shadowColor }
-          : undefined,
-    });
+    const allSame =
+      radiusTL === radiusTR && radiusTR === radiusBR && radiusBR === radiusBL;
+    const result = generatePixelArt(
+      width,
+      height,
+      {
+        pixelSize,
+        borderRadius: allSame
+          ? radiusTL
+          : [radiusTL ?? 0, radiusTR ?? 0, radiusBR ?? 0, radiusBL ?? 0],
+        borderWidth,
+        borderColor,
+        backgroundColor,
+        shadow:
+          shadowX !== undefined && shadowY !== undefined && shadowColor
+            ? { x: shadowX, y: shadowY, color: shadowColor }
+            : undefined,
+      },
+      // The composite PNG output is not part of this hook's result —
+      // skip generating it.
+      { want: 'styles' },
+    );
 
     return {
       wrapperStyle: result.wrapperStyle as React.CSSProperties,
@@ -69,7 +86,10 @@ export function usePixelArt(
     width,
     height,
     pixelSize,
-    borderRadius,
+    radiusTL,
+    radiusTR,
+    radiusBR,
+    radiusBL,
     borderWidth,
     borderColor,
     backgroundColor,

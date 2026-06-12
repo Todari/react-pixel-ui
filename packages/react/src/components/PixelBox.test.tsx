@@ -68,3 +68,39 @@ describe('PixelBox', () => {
     expect(div.getAttribute('data-custom')).toBe('yes');
   });
 });
+
+describe('PixelBox — responsive mode', () => {
+  it('does not pin its own px width/height in responsive mode', () => {
+    const { container } = render(
+      <PixelBox responsive background="#f00" style={{ width: '100%' }} />,
+    );
+    const root = container.firstChild as HTMLElement;
+    // The component must not force the 200x100 fallback — user CSS rules
+    expect(root.style.width).toBe('100%');
+    expect(root.style.height).not.toBe('100px');
+  });
+
+  it('pins explicit width/height in fixed mode (default)', () => {
+    const { container } = render(
+      <PixelBox width={120} height={60} background="#f00" />,
+    );
+    const root = container.firstChild as HTMLElement;
+    expect(root.style.width).toBe('120px');
+    expect(root.style.height).toBe('60px');
+  });
+
+  it('puts the user style on the ROOT element when a border is used', () => {
+    const { container } = render(
+      <PixelBox
+        width={120}
+        height={60}
+        borderWidth={4}
+        borderColor="#333"
+        background="#f00"
+        style={{ margin: 8 }}
+      />,
+    );
+    const root = container.firstChild as HTMLElement;
+    expect(root.style.margin).toBe('8px');
+  });
+});

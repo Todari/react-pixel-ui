@@ -1,9 +1,9 @@
 {
   "$schema": "https://unpkg.com/@changesets/config/schema.json",
   "changelog": [
-    "@changesets/changelog-git",
+    "@changesets/changelog-github",
     {
-      "repo": ""
+      "repo": "Todari/react-pixel-ui"
     }
   ],
   "commit": false,

@@ -39,3 +39,25 @@ describe('PixelButton', () => {
     expect(btn.disabled).toBe(true);
   });
 });
+
+describe('PixelButton — robustness', () => {
+  it('falls back to primary on an unknown variant instead of crashing', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { getByRole } = render(
+      // @ts-expect-error intentional: plain-JS callers can pass anything
+      <PixelButton variant="Primary">oops</PixelButton>,
+    );
+    expect(getByRole('button')).toBeInTheDocument();
+    expect(warn.mock.calls.flat().join(' ')).toContain('Unknown PixelButton variant');
+    warn.mockRestore();
+  });
+
+  it('defaults to type="button" so it does not submit forms', () => {
+    const { getByRole } = render(<PixelButton>Go</PixelButton>);
+    expect((getByRole('button') as HTMLButtonElement).type).toBe('button');
+  });
+
+  it('exposes a stable displayName for DevTools', () => {
+    expect(PixelButton.displayName).toBe('PixelButton');
+  });
+});

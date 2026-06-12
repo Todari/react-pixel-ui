@@ -9,9 +9,7 @@
         "^build"
       ],
       "outputs": [
-        "dist/**",
-        ".next/**",
-        "!.next/cache/**"
+        "dist/**"
       ]
     },
     "dev": {
@@ -37,9 +35,7 @@
       "dependsOn": [
         "^build"
       ],
-      "outputs": [
-        "coverage/**"
-      ]
+      "outputs": []
     },
     "clean": {
       "cache": false

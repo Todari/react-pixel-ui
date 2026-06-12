@@ -15,15 +15,12 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
     "test": "turbo run test",
-    "storybook": "turbo run storybook --filter=storybook",
-    "build-storybook": "turbo run build-storybook --filter=storybook",
-    "config:update": "node scripts/update-configs.js",
-    "config:sync": "pnpm config:update && pnpm install && pnpm type-check",
-    "setup": "pnpm install && pnpm config:update && pnpm build",
+    "setup": "pnpm install && pnpm build",
     "version": "changeset version",
-    "release": "pnpm build && changeset publish"
+    "release": "pnpm build && pnpm test && changeset publish"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.7",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

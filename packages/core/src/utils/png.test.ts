@@ -131,3 +131,75 @@ describe('encodePNG', () => {
     expect(inflated[row100 + 4]).toBe(255); // a
   });
 });
+
+describe('encodePNG — deflate compression', () => {
+  function inflateIdat(url: string): Buffer {
+    const bytes = decodeDataUrl(url);
+    let pos = 8;
+    const idats: Buffer[] = [];
+    while (pos < bytes.length) {
+      const len = readUint32BE(bytes, pos);
+      const type = bytes.slice(pos + 4, pos + 8).toString('ascii');
+      if (type === 'IDAT') idats.push(bytes.slice(pos + 8, pos + 8 + len));
+      pos += 12 + len;
+    }
+    return inflateSync(Buffer.concat(idats));
+  }
+
+  it('round-trips pseudo-random (incompressible) pixels exactly', () => {
+    let seed = 12345;
+    const rand = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed / 0x7fffffff;
+    };
+    const w = 37;
+    const h = 23;
+    const pixels: RGBAColor[] = Array.from({ length: w * h }, () => ({
+      r: Math.floor(rand() * 256),
+      g: Math.floor(rand() * 256),
+      b: Math.floor(rand() * 256),
+      a: rand(),
+    }));
+    const raw = inflateIdat(encodePNG(w, h, pixels));
+    expect(raw.length).toBe(h * (1 + w * 4));
+    let o = 0;
+    for (let y = 0; y < h; y++) {
+      expect(raw[o++]).toBe(0);
+      for (let x = 0; x < w; x++) {
+        const p = pixels[y * w + x];
+        expect(raw[o++]).toBe(p.r & 0xff);
+        expect(raw[o++]).toBe(p.g & 0xff);
+        expect(raw[o++]).toBe(p.b & 0xff);
+        expect(raw[o++]).toBe(Math.round(p.a * 255) & 0xff);
+      }
+    }
+  });
+
+  it('compresses repetitive pixel-art data dramatically', () => {
+    // 150x100 solid block — raw is ~60KB; deflate should crush it
+    const pixels = Array.from({ length: 150 * 100 }, () => ({
+      r: 255, g: 0, b: 128, a: 1,
+    }));
+    const url = encodePNG(150, 100, pixels);
+    const rawSize = 100 * (1 + 150 * 4);
+    expect(url.length).toBeLessThan(rawSize / 20); // at least 20x smaller
+    // ...and still decode losslessly
+    const raw = inflateIdat(url);
+    expect(raw.length).toBe(rawSize);
+    expect(raw[1]).toBe(255);
+    expect(raw[2]).toBe(0);
+    expect(raw[3]).toBe(128);
+  });
+
+  it('round-trips data larger than one deflate window', () => {
+    // 250x150 with varied content (~150KB raw, larger than 64KB blocks)
+    const pixels: RGBAColor[] = Array.from({ length: 250 * 150 }, (_, i) => ({
+      r: i & 0xff,
+      g: (i >> 3) & 0xff,
+      b: (i >> 6) & 0xff,
+      a: 1,
+    }));
+    const raw = inflateIdat(encodePNG(250, 150, pixels));
+    expect(raw.length).toBe(150 * (1 + 250 * 4));
+  });
+});

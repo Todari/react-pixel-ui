@@ -1,7 +1,16 @@
-import { useCallback, useEffect, useRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { generatePixelArt, parseComputedStyles } from '@react-pixel-ui/core';
 import { usePixelConfig } from '../context/PixelConfigProvider';
 import { createStyleObserver } from '../utils/style-observer';
+
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export interface UsePixelRefOptions {
   pixelSize?: number;
@@ -33,8 +42,10 @@ interface ParentFilterSnapshot {
  * Hook that automatically pixelates any HTML element.
  *
  * Applies staircase clip-path, pixel gradient, and hard shadow.
- * For borders, uses the outer clip-path with padding to simulate
- * the border (no wrapper div or pseudo-element needed).
+ *
+ * The style observer is created inside an effect (not the ref callback),
+ * so React 18 StrictMode's simulated unmount/remount re-creates it
+ * symmetrically instead of permanently disconnecting it.
  */
 export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
   options: UsePixelRefOptions = {},
@@ -42,15 +53,17 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
   const config = usePixelConfig();
   const pixelSize = options.pixelSize ?? config.pixelSize;
   const enabled = options.enabled ?? true;
+  const observeHover = options.observeHover ?? true;
+  const observeFocus = options.observeFocus ?? true;
+  const observeActive = options.observeActive ?? true;
 
-  const elementRef = useRef<T | null>(null);
+  const [node, setNode] = useState<T | null>(null);
   const observerRef = useRef<{
     disconnect: () => void;
     pause: () => void;
   } | null>(null);
   const isApplyingRef = useRef(false);
   const originalStylesRef = useRef<Record<string, string> | null>(null);
-  const originalPaddingRef = useRef<string>('');
   // Track any parent element we wrote a `filter` to, so we can restore it.
   const parentFilterRef = useRef<ParentFilterSnapshot | null>(null);
 
@@ -60,7 +73,6 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
       originals[prop] = el.style[prop as 'filter'] || '';
     }
     originalStylesRef.current = originals;
-    originalPaddingRef.current = el.style.padding || '';
   }, []);
 
   const restoreOriginals = useCallback((el: HTMLElement) => {
@@ -69,7 +81,6 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
     for (const prop of MANAGED_PROPS) {
       el.style[prop as 'filter'] = originals[prop] || '';
     }
-    el.style.padding = originalPaddingRef.current;
   }, []);
 
   const restoreParentFilter = useCallback(() => {
@@ -84,7 +95,7 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
   }, []);
 
   const applyPixelArt = useCallback(() => {
-    const el = elementRef.current;
+    const el = node;
     if (!el || !enabled) return;
     if (isApplyingRef.current) return;
     isApplyingRef.current = true;
@@ -103,8 +114,6 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
       // re-measuring, so the new apply cycle starts from a clean state.
       restoreParentFilter();
 
-      const computed = getComputedStyle(el);
-      const artConfig = parseComputedStyles(computed, pixelSize);
       // Measure outer (border-box) dimensions so the composite image covers
       // the entire element including the border area. We keep the original
       // border-width but change its color to transparent — this preserves
@@ -113,37 +122,60 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
       const height = el.offsetHeight;
       if (width === 0 || height === 0) return;
 
-      const result = generatePixelArt(width, height, artConfig);
+      const computed = getComputedStyle(el);
+      const artConfig = parseComputedStyles(computed, pixelSize, {
+        width,
+        height,
+      });
 
-      el.style.borderColor = 'transparent';
-      el.style.borderRadius = '0';
-      el.style.boxShadow = 'none';
+      const result = generatePixelArt(width, height, artConfig, {
+        want: 'composite',
+      });
 
       if (result.clipPath !== 'none') {
         el.style.clipPath = result.clipPath;
       }
 
       if (result.compositeImage) {
+        // Composite PNG bakes background + border into one image.
+        el.style.borderColor = 'transparent';
+        el.style.borderRadius = '0';
         el.style.backgroundImage = result.compositeImage;
         el.style.backgroundSize = '100% 100%';
         el.style.backgroundRepeat = 'no-repeat';
         el.style.backgroundOrigin = 'border-box';
         el.style.backgroundClip = 'border-box';
         el.style.imageRendering = 'pixelated';
-      } else if (result.contentStyle.background) {
-        el.style.background = result.contentStyle.background as string;
+      } else if (artConfig.backgroundColor || artConfig.borderColor) {
+        // The background couldn't be pixelated (url() image,
+        // conic-gradient, ...) — leave the element's own background and
+        // border alone so it degrades gracefully instead of vanishing.
+        el.style.borderRadius = '0';
       }
 
-      // drop-shadow must be on a PARENT element — clip-path clips filter on same element.
-      // Snapshot the parent's original filter before writing, so we can restore it
-      // on cleanup (ref detach / option change / unmount).
-      if (result.wrapperStyle.filter && el.parentElement) {
-        const parent = el.parentElement;
-        parentFilterRef.current = {
-          el: parent,
-          originalFilter: parent.style.filter,
-        };
-        parent.style.filter = result.wrapperStyle.filter as string;
+      // The composer puts the shadow filter on wrapperStyle when a border
+      // wrapper is needed and on contentStyle otherwise — check both, or
+      // borderless elements silently lose their shadow.
+      const shadowFilter = (result.wrapperStyle.filter ??
+        result.contentStyle.filter) as string | undefined;
+
+      if (shadowFilter) {
+        // Replace the author box-shadow with the pixelated drop-shadow.
+        el.style.boxShadow = 'none';
+
+        if (result.clipPath !== 'none' && el.parentElement) {
+          // drop-shadow on the SAME element as clip-path gets clipped —
+          // apply it to the parent. Snapshot the parent's original filter
+          // so it can be restored on cleanup.
+          const parent = el.parentElement;
+          parentFilterRef.current = {
+            el: parent,
+            originalFilter: parent.style.filter,
+          };
+          parent.style.filter = shadowFilter;
+        } else {
+          el.style.filter = shadowFilter;
+        }
       }
     } catch (err) {
       if (process.env.NODE_ENV !== 'production') {
@@ -153,47 +185,57 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
     } finally {
       isApplyingRef.current = false;
     }
-  }, [pixelSize, enabled, captureOriginals, restoreOriginals, restoreParentFilter]);
+  }, [
+    node,
+    pixelSize,
+    enabled,
+    captureOriginals,
+    restoreOriginals,
+    restoreParentFilter,
+  ]);
 
-  useEffect(() => {
-    return () => {
-      observerRef.current?.disconnect();
-      const el = elementRef.current;
-      if (el) restoreOriginals(el);
-      restoreParentFilter();
-    };
-  }, [restoreOriginals, restoreParentFilter]);
+  // Own the whole lifecycle (capture → apply → observe → restore) in one
+  // layout effect: StrictMode's mount→cleanup→remount double-invocation
+  // tears everything down and recreates it symmetrically, instead of the
+  // observer dying with the first simulated unmount.
+  useIsomorphicLayoutEffect(() => {
+    if (!node || !enabled) return;
 
-  useEffect(() => {
+    captureOriginals(node);
     applyPixelArt();
-  }, [applyPixelArt]);
 
-  return useCallback(
-    (node: T | null) => {
-      observerRef.current?.disconnect();
-      if (elementRef.current) restoreOriginals(elementRef.current);
+    const observer = createStyleObserver(node, {
+      onUpdate: () => {
+        if (isApplyingRef.current) return;
+        applyPixelArt();
+      },
+      hover: observeHover,
+      focus: observeFocus,
+      active: observeActive,
+      observeStyle: true,
+    });
+    observerRef.current = observer;
+
+    return () => {
+      observer.disconnect();
+      observerRef.current = null;
+      restoreOriginals(node);
       restoreParentFilter();
-      elementRef.current = node;
       originalStylesRef.current = null;
+    };
+  }, [
+    node,
+    enabled,
+    applyPixelArt,
+    observeHover,
+    observeFocus,
+    observeActive,
+    captureOriginals,
+    restoreOriginals,
+    restoreParentFilter,
+  ]);
 
-      if (!node || !enabled) return;
-
-      captureOriginals(node);
-      applyPixelArt();
-
-      observerRef.current = createStyleObserver(node, {
-        onUpdate: () => {
-          if (isApplyingRef.current) return;
-          applyPixelArt();
-        },
-        hover: options.observeHover ?? true,
-        focus: options.observeFocus ?? true,
-        active: options.observeActive ?? true,
-        observeStyle: true,
-      });
-    },
-    [applyPixelArt, enabled, captureOriginals, restoreOriginals,
-     restoreParentFilter,
-     options.observeHover, options.observeFocus, options.observeActive],
-  );
+  return useCallback((el: T | null) => {
+    setNode(el);
+  }, []);
 }

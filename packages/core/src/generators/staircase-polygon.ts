@@ -1,5 +1,9 @@
 import type { BorderRadii, Point } from '../types';
-import { buildCornerGrid, traceStaircaseBoundary } from '../utils/math';
+import {
+  buildCornerGrid,
+  sanitizePixelSize,
+  traceStaircaseBoundary,
+} from '../utils/math';
 
 /**
  * Generate a clip-path polygon string for a rectangle with staircase corners.
@@ -36,6 +40,7 @@ export function generatePolygonPoints(
   radii: BorderRadii,
   pixelSize: number,
 ): Point[] {
+  pixelSize = sanitizePixelSize(pixelSize);
   // If all radii are 0, return simple rectangle (clockwise)
   if (
     radii.topLeft === 0 &&

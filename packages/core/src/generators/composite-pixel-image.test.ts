@@ -135,3 +135,63 @@ describe('generateCompositePixelImage', () => {
     expect(inflated[midOffset + 2]).toBe(255); // b
   });
 });
+
+describe('generateCompositePixelImage — graceful degradation', () => {
+  it('returns null for an unparseable background (url, conic-gradient)', () => {
+    expect(
+      generateCompositePixelImage(
+        40, 40, 4,
+        { topLeft: 0, topRight: 0, bottomRight: 0, bottomLeft: 0 },
+        0, undefined, 'url("photo.png")',
+      ),
+    ).toBeNull();
+    expect(
+      generateCompositePixelImage(
+        40, 40, 4,
+        { topLeft: 0, topRight: 0, bottomRight: 0, bottomLeft: 0 },
+        2, '#333', 'conic-gradient(red, blue)',
+      ),
+    ).toBeNull();
+  });
+
+  it('keeps the interior transparent for border-only elements', async () => {
+    const { inflateSync } = await import('node:zlib');
+    const url = generateCompositePixelImage(
+      16, 16, 4,
+      { topLeft: 0, topRight: 0, bottomRight: 0, bottomLeft: 0 },
+      4, '#ff0000', undefined,
+    );
+    expect(url).not.toBeNull();
+    const b64 = url!.match(/base64,([^"]+)/)![1];
+    const png = Buffer.from(b64, 'base64');
+    // Extract IDAT
+    let pos = 8;
+    let idat: Buffer | null = null;
+    while (pos < png.length) {
+      const len = png.readUInt32BE(pos);
+      const type = png.toString('ascii', pos + 4, pos + 8);
+      if (type === 'IDAT') { idat = png.subarray(pos + 8, pos + 8 + len); break; }
+      pos += 12 + len;
+    }
+    const raw = inflateSync(idat!);
+    // 4x4 grid; center cell (row 1..2, col 1..2) must be transparent,
+    // edge cells must be the border color.
+    const px = (row: number, col: number) => {
+      const o = row * (1 + 4 * 4) + 1 + col * 4;
+      return [raw[o], raw[o + 1], raw[o + 2], raw[o + 3]];
+    };
+    expect(px(0, 0)).toEqual([255, 0, 0, 255]); // border
+    expect(px(1, 1)).toEqual([0, 0, 0, 0]); // interior transparent
+    expect(px(2, 2)).toEqual([0, 0, 0, 0]);
+    expect(px(3, 3)).toEqual([255, 0, 0, 255]); // border
+  });
+
+  it('does not hang or throw on pixelSize <= 0', () => {
+    const url = generateCompositePixelImage(
+      8, 8, 0,
+      { topLeft: 0, topRight: 0, bottomRight: 0, bottomLeft: 0 },
+      0, undefined, '#fff',
+    );
+    expect(url).toMatch(/^url\("data:image\/png/);
+  });
+});

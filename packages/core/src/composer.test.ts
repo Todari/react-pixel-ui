@@ -102,3 +102,41 @@ describe('generatePixelArt', () => {
     expect(result.wrapperStyle.filter).toContain('drop-shadow');
   });
 });
+
+describe('generatePixelArt — want option and caching', () => {
+  const config = {
+    pixelSize: 4,
+    borderRadius: 8,
+    backgroundColor: 'linear-gradient(90deg, red, blue)',
+  };
+
+  it("want: 'styles' skips the composite image", () => {
+    const result = generatePixelArt(80, 40, config, { want: 'styles' });
+    expect(result.compositeImage).toBeNull();
+    expect(result.contentStyle.backgroundImage).toMatch(/^url\(/);
+  });
+
+  it("want: 'composite' skips the pixel-gradient styles", () => {
+    const result = generatePixelArt(80, 40, config, { want: 'composite' });
+    expect(result.compositeImage).toMatch(/^url\(/);
+    // Raw background passes through as the fallback value
+    expect(result.contentStyle.background).toBe(config.backgroundColor);
+    expect(result.contentStyle.backgroundImage).toBeUndefined();
+  });
+
+  it('returns the cached result for identical inputs', () => {
+    const a = generatePixelArt(80, 40, { ...config }, { want: 'composite' });
+    const b = generatePixelArt(80, 40, { ...config }, { want: 'composite' });
+    expect(b).toBe(a);
+  });
+
+  it('skips the shadow filter when offsets snap to zero', () => {
+    const result = generatePixelArt(80, 40, {
+      pixelSize: 4,
+      backgroundColor: '#fff',
+      shadow: { x: 1, y: 1, color: '#000' },
+    });
+    expect(result.contentStyle.filter).toBeUndefined();
+    expect(result.wrapperStyle.filter).toBeUndefined();
+  });
+});

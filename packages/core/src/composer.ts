@@ -38,16 +38,69 @@ function snapRadii(
   };
 }
 
+/** Options for generatePixelArt */
+export interface GeneratePixelArtOptions {
+  /**
+   * Which outputs to generate. Generating a PNG is the expensive part
+   * of this function, and the two PNG outputs are mutually exclusive in
+   * practice — generating only the one you need roughly halves the cost.
+   *
+   * - 'styles': wrapperStyle/contentStyle (pixel-gradient backgroundImage);
+   *   compositeImage is null.
+   * - 'composite': compositeImage (border + background in one PNG);
+   *   contentStyle carries the raw background as fallback.
+   * - 'both' (default): everything — backward compatible.
+   */
+  want?: 'styles' | 'composite' | 'both';
+}
+
+// Small LRU keyed by all inputs. generatePixelArt is pure, and UI churn
+// (hover/focus/theme toggles) tends to alternate between a handful of
+// configs — caching makes repeat generations free.
+const CACHE_LIMIT = 16;
+const artCache = new Map<string, PixelArtStyles>();
+
 /**
  * Generate pixel art styles from a configuration.
  *
  * All values (borderWidth, borderRadius) are snapped to the pixelSize grid
  * so that inner and outer staircases stay in phase.
+ *
+ * Results are cached (small LRU) — treat the returned object as immutable.
  */
 export function generatePixelArt(
   width: number,
   height: number,
   config: PixelArtConfig,
+  options?: GeneratePixelArtOptions,
+): PixelArtStyles {
+  const want = options?.want ?? 'both';
+
+  const cacheKey = `${width}|${height}|${want}|${JSON.stringify(config)}`;
+  const cached = artCache.get(cacheKey);
+  if (cached) {
+    // Refresh LRU position
+    artCache.delete(cacheKey);
+    artCache.set(cacheKey, cached);
+    return cached;
+  }
+
+  const result = generatePixelArtUncached(width, height, config, want);
+
+  artCache.set(cacheKey, result);
+  if (artCache.size > CACHE_LIMIT) {
+    const oldest = artCache.keys().next().value;
+    if (oldest !== undefined) artCache.delete(oldest);
+  }
+
+  return result;
+}
+
+function generatePixelArtUncached(
+  width: number,
+  height: number,
+  config: PixelArtConfig,
+  want: 'styles' | 'composite' | 'both',
 ): PixelArtStyles {
   const { borderColor, backgroundColor, shadow } = config;
 
@@ -89,20 +142,26 @@ export function generatePixelArt(
       : 'none';
   }
 
-  // Resolve background — use inner dimensions for gradient when border exists
+  // Resolve background — use inner dimensions for gradient when border exists.
+  // When only the composite output is wanted, skip the (expensive) pixel
+  // gradient PNG and pass the raw background through as a fallback value.
   const bgWidth = needsWrapper ? width - borderWidth * 2 : width;
   const bgHeight = needsWrapper ? height - borderWidth * 2 : height;
-  const resolvedBg = resolveBackground(
-    backgroundColor,
-    pixelSize,
-    bgWidth,
-    bgHeight,
-  );
+  const resolvedBg =
+    want === 'composite'
+      ? backgroundColor !== undefined
+        ? { isPixelImage: false, value: backgroundColor }
+        : undefined
+      : resolveBackground(backgroundColor, pixelSize, bgWidth, bgHeight);
 
-  // Generate shadow filter
-  const shadowFilter = shadow
+  // Generate shadow filter. Offsets that snap to 0/0 produce no visible
+  // shadow — skip the filter entirely so consumers don't add wrappers for it.
+  let shadowFilter = shadow
     ? generatePixelShadow(shadow.x, shadow.y, shadow.color, pixelSize)
     : undefined;
+  if (shadowFilter && shadowFilter.startsWith('drop-shadow(0px 0px')) {
+    shadowFilter = undefined;
+  }
 
   // Build styles
   const wrapperStyle: CSSProperties = {};
@@ -142,13 +201,17 @@ export function generatePixelArt(
     }
   }
 
-  // Generate composite BMP with border + gradient baked in (for single-element use)
-  const compositeImage = generateCompositePixelImage(
-    width, height, pixelSize, radii,
-    needsWrapper ? borderWidth : 0,
-    needsWrapper ? borderColor : undefined,
-    backgroundColor,
-  );
+  // Generate composite PNG with border + gradient baked in (for
+  // single-element use) — skipped when only styles are wanted.
+  const compositeImage =
+    want === 'styles'
+      ? null
+      : generateCompositePixelImage(
+          width, height, pixelSize, radii,
+          needsWrapper ? borderWidth : 0,
+          needsWrapper ? borderColor : undefined,
+          backgroundColor,
+        );
 
   return {
     wrapperStyle,
