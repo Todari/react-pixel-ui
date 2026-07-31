@@ -8,6 +8,10 @@ import {
 import { generatePixelArt, parseComputedStyles } from '@react-pixel-ui/core';
 import { usePixelConfig } from '../context/PixelConfigProvider';
 import { createStyleObserver } from '../utils/style-observer';
+import {
+  releaseManagedParentFilter,
+  setManagedParentFilter,
+} from '../utils/parent-filter-manager';
 
 const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -35,7 +39,7 @@ const MANAGED_PROPS = [
 
 interface ParentFilterSnapshot {
   el: HTMLElement;
-  originalFilter: string;
+  token: symbol;
 }
 
 /**
@@ -64,7 +68,8 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
   } | null>(null);
   const isApplyingRef = useRef(false);
   const originalStylesRef = useRef<Record<string, string> | null>(null);
-  // Track any parent element we wrote a `filter` to, so we can restore it.
+  const parentFilterTokenRef = useRef(Symbol('react-pixel-ui-shadow'));
+  // Track any parent filter registration so it can be released cleanly.
   const parentFilterRef = useRef<ParentFilterSnapshot | null>(null);
 
   const captureOriginals = useCallback((el: HTMLElement) => {
@@ -87,7 +92,7 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
     const snapshot = parentFilterRef.current;
     if (!snapshot) return;
     try {
-      snapshot.el.style.filter = snapshot.originalFilter;
+      releaseManagedParentFilter(snapshot.el, snapshot.token);
     } catch {
       // Parent may have been removed from the DOM — nothing to restore.
     }
@@ -165,21 +170,21 @@ export function usePixelRef<T extends HTMLElement = HTMLDivElement>(
 
         if (result.clipPath !== 'none' && el.parentElement) {
           // drop-shadow on the SAME element as clip-path gets clipped —
-          // apply it to the parent. Snapshot the parent's original filter
-          // so it can be restored on cleanup.
+          // apply it to the parent. The manager preserves author filters and
+          // coordinates sibling usePixelRef instances sharing this parent.
           const parent = el.parentElement;
+          const token = parentFilterTokenRef.current;
           parentFilterRef.current = {
             el: parent,
-            originalFilter: parent.style.filter,
+            token,
           };
-          parent.style.filter = shadowFilter;
+          setManagedParentFilter(parent, token, shadowFilter);
         } else {
           el.style.filter = shadowFilter;
         }
       }
     } catch (err) {
       if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
         console.warn('[react-pixel-ui] usePixelRef failed to apply pixel art:', err);
       }
     } finally {

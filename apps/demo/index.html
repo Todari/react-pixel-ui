@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>React Pixel UI - CSS Pixel Art Library for React</title>
-    <meta name="description" content="Create retro pixel art UI with React. Pure CSS output using clip-path, RGBA PNG gradients, and drop-shadow. No Canvas dependency, SSR compatible." />
+    <meta name="description" content="Create retro pixel art UI with React. DOM and CSS output using clip-path, generated RGBA PNG gradients, and drop-shadow. No Canvas dependency, SSR compatible." />
     <meta name="keywords" content="react, pixel, pixel-art, pixelated, css, clip-path, retro, ui, react component, library, SSR" />
     <meta name="author" content="Todari" />
     <link rel="canonical" href="https://react-pixel-ui.vercel.app/" />
@@ -14,13 +14,22 @@
     <meta property="og:site_name" content="React Pixel UI" />
     <meta property="og:title" content="React Pixel UI - CSS Pixel Art Library" />
     <meta property="og:description" content="Wrap any element with &lt;Pixel&gt; and your CSS becomes pixel art. Tailwind, inline styles, CSS modules — all supported. No Canvas, SSR compatible." />
+    <meta property="og:image" content="https://react-pixel-ui.vercel.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="React Pixel UI — Any CSS to pixel art" />
     <meta property="og:locale" content="en_US" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="React Pixel UI - CSS Pixel Art Library" />
-    <meta name="twitter:description" content="Wrap any element with <Pixel> and your CSS becomes pixel art. No Canvas, SSR compatible." />
+    <meta name="twitter:description" content="Wrap any element with &lt;Pixel&gt; and your CSS becomes pixel art. No Canvas, SSR compatible." />
+    <meta name="twitter:image" content="https://react-pixel-ui.vercel.app/og.png" />
+    <meta name="twitter:image:alt" content="React Pixel UI — Any CSS to pixel art" />
 
     <meta name="theme-color" content="#ff8906" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Press+Start+2P&amp;display=swap" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect fill='%23ff8906' x='0' y='0' width='8' height='8'/><rect fill='%23e53170' x='8' y='0' width='8' height='8'/><rect fill='%236c5ce7' x='0' y='8' width='8' height='8'/><rect fill='%2300b894' x='8' y='8' width='8' height='8'/></svg>" />
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect fill='%23ff8906' x='0' y='0' width='8' height='8'/><rect fill='%23e53170' x='8' y='0' width='8' height='8'/><rect fill='%236c5ce7' x='0' y='8' width='8' height='8'/><rect fill='%2300b894' x='8' y='8' width='8' height='8'/></svg>" />
 
@@ -33,7 +42,7 @@
             "@id": "https://react-pixel-ui.vercel.app/#website",
             "url": "https://react-pixel-ui.vercel.app/",
             "name": "React Pixel UI",
-            "description": "Pure CSS pixel art library for React — no Canvas, SSR compatible.",
+            "description": "DOM and CSS pixel art library for React — no Canvas, SSR compatible.",
             "inLanguage": "en-US",
             "publisher": { "@id": "https://react-pixel-ui.vercel.app/#person" }
           },

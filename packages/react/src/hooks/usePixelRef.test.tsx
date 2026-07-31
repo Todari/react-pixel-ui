@@ -82,11 +82,11 @@ describe('usePixelRef', () => {
     expect(queryByTestId('target')).toBeNull();
   });
 
-  it('writes and restores parent filter for shadow', () => {
+  it('preserves and restores an existing parent filter for shadow', () => {
     function Component() {
       const ref = usePixelRef<HTMLDivElement>({ pixelSize: 6 });
       return (
-        <div data-testid="parent">
+        <div data-testid="parent" style={{ filter: 'blur(2px)' }}>
           <div
             ref={ref}
             style={{
@@ -102,13 +102,9 @@ describe('usePixelRef', () => {
 
     const { getByTestId, unmount } = render(<Component />);
     const parent = getByTestId('parent') as HTMLElement;
-    // Parent may or may not have a filter applied depending on whether
-    // happy-dom returns a non-none computed box-shadow. Key assertion:
-    // after unmount, the parent filter must be restored to whatever it was.
-    const beforeUnmount = parent.style.filter;
+    expect(parent.style.filter).toContain('blur(2px)');
     unmount();
-    // After unmount, the cleanup restores original (empty) filter
-    expect(parent.style.filter).toBe(beforeUnmount || '');
+    expect(parent.style.filter).toBe('blur(2px)');
   });
 
   it('does nothing when enabled=false', () => {

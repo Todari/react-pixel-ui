@@ -7,6 +7,11 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
 jobs:
   release:
     name: Release
@@ -15,10 +20,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v5
 
-      - name: Setup Node.js 20.x
+      - name: Setup Node.js 22.x
         uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           registry-url: "https://registry.npmjs.org"
           # pnpm comes from corepack in the next step; without this,
           # setup-node@v5 tries to locate pnpm for caching and fails
@@ -27,13 +32,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
+      - name: Install npm with trusted publishing support
+        run: npm install --global "npm@^11.5.1"
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Create .npmrc
-        run: |
-          echo email=rhymint@gmail.com > ~/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
@@ -43,5 +46,3 @@ jobs:
           publish: pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

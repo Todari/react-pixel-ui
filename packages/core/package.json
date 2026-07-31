@@ -45,14 +45,15 @@
     "README.md"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "clean": "rm -rf dist",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -62,6 +63,6 @@
     "@react-pixel-ui/eslint-config": "workspace:*",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^1.6.0"
+    "vitest": "^3.2.6"
   }
 }

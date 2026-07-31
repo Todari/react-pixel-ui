@@ -18,7 +18,7 @@ changelogs:
 
 ### New Features
 
-- **Pure CSS output** — Uses `clip-path: polygon()`, BMP data URL gradients, and `filter: drop-shadow()`
+- **DOM/CSS output** — Uses `clip-path: polygon()`, PNG data URL gradients, and `filter: drop-shadow()` without Canvas
 - **SSR compatible** — All computation is pure math, zero browser API dependency
 - **`PixelBox` component** — Drop-in pixel art container with automatic wrapper div for borders
 - **`PixelButton` component** — Pre-styled button with `primary`, `secondary`, `danger` variants
@@ -29,7 +29,7 @@ changelogs:
 - **`PixelConfigProvider`** — React context for global defaults (pixelSize, borderColor)
 - **Per-corner border radius** — `borderRadius={[tl, tr, br, bl]}` array syntax
 - **Pixel grid snapping** — `borderWidth` and `borderRadius` auto-snap to `pixelSize` multiples
-- **2D pixel gradients** — BMP data URL with `image-rendering: pixelated` for true square blocks
+- **2D pixel gradients** — RGBA PNG data URL with `image-rendering: pixelated` for true square blocks
 - **Hard pixel shadows** — `drop-shadow(blur=0)` follows clip-path contour
 
 ### Migration from v1.x

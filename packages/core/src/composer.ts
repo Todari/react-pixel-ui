@@ -224,13 +224,13 @@ function generatePixelArtUncached(
 }
 
 interface ResolvedBackground {
-  /** True if this is a pixel gradient BMP (needs image-rendering: pixelated) */
+  /** True if this is a pixel gradient PNG (needs image-rendering: pixelated) */
   isPixelImage: boolean;
   /** CSS value — either a color string or a url("data:...") */
   value: string;
 }
 
-/** Resolve background — generate pixel gradient BMP for gradients, pass through solid colors */
+/** Resolve background — generate pixel gradient PNG for gradients, pass through solid colors */
 function resolveBackground(
   backgroundColor: string | undefined,
   pixelSize: number,
@@ -243,14 +243,14 @@ function resolveBackground(
     backgroundColor.includes('linear-gradient') ||
     backgroundColor.includes('radial-gradient')
   ) {
-    const bmpUrl = generatePixelGradient(
+    const pngUrl = generatePixelGradient(
       backgroundColor,
       pixelSize,
       width,
       height,
     );
-    if (bmpUrl) {
-      return { isPixelImage: true, value: bmpUrl };
+    if (pngUrl) {
+      return { isPixelImage: true, value: pngUrl };
     }
   }
 

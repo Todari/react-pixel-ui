@@ -37,7 +37,7 @@ export interface PixelArtStyles {
   clipPath: string;
   /** Inner clip-path polygon string (null if no border) */
   innerClipPath: string | null;
-  /** Composite BMP data URL with border + gradient baked in (for single-element rendering) */
+  /** Composite PNG data URL with border + gradient baked in (for single-element rendering) */
   compositeImage: string | null;
 }
 

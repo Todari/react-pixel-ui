@@ -10,6 +10,7 @@ import React, {
 import { generatePixelArt, parseComputedStyles } from '@react-pixel-ui/core';
 import type { PixelArtConfig, PixelArtStyles } from '@react-pixel-ui/core';
 import { usePixelConfig } from '../context/PixelConfigProvider';
+import { subscribeRootThemeChanges } from '../utils/theme-observer';
 
 const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -79,35 +80,11 @@ export function Pixel({
 
   // Observe ancestor theme-class toggles (e.g., Tailwind `dark:` on <html>)
   // without touching the child element itself — avoiding self-mutation loops.
+  // All <Pixel> instances share the same root MutationObserver.
   useEffect(() => {
     if (!enabled) return;
     if (typeof document === 'undefined') return;
-
-    let rafId: number | null = null;
-    const scheduleReset = () => {
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        setArtState(null);
-      });
-    };
-
-    const rootObserver = new MutationObserver(scheduleReset);
-    rootObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class', 'data-theme'],
-    });
-    if (document.body) {
-      rootObserver.observe(document.body, {
-        attributes: true,
-        attributeFilter: ['class', 'data-theme'],
-      });
-    }
-
-    return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      rootObserver.disconnect();
-    };
+    return subscribeRootThemeChanges(() => setArtState(null));
   }, [enabled]);
 
   // Re-measure when the child's size changes (responsive layouts, font
@@ -168,7 +145,6 @@ export function Pixel({
                 ?.displayName ||
               (childType as { name?: string })?.name ||
               'Component';
-        // eslint-disable-next-line no-console
         console.warn(
           `[react-pixel-ui] <Pixel>'s child <${typeName}> did not accept a ref. ` +
             `Pass an HTML element (e.g. <div>) directly, or wrap the component with React.forwardRef.`,
@@ -249,6 +225,9 @@ export function Pixel({
     return passthroughWrap(cloneElement(children, { ref: mergedRef } as never));
   }
 
+  const childProps = children.props as { style?: React.CSSProperties };
+  const childStyle = childProps.style ?? {};
+
   // Phase 2: apply pixel art via style override.
   // Instead of `border: none` (which shrinks content-box elements and causes
   // layout shift), we set `border-color: transparent` to preserve the box,
@@ -263,7 +242,16 @@ export function Pixel({
   if (result.compositeImage) {
     // Composite PNG bakes background + border into one image.
     pixelStyle.background = 'none';
-    pixelStyle.borderColor = 'transparent';
+    if (artState.config.borderWidth && artState.config.borderColor) {
+      // React warns when a render mixes an inline `border` shorthand with
+      // `borderColor`, then removes one of them on a later render. Override
+      // the same form the author used so repeated measurement stays clean.
+      if (Object.prototype.hasOwnProperty.call(childStyle, 'border')) {
+        pixelStyle.border = `${artState.config.borderWidth}px solid transparent`;
+      } else {
+        pixelStyle.borderColor = 'transparent';
+      }
+    }
     pixelStyle.borderRadius = 0;
     pixelStyle.backgroundImage = result.compositeImage;
     pixelStyle.backgroundSize = '100% 100%';
@@ -282,8 +270,6 @@ export function Pixel({
     // The author box-shadow is replaced by a pixelated drop-shadow filter.
     pixelStyle.boxShadow = 'none';
   }
-
-  const childProps = children.props as { style?: React.CSSProperties };
 
   // drop-shadow on the SAME element as clip-path gets clipped.
   // Move shadow to a wrapper div so it renders outside the clip.

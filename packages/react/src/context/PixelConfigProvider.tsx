@@ -21,7 +21,8 @@ export interface PixelConfigProviderProps {
 
 /**
  * Provider for default pixel art configuration.
- * Wrap your app or component tree to set defaults for all PixelBox/usePixelArt consumers.
+ * `pixelSize` is shared by all React APIs. `borderColor` is the fallback for
+ * PixelBox; CSS-reading APIs keep the border color computed from the element.
  */
 export function PixelConfigProvider({
   config = {},
