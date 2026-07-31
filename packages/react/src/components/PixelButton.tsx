@@ -66,7 +66,6 @@ export const PixelButton = forwardRef<HTMLButtonElement, PixelButtonProps>(
       process.env.NODE_ENV !== 'production' &&
       !(variant in VARIANT_STYLES)
     ) {
-      // eslint-disable-next-line no-console
       console.warn(
         `[react-pixel-ui] Unknown PixelButton variant "${variant}" — falling back to "primary".`,
       );

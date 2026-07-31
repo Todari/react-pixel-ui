@@ -4,7 +4,7 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@react-pixel-ui/react)](https://bundlephobia.com/package/@react-pixel-ui/react)
 [![license](https://img.shields.io/npm/l/@react-pixel-ui/react)](https://github.com/Todari/react-pixel-ui/blob/main/LICENSE)
 
-Any CSS to pixel art. Wrap your element with `<Pixel>` — Tailwind, inline styles, CSS modules all work. No Canvas, SSR compatible.
+Turn supported CSS into pixel art. Wrap one rendered HTML element with `<Pixel>` — Tailwind, inline styles, and CSS modules work without Canvas and remain SSR compatible.
 
 [Demo](https://react-pixel-ui.vercel.app) | [npm](https://www.npmjs.com/package/@react-pixel-ui/react) | [GitHub](https://github.com/Todari/react-pixel-ui)
 
@@ -69,7 +69,7 @@ import { Pixel } from '@react-pixel-ui/react';
 |------|------|---------|-------------|
 | `size` | `number` | `4` | Pixel block size in CSS px. Larger = blockier. |
 | `enabled` | `boolean` | `true` | Toggle pixelation on/off |
-| `children` | `ReactElement` | required | Single child element to pixelate |
+| `children` | `ReactElement` | required | Single HTML element, or a component that forwards its ref to one |
 
 **Supported CSS properties:**
 - `background` / `background-color` — solid colors and gradients (`linear-gradient`, `radial-gradient`, `repeating-*`). Alpha-preserving.
@@ -81,6 +81,11 @@ import { Pixel } from '@react-pixel-ui/react';
 ### `usePixelRef` — Ref-based hook
 
 Attach to any element without wrapping. Best for third-party components or when you can't use a wrapper.
+
+When a pixel shadow is present, the hook composes the generated
+`drop-shadow()` on the element's parent so the child's staircase clip does
+not cut it off. Existing parent filters are preserved, and multiple managed
+children share the parent safely.
 
 ```tsx
 import { usePixelRef } from '@react-pixel-ui/react';
@@ -132,7 +137,7 @@ function App() {
 | Config Key | Type | Default | Description |
 |------------|------|---------|-------------|
 | `pixelSize` | `number` | `4` | Default pixel block size |
-| `borderColor` | `string` | — | Default border color |
+| `borderColor` | `string` | — | Default for `PixelBox`; CSS-reading APIs use the computed border color |
 
 ### `PixelBox` — Explicit props
 
@@ -363,6 +368,11 @@ A: Yes. The core package uses pure math (no Canvas, no DOM APIs). Elements rende
   the child via descendant selectors, trigger a parent re-render or use
   `usePixelRef`, which listens to `style` mutations on the managed element
   directly in addition to hover / focus / active / resize.
+- **`usePixelRef` shadows and parent filters**: hard shadows are composed on
+  the managed element's parent to avoid clipping. The hook preserves
+  existing filters and coordinates sibling instances, but CSS selectors
+  that expect the parent's `filter` to be exactly `none` may still need an
+  isolated wrapper.
 
 ## Browser Compatibility
 
@@ -371,8 +381,6 @@ A: Yes. The core package uses pure math (no Canvas, no DOM APIs). Elements rende
 | `clip-path: polygon()` | 55+ | 54+ | 10+ | 79+ |
 | `image-rendering: pixelated` | 41+ | 56+ (`crisp-edges`) | 10+ | 79+ |
 | `filter: drop-shadow()` | 18+ | 35+ | 6+ | 79+ |
-
-**Overall: 97%+** global browser coverage.
 
 ## TypeScript
 
@@ -391,7 +399,7 @@ import type {
 
 ```
 packages/
-  core/     # Pure CSS generators (zero browser dependency, SSR safe)
+  core/     # Framework-agnostic style generators (zero browser dependency, SSR safe)
   react/    # React hooks & components
 apps/
   demo/     # Interactive demo + documentation site

@@ -5,10 +5,13 @@
   "description": "Demo app for React Pixel UI",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "pnpm build:client && pnpm build:ssr && pnpm prerender",
+    "build:client": "vite build",
+    "build:ssr": "vite build --ssr src/entry-server.tsx --outDir dist/.ssr",
+    "prerender": "node scripts/prerender.mjs",
     "preview": "vite preview",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -21,8 +24,8 @@
     "@react-pixel-ui/eslint-config": "workspace:*",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
-    "@vitejs/plugin-react": "^4.0.0",
+    "@vitejs/plugin-react": "^4.7.0",
     "typescript": "^5.0.0",
-    "vite": "^5.0.0"
+    "vite": "^6.4.3"
   }
 }

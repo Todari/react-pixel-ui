@@ -1,70 +1,132 @@
-import { useState } from 'react';
-import { Pixel, usePixelRef, PixelButton, PixelConfigProvider } from '@react-pixel-ui/react';
-import { trackEvent } from './ga';
-import './App.css';
+import { useState } from "react";
+import {
+  Pixel,
+  usePixelRef,
+  PixelButton,
+  PixelConfigProvider,
+} from "@react-pixel-ui/react";
+import { trackEvent } from "./ga";
+import "./App.css";
+
+const GITHUB_URL = "https://github.com/Todari/react-pixel-ui";
+const NPM_URL = "https://www.npmjs.com/package/@react-pixel-ui/react";
 
 function App() {
   const [pixelSize, setPixelSize] = useState(6);
 
   // Playground state
   const [pgPixelSize, setPgPixelSize] = useState(6);
-  const [pgBg, setPgBg] = useState('linear-gradient(135deg, #ff6b6b, #4ecdc4)');
+  const [pgBg, setPgBg] = useState("linear-gradient(135deg, #ff6b6b, #4ecdc4)");
   const [pgRadius, setPgRadius] = useState(20);
   const [pgBorder, setPgBorder] = useState(3);
-  const [pgBorderColor, setPgBorderColor] = useState('#2d3436');
+  const [pgBorderColor, setPgBorderColor] = useState("#2d3436");
   const [pgWidth, setPgWidth] = useState(300);
   const [pgHeight, setPgHeight] = useState(120);
   const [pgShadowX, setPgShadowX] = useState(4);
   const [pgShadowY, setPgShadowY] = useState(4);
-  const [pgShadowColor, setPgShadowColor] = useState('#2d3436');
+  const [pgShadowColor, setPgShadowColor] = useState("#2d3436");
 
   return (
-    <PixelConfigProvider config={{ pixelSize }}>
-      {/* Hero */}
-      <section className="hero">
-        <div className="hero-badge">v2.0</div>
-        <h1>React Pixel UI</h1>
-        <p>
-          Wrap any element with <code>&lt;Pixel&gt;</code> and your CSS becomes pixel art.
-          Tailwind, inline styles, CSS modules — all supported. No Canvas.
-        </p>
-        <div className="hero-boxes">
-          {[
-            { bg: 'linear-gradient(135deg, #ff8906, #e53170)', bc: '#b8441a', label: '<Pixel>' },
-            { bg: 'linear-gradient(135deg, #a29bfe, #6c5ce7)', bc: '#4a3580', label: 'Gradient' },
-            { bg: 'linear-gradient(135deg, #55efc4, #00b894)', bc: '#007a5e', label: 'Shadow' },
-          ].map((item, i) => (
-            <Pixel size={pixelSize} key={i}>
-              <div style={{
-                background: item.bg, border: `3px solid ${item.bc}`, borderRadius: 12,
-                width: 'min(140px, 100%)', height: 56,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontWeight: 700, fontSize: 13,
-                boxShadow: i === 2 ? '4px 4px 0 rgba(0,0,0,0.3)' : undefined,
-              }}>
-                {item.label}
-              </div>
-            </Pixel>
-          ))}
-        </div>
-      </section>
-
-      <div className="container">
-        {/* Global pixel size control */}
-        <div className="controls">
-          <div className="control-item">
-            <span>Pixel Size</span>
-            <span className="value">{pixelSize}px</span>
-            <input type="range" min="2" max="16" value={pixelSize}
-              onChange={(e) => setPixelSize(Number(e.target.value))} />
+    <>
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
+      <PixelConfigProvider config={{ pixelSize }}>
+        {/* Hero */}
+        <section className="hero" aria-labelledby="hero-title">
+          <div className="hero-badge">v{__REACT_PIXEL_UI_VERSION__}</div>
+          <h1 id="hero-title">React Pixel UI</h1>
+          <p>
+            Wrap any element with <code>&lt;Pixel&gt;</code> and your CSS
+            becomes pixel art. Tailwind, inline styles, CSS modules — all
+            supported. No Canvas.
+          </p>
+          <nav className="hero-actions" aria-label="Primary">
+            <a className="hero-action hero-action-primary" href="#installation">
+              Install
+            </a>
+            <a className="hero-action" href="#playground">
+              Try playground
+            </a>
+            <a
+              className="hero-action"
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() =>
+                trackEvent("click_github_link", { placement: "hero" })
+              }
+            >
+              GitHub
+            </a>
+          </nav>
+          <div className="hero-boxes">
+            {[
+              {
+                bg: "linear-gradient(135deg, #ff8906, #e53170)",
+                bc: "#b8441a",
+                label: "<Pixel>",
+              },
+              {
+                bg: "linear-gradient(135deg, #a29bfe, #6c5ce7)",
+                bc: "#4a3580",
+                label: "Gradient",
+              },
+              {
+                bg: "linear-gradient(135deg, #55efc4, #00b894)",
+                bc: "#007a5e",
+                label: "Shadow",
+              },
+            ].map((item, i) => (
+              <Pixel size={pixelSize} key={i}>
+                <div
+                  style={{
+                    background: item.bg,
+                    border: `3px solid ${item.bc}`,
+                    borderRadius: 12,
+                    width: "min(140px, 100%)",
+                    height: 56,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                    fontWeight: 700,
+                    fontSize: 13,
+                    boxShadow:
+                      i === 2 ? "4px 4px 0 rgba(0,0,0,0.3)" : undefined,
+                  }}
+                >
+                  {item.label}
+                </div>
+              </Pixel>
+            ))}
           </div>
-        </div>
+        </section>
 
-        {/* Install */}
-        <section className="section">
-          <div className="section-label">Get Started</div>
-          <h2 className="section-title">Installation</h2>
-          <Code>{`# npm
+        <main id="main-content" className="container">
+          {/* Global pixel size control */}
+          <div className="controls">
+            <div className="control-item">
+              <label htmlFor="global-pixel-size">Pixel Size</label>
+              <output className="value" htmlFor="global-pixel-size">
+                {pixelSize}px
+              </output>
+              <input
+                id="global-pixel-size"
+                type="range"
+                min="2"
+                max="16"
+                value={pixelSize}
+                onChange={(e) => setPixelSize(Number(e.target.value))}
+              />
+            </div>
+          </div>
+
+          {/* Install */}
+          <section className="section" id="installation">
+            <div className="section-label">Get Started</div>
+            <h2 className="section-title">Installation</h2>
+            <Code>{`# npm
 npm install @react-pixel-ui/react
 
 # pnpm
@@ -72,49 +134,78 @@ pnpm add @react-pixel-ui/react
 
 # yarn
 yarn add @react-pixel-ui/react`}</Code>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 12 }}>
-            Requires React 18+. <code>@react-pixel-ui/core</code> is installed automatically.
-          </p>
-        </section>
+            <p
+              style={{
+                color: "var(--text-muted)",
+                fontSize: 13,
+                marginTop: 12,
+              }}
+            >
+              Requires React 18+. <code>@react-pixel-ui/core</code> is installed
+              automatically.
+            </p>
+          </section>
 
-        {/* Primary API */}
-        <section className="section">
-          <div className="section-label">Primary API</div>
-          <h2 className="section-title">&lt;Pixel&gt; — Wrap any element</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>
-            Wrap any element and its CSS is automatically converted to pixel art.
-            Works with inline styles, Tailwind, CSS modules.
-          </p>
-          <div className="comparison-grid">
-            <div className="comparison-card">
-              <h3>Original CSS</h3>
-              <div style={{
-                background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)',
-                border: '4px solid #2d3436', borderRadius: 24,
-                width: 'min(260px, 100%)', height: 110,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontWeight: 700, fontSize: 18,
-              }}>
-                Normal div
+          {/* Primary API */}
+          <section className="section">
+            <div className="section-label">Primary API</div>
+            <h2 className="section-title">&lt;Pixel&gt; — Wrap any element</h2>
+            <p
+              style={{
+                color: "var(--text-muted)",
+                fontSize: 14,
+                marginBottom: 20,
+              }}
+            >
+              Wrap any element and its CSS is automatically converted to pixel
+              art. Works with inline styles, Tailwind, CSS modules.
+            </p>
+            <div className="comparison-grid">
+              <div className="comparison-card">
+                <h3>Original CSS</h3>
+                <div
+                  style={{
+                    background: "linear-gradient(135deg, #ff6b6b, #4ecdc4)",
+                    border: "4px solid #2d3436",
+                    borderRadius: 24,
+                    width: "min(260px, 100%)",
+                    height: 110,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                    fontWeight: 700,
+                    fontSize: 18,
+                  }}
+                >
+                  Normal div
+                </div>
+              </div>
+              <div className="comparison-card">
+                <h3>Wrapped with &lt;Pixel&gt;</h3>
+                <Pixel size={pixelSize}>
+                  <div
+                    style={{
+                      background: "linear-gradient(135deg, #ff6b6b, #4ecdc4)",
+                      border: "4px solid #2d3436",
+                      borderRadius: 24,
+                      width: "min(260px, 100%)",
+                      height: 110,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#fff",
+                      fontWeight: 700,
+                      fontSize: 18,
+                      boxShadow: "6px 6px 0 rgba(0,0,0,0.3)",
+                    }}
+                  >
+                    Pixel Art!
+                  </div>
+                </Pixel>
               </div>
             </div>
-            <div className="comparison-card">
-              <h3>Wrapped with &lt;Pixel&gt;</h3>
-              <Pixel size={pixelSize}>
-                <div style={{
-                  background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)',
-                  border: '4px solid #2d3436', borderRadius: 24,
-                  width: 'min(260px, 100%)', height: 110,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#fff', fontWeight: 700, fontSize: 18,
-                  boxShadow: '6px 6px 0 rgba(0,0,0,0.3)',
-                }}>
-                  Pixel Art!
-                </div>
-              </Pixel>
-            </div>
-          </div>
-          <Code>{`import { Pixel } from '@react-pixel-ui/react';
+            <Code>{`import { Pixel } from '@react-pixel-ui/react';
 
 <Pixel size={6}>
   <div style={{
@@ -125,19 +216,31 @@ yarn add @react-pixel-ui/react`}</Code>
     Pixel Art!
   </div>
 </Pixel>`}</Code>
-        </section>
+          </section>
 
-        {/* Hook API */}
-        <section className="section">
-          <div className="section-label">Hook API</div>
-          <h2 className="section-title">usePixelRef — Ref-based</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>
-            For maximum flexibility. Attach to any element without a wrapper.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-            <RefHookDemo pixelSize={pixelSize} />
-          </div>
-          <Code>{`const pixelRef = usePixelRef({ pixelSize: 6 });
+          {/* Hook API */}
+          <section className="section">
+            <div className="section-label">Hook API</div>
+            <h2 className="section-title">usePixelRef — Ref-based</h2>
+            <p
+              style={{
+                color: "var(--text-muted)",
+                fontSize: 14,
+                marginBottom: 20,
+              }}
+            >
+              For maximum flexibility. Attach to any element without a wrapper.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: 20,
+              }}
+            >
+              <RefHookDemo pixelSize={pixelSize} />
+            </div>
+            <Code>{`const pixelRef = usePixelRef({ pixelSize: 6 });
 
 <div
   ref={pixelRef}
@@ -149,194 +252,433 @@ yarn add @react-pixel-ui/react`}</Code>
 >
   Content
 </div>`}</Code>
-        </section>
+          </section>
 
-        {/* Modern color spaces */}
-        <section className="section">
-          <div className="section-label">Color</div>
-          <h2 className="section-title">oklch, hsl, and translucency</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>
-            Full RGBA alpha preserved end-to-end. Any CSS color form (including
-            CSS Color 4 <code>oklch()</code>) works in gradients and borders.
-          </p>
-          <div className="comparison-grid">
-            <div className="comparison-card">
-              <h3>oklch gradient</h3>
-              <Pixel size={pixelSize}>
-                <div style={{
-                  background: 'linear-gradient(135deg, oklch(0.75 0.2 30), oklch(0.6 0.25 280))',
-                  border: '4px solid hsl(220 40% 15%)',
-                  borderRadius: 20,
-                  width: 'min(260px, 100%)', height: 110,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#fff', fontWeight: 700, fontSize: 18,
-                }}>
-                  oklch + hsl
-                </div>
-              </Pixel>
+          {/* Modern color spaces */}
+          <section className="section">
+            <div className="section-label">Color</div>
+            <h2 className="section-title">oklch, hsl, and translucency</h2>
+            <p
+              style={{
+                color: "var(--text-muted)",
+                fontSize: 14,
+                marginBottom: 20,
+              }}
+            >
+              Full RGBA alpha preserved end-to-end. Any CSS color form
+              (including CSS Color 4 <code>oklch()</code>) works in gradients
+              and borders.
+            </p>
+            <div className="comparison-grid">
+              <div className="comparison-card">
+                <h3>oklch gradient</h3>
+                <Pixel size={pixelSize}>
+                  <div
+                    style={{
+                      background:
+                        "linear-gradient(135deg, oklch(0.75 0.2 30), oklch(0.6 0.25 280))",
+                      border: "4px solid hsl(220 40% 15%)",
+                      borderRadius: 20,
+                      width: "min(260px, 100%)",
+                      height: 110,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#fff",
+                      fontWeight: 700,
+                      fontSize: 18,
+                    }}
+                  >
+                    oklch + hsl
+                  </div>
+                </Pixel>
+              </div>
+              <div className="comparison-card">
+                <h3>Translucent fade</h3>
+                <Pixel size={pixelSize}>
+                  <div
+                    style={{
+                      background:
+                        "linear-gradient(to right, rgba(255,107,107,0.15), rgba(78,205,196,1))",
+                      borderRadius: 20,
+                      width: "min(260px, 100%)",
+                      height: 110,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#2d3436",
+                      fontWeight: 700,
+                      fontSize: 18,
+                    }}
+                  >
+                    RGBA preserved
+                  </div>
+                </Pixel>
+              </div>
             </div>
-            <div className="comparison-card">
-              <h3>Translucent fade</h3>
-              <Pixel size={pixelSize}>
-                <div style={{
-                  background: 'linear-gradient(to right, rgba(255,107,107,0.15), rgba(78,205,196,1))',
-                  borderRadius: 20,
-                  width: 'min(260px, 100%)', height: 110,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#2d3436', fontWeight: 700, fontSize: 18,
-                }}>
-                  RGBA preserved
-                </div>
-              </Pixel>
-            </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Playground */}
-        <section className="section">
-          <div className="section-label">Interactive</div>
-          <h2 className="section-title">Playground</h2>
-          <div className="playground">
-            <div className="playground-preview">
-              {/* No `key` hack needed — <Pixel> now re-measures when the
+          {/* Playground */}
+          <section className="section" id="playground">
+            <div className="section-label">Interactive</div>
+            <h2 className="section-title">Playground</h2>
+            <div className="playground">
+              <div className="playground-preview">
+                {/* No `key` hack needed — <Pixel> now re-measures when the
                   child's style prop changes via useLayoutEffect deps. */}
-              <Pixel size={pgPixelSize}>
-                <div style={{
-                  background: pgBg,
-                  borderRadius: pgRadius,
-                  border: `${pgBorder}px solid ${pgBorderColor}`,
-                  // Cap width at the container's actual width on narrow viewports
-                  // so the preview never overflows its card.
-                  width: `min(${pgWidth}px, 100%)`,
-                  height: pgHeight,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#fff', fontWeight: 700, fontSize: 16,
-                  boxShadow: pgShadowX || pgShadowY ? `${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}` : 'none',
-                }}>
-                  Playground
-                </div>
-              </Pixel>
+                <Pixel size={pgPixelSize}>
+                  <div
+                    style={{
+                      background: pgBg,
+                      borderRadius: pgRadius,
+                      border: `${pgBorder}px solid ${pgBorderColor}`,
+                      // Cap width at the container's actual width on narrow viewports
+                      // so the preview never overflows its card.
+                      width: `min(${pgWidth}px, 100%)`,
+                      height: pgHeight,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#fff",
+                      fontWeight: 700,
+                      fontSize: 16,
+                      boxShadow:
+                        pgShadowX || pgShadowY
+                          ? `${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}`
+                          : "none",
+                    }}
+                  >
+                    Playground
+                  </div>
+                </Pixel>
+              </div>
+              <div className="playground-controls">
+                <label>
+                  <span>Pixel Size: {pgPixelSize}px</span>
+                  <input
+                    type="range"
+                    min="2"
+                    max="20"
+                    value={pgPixelSize}
+                    onChange={(e) => {
+                      setPgPixelSize(Number(e.target.value));
+                      trackEvent("interact_playground", {
+                        changed_property: "pixel_size",
+                      });
+                    }}
+                  />
+                </label>
+                <label>
+                  <span>Background</span>
+                  <select
+                    value={pgBg}
+                    onChange={(e) => {
+                      setPgBg(e.target.value);
+                      trackEvent("interact_playground", {
+                        changed_property: "background",
+                      });
+                    }}
+                  >
+                    <option value="linear-gradient(135deg, #ff6b6b, #4ecdc4)">
+                      Red → Teal
+                    </option>
+                    <option value="linear-gradient(180deg, #a29bfe, #6c5ce7)">
+                      Purple vertical
+                    </option>
+                    <option value="linear-gradient(45deg, #ff8906, #e53170)">
+                      Orange → Pink
+                    </option>
+                    <option value="linear-gradient(90deg, #55efc4, #0984e3)">
+                      Green → Blue
+                    </option>
+                    <option value="linear-gradient(135deg, #fd79a8, #e84393)">
+                      Pink
+                    </option>
+                    <option value="linear-gradient(135deg, #2d3436, #636e72)">
+                      Dark
+                    </option>
+                    <option value="#ff6b6b">Solid red</option>
+                    <option value="#6c5ce7">Solid purple</option>
+                    <option value="#00b894">Solid green</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Border Radius: {pgRadius}px</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="60"
+                    value={pgRadius}
+                    onChange={(e) => {
+                      setPgRadius(Number(e.target.value));
+                      trackEvent("interact_playground", {
+                        changed_property: "border_radius",
+                      });
+                    }}
+                  />
+                </label>
+                <label>
+                  <span>Border Width: {pgBorder}px</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="12"
+                    value={pgBorder}
+                    onChange={(e) => {
+                      setPgBorder(Number(e.target.value));
+                      trackEvent("interact_playground", {
+                        changed_property: "border_width",
+                      });
+                    }}
+                  />
+                </label>
+                <label>
+                  <span>Border Color</span>
+                  <input
+                    type="color"
+                    value={pgBorderColor}
+                    onChange={(e) => {
+                      setPgBorderColor(e.target.value);
+                      trackEvent("interact_playground", {
+                        changed_property: "border_color",
+                      });
+                    }}
+                  />
+                </label>
+                <label>
+                  <span>Width: {pgWidth}px</span>
+                  <input
+                    type="range"
+                    min="120"
+                    max="500"
+                    value={pgWidth}
+                    onChange={(e) => {
+                      setPgWidth(Number(e.target.value));
+                      trackEvent("interact_playground", {
+                        changed_property: "width",
+                      });
+                    }}
+                  />
+                </label>
+                <label>
+                  <span>Height: {pgHeight}px</span>
+                  <input
+                    type="range"
+                    min="40"
+                    max="200"
+                    value={pgHeight}
+                    onChange={(e) => {
+                      setPgHeight(Number(e.target.value));
+                      trackEvent("interact_playground", {
+                        changed_property: "height",
+                      });
+                    }}
+                  />
+                </label>
+                <label>
+                  <span>Shadow X: {pgShadowX}px</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20"
+                    value={pgShadowX}
+                    onChange={(e) => {
+                      setPgShadowX(Number(e.target.value));
+                      trackEvent("interact_playground", {
+                        changed_property: "shadow_x",
+                      });
+                    }}
+                  />
+                </label>
+                <label>
+                  <span>Shadow Y: {pgShadowY}px</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20"
+                    value={pgShadowY}
+                    onChange={(e) => {
+                      setPgShadowY(Number(e.target.value));
+                      trackEvent("interact_playground", {
+                        changed_property: "shadow_y",
+                      });
+                    }}
+                  />
+                </label>
+                <label>
+                  <span>Shadow Color</span>
+                  <input
+                    type="color"
+                    value={pgShadowColor}
+                    onChange={(e) => {
+                      setPgShadowColor(e.target.value);
+                      trackEvent("interact_playground", {
+                        changed_property: "shadow_color",
+                      });
+                    }}
+                  />
+                </label>
+              </div>
             </div>
-            <div className="playground-controls">
-              <label>
-                <span>Pixel Size: {pgPixelSize}px</span>
-                <input type="range" min="2" max="20" value={pgPixelSize} onChange={e => { setPgPixelSize(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'pixel_size' }); }} />
-              </label>
-              <label>
-                <span>Background</span>
-                <select value={pgBg} onChange={e => { setPgBg(e.target.value); trackEvent('interact_playground', { changed_property: 'background' }); }}>
-                  <option value="linear-gradient(135deg, #ff6b6b, #4ecdc4)">Red → Teal</option>
-                  <option value="linear-gradient(180deg, #a29bfe, #6c5ce7)">Purple vertical</option>
-                  <option value="linear-gradient(45deg, #ff8906, #e53170)">Orange → Pink</option>
-                  <option value="linear-gradient(90deg, #55efc4, #0984e3)">Green → Blue</option>
-                  <option value="linear-gradient(135deg, #fd79a8, #e84393)">Pink</option>
-                  <option value="linear-gradient(135deg, #2d3436, #636e72)">Dark</option>
-                  <option value="#ff6b6b">Solid red</option>
-                  <option value="#6c5ce7">Solid purple</option>
-                  <option value="#00b894">Solid green</option>
-                </select>
-              </label>
-              <label>
-                <span>Border Radius: {pgRadius}px</span>
-                <input type="range" min="0" max="60" value={pgRadius} onChange={e => { setPgRadius(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'border_radius' }); }} />
-              </label>
-              <label>
-                <span>Border Width: {pgBorder}px</span>
-                <input type="range" min="0" max="12" value={pgBorder} onChange={e => { setPgBorder(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'border_width' }); }} />
-              </label>
-              <label>
-                <span>Border Color</span>
-                <input type="color" value={pgBorderColor} onChange={e => { setPgBorderColor(e.target.value); trackEvent('interact_playground', { changed_property: 'border_color' }); }} />
-              </label>
-              <label>
-                <span>Width: {pgWidth}px</span>
-                <input type="range" min="120" max="500" value={pgWidth} onChange={e => { setPgWidth(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'width' }); }} />
-              </label>
-              <label>
-                <span>Height: {pgHeight}px</span>
-                <input type="range" min="40" max="200" value={pgHeight} onChange={e => { setPgHeight(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'height' }); }} />
-              </label>
-              <label>
-                <span>Shadow X: {pgShadowX}px</span>
-                <input type="range" min="0" max="20" value={pgShadowX} onChange={e => { setPgShadowX(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'shadow_x' }); }} />
-              </label>
-              <label>
-                <span>Shadow Y: {pgShadowY}px</span>
-                <input type="range" min="0" max="20" value={pgShadowY} onChange={e => { setPgShadowY(Number(e.target.value)); trackEvent('interact_playground', { changed_property: 'shadow_y' }); }} />
-              </label>
-              <label>
-                <span>Shadow Color</span>
-                <input type="color" value={pgShadowColor} onChange={e => { setPgShadowColor(e.target.value); trackEvent('interact_playground', { changed_property: 'shadow_color' }); }} />
-              </label>
-            </div>
-          </div>
-          <Code>{`<Pixel size={${pgPixelSize}}>
+            <Code>{`<Pixel size={${pgPixelSize}}>
   <div style={{
     background: '${pgBg}',
     borderRadius: ${pgRadius},
     border: '${pgBorder}px solid ${pgBorderColor}',
     width: ${pgWidth},
-    height: ${pgHeight},${pgShadowX || pgShadowY ? `\n    boxShadow: '${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}',` : ''}
+    height: ${pgHeight},${pgShadowX || pgShadowY ? `\n    boxShadow: '${pgShadowX}px ${pgShadowY}px 0 ${pgShadowColor}',` : ""}
   }}>
     Content
   </div>
 </Pixel>`}</Code>
-        </section>
+          </section>
 
-        {/* Showcase */}
-        <section className="section">
-          <div className="section-label">Gallery</div>
-          <h2 className="section-title">Showcase</h2>
-          <div className="showcase-grid">
-            {[
-              { bg: '#dfe6e9', bc: '#2d3436', r: 16, bw: 3, color: '#2d3436', label: 'Card' },
-              { bg: 'linear-gradient(180deg, #a29bfe, #6c5ce7)', bc: '#4a3580', r: 12, bw: 2, color: '#fff', label: 'Purple' },
-              { bg: 'linear-gradient(135deg, #fd79a8, #e84393)', bc: '#b8256e', r: 16, bw: 3, color: '#fff', label: 'Pink', shadow: true },
-              { bg: 'linear-gradient(135deg, #2d3436, #636e72)', bc: '#636e72', r: 16, bw: 2, color: '#dfe6e9', label: 'Dark', shadow: true },
-              { bg: 'linear-gradient(90deg, #55efc4, #0984e3)', bc: '#007a5e', r: 20, bw: 3, color: '#fff', label: 'Ocean' },
-              { bg: 'linear-gradient(45deg, #ff8906, #e53170)', bc: '#b8441a', r: 8, bw: 2, color: '#fff', label: 'Sunset' },
-              { bg: '#ffeaa7', bc: '#e17055', r: 12, bw: 3, color: '#2d3436', label: 'Warm' },
-              { bg: 'linear-gradient(180deg, #74b9ff, #0984e3)', bc: '#0652DD', r: 24, bw: 3, color: '#fff', label: 'Sky' },
-            ].map((item, i) => (
-              <ShowcaseItem label={item.label} key={i}>
-                <Pixel size={pixelSize}>
-                  <div style={{
-                    background: item.bg, border: `${item.bw}px solid ${item.bc}`,
-                    borderRadius: item.r, width: 'min(150px, 100%)', height: 60,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: item.color, fontWeight: 600, fontSize: 13,
-                    boxShadow: item.shadow ? '4px 4px 0 rgba(0,0,0,0.3)' : undefined,
-                  }}>
-                    {item.label}
-                  </div>
-                </Pixel>
-              </ShowcaseItem>
-            ))}
-          </div>
-        </section>
+          {/* Showcase */}
+          <section className="section">
+            <div className="section-label">Gallery</div>
+            <h2 className="section-title">Showcase</h2>
+            <div className="showcase-grid">
+              {[
+                {
+                  bg: "#dfe6e9",
+                  bc: "#2d3436",
+                  r: 16,
+                  bw: 3,
+                  color: "#2d3436",
+                  label: "Card",
+                },
+                {
+                  bg: "linear-gradient(180deg, #a29bfe, #6c5ce7)",
+                  bc: "#4a3580",
+                  r: 12,
+                  bw: 2,
+                  color: "#fff",
+                  label: "Purple",
+                },
+                {
+                  bg: "linear-gradient(135deg, #fd79a8, #e84393)",
+                  bc: "#b8256e",
+                  r: 16,
+                  bw: 3,
+                  color: "#fff",
+                  label: "Pink",
+                  shadow: true,
+                },
+                {
+                  bg: "linear-gradient(135deg, #2d3436, #636e72)",
+                  bc: "#636e72",
+                  r: 16,
+                  bw: 2,
+                  color: "#dfe6e9",
+                  label: "Dark",
+                  shadow: true,
+                },
+                {
+                  bg: "linear-gradient(90deg, #55efc4, #0984e3)",
+                  bc: "#007a5e",
+                  r: 20,
+                  bw: 3,
+                  color: "#fff",
+                  label: "Ocean",
+                },
+                {
+                  bg: "linear-gradient(45deg, #ff8906, #e53170)",
+                  bc: "#b8441a",
+                  r: 8,
+                  bw: 2,
+                  color: "#fff",
+                  label: "Sunset",
+                },
+                {
+                  bg: "#ffeaa7",
+                  bc: "#e17055",
+                  r: 12,
+                  bw: 3,
+                  color: "#2d3436",
+                  label: "Warm",
+                },
+                {
+                  bg: "linear-gradient(180deg, #74b9ff, #0984e3)",
+                  bc: "#0652DD",
+                  r: 24,
+                  bw: 3,
+                  color: "#fff",
+                  label: "Sky",
+                },
+              ].map((item, i) => (
+                <ShowcaseItem label={item.label} key={i}>
+                  <Pixel size={pixelSize}>
+                    <div
+                      style={{
+                        background: item.bg,
+                        border: `${item.bw}px solid ${item.bc}`,
+                        borderRadius: item.r,
+                        width: "min(150px, 100%)",
+                        height: 60,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: item.color,
+                        fontWeight: 600,
+                        fontSize: 13,
+                        boxShadow: item.shadow
+                          ? "4px 4px 0 rgba(0,0,0,0.3)"
+                          : undefined,
+                      }}
+                    >
+                      {item.label}
+                    </div>
+                  </Pixel>
+                </ShowcaseItem>
+              ))}
+            </div>
+          </section>
 
-        {/* Buttons */}
-        <section className="section">
-          <div className="section-label">Components</div>
-          <h2 className="section-title">PixelButton</h2>
-          <div className="button-row">
-            <PixelButton variant="primary" width={140} height={44} borderRadius={8}>Primary</PixelButton>
-            <PixelButton variant="secondary" width={140} height={44} borderRadius={8}>Secondary</PixelButton>
-            <PixelButton variant="danger" width={140} height={44} borderRadius={8}>Danger</PixelButton>
-          </div>
-        </section>
+          {/* Buttons */}
+          <section className="section">
+            <div className="section-label">Components</div>
+            <h2 className="section-title">PixelButton</h2>
+            <div className="button-row">
+              <PixelButton
+                variant="primary"
+                width={140}
+                height={44}
+                borderRadius={8}
+              >
+                Primary
+              </PixelButton>
+              <PixelButton
+                variant="secondary"
+                width={140}
+                height={44}
+                borderRadius={8}
+              >
+                Secondary
+              </PixelButton>
+              <PixelButton
+                variant="danger"
+                width={140}
+                height={44}
+                borderRadius={8}
+              >
+                Danger
+              </PixelButton>
+            </div>
+          </section>
 
-        {/* Usage Guide */}
-        <section className="section">
-          <div className="section-label">Documentation</div>
-          <h2 className="section-title">Usage Guide</h2>
+          {/* Usage Guide */}
+          <section className="section">
+            <div className="section-label">Documentation</div>
+            <h2 className="section-title">Usage Guide</h2>
 
-          <h3 className="subsection-title">1. Basic Usage</h3>
-          <p className="doc-text">
-            Wrap any element with <code>&lt;Pixel&gt;</code>. It reads computed CSS and converts
-            {' '}<code>background</code>, <code>border-radius</code>, <code>border</code>, and <code>box-shadow</code> to pixel art.
-          </p>
-          <Code>{`import { Pixel } from '@react-pixel-ui/react';
+            <h3 className="subsection-title">1. Basic Usage</h3>
+            <p className="doc-text">
+              Wrap any element with <code>&lt;Pixel&gt;</code>. It reads
+              computed CSS and converts <code>background</code>,{" "}
+              <code>border-radius</code>, <code>border</code>, and{" "}
+              <code>box-shadow</code> to pixel art.
+            </p>
+            <Code>{`import { Pixel } from '@react-pixel-ui/react';
 
 <Pixel size={6}>
   <div className="your-existing-classes">
@@ -344,11 +686,12 @@ yarn add @react-pixel-ui/react`}</Code>
   </div>
 </Pixel>`}</Code>
 
-          <h3 className="subsection-title">2. Hook API</h3>
-          <p className="doc-text">
-            Use <code>usePixelRef</code> when you need a ref-based approach without wrapping.
-          </p>
-          <Code>{`import { usePixelRef } from '@react-pixel-ui/react';
+            <h3 className="subsection-title">2. Hook API</h3>
+            <p className="doc-text">
+              Use <code>usePixelRef</code> when you need a ref-based approach
+              without wrapping.
+            </p>
+            <Code>{`import { usePixelRef } from '@react-pixel-ui/react';
 
 function MyComponent() {
   const ref = usePixelRef({ pixelSize: 6 });
@@ -364,21 +707,23 @@ function MyComponent() {
   );
 }`}</Code>
 
-          <h3 className="subsection-title">3. Global Config</h3>
-          <p className="doc-text">
-            Set defaults for all <code>&lt;Pixel&gt;</code> and <code>usePixelRef</code> instances.
-          </p>
-          <Code>{`import { PixelConfigProvider } from '@react-pixel-ui/react';
+            <h3 className="subsection-title">3. Global Config</h3>
+            <p className="doc-text">
+              Set defaults for all <code>&lt;Pixel&gt;</code> and{" "}
+              <code>usePixelRef</code> instances.
+            </p>
+            <Code>{`import { PixelConfigProvider } from '@react-pixel-ui/react';
 
 <PixelConfigProvider config={{ pixelSize: 6 }}>
   <App />
 </PixelConfigProvider>`}</Code>
 
-          <h3 className="subsection-title">4. Explicit Components</h3>
-          <p className="doc-text">
-            <code>PixelBox</code> and <code>PixelButton</code> take explicit props instead of reading CSS.
-          </p>
-          <Code>{`import { PixelBox } from '@react-pixel-ui/react';
+            <h3 className="subsection-title">4. Explicit Components</h3>
+            <p className="doc-text">
+              <code>PixelBox</code> and <code>PixelButton</code> take explicit
+              props instead of reading CSS.
+            </p>
+            <Code>{`import { PixelBox } from '@react-pixel-ui/react';
 
 <PixelBox
   width={280}
@@ -389,106 +734,239 @@ function MyComponent() {
   borderColor="#333"
   background="linear-gradient(45deg, #ff6b6b, #4ecdc4)"
 />`}</Code>
-        </section>
+          </section>
 
-        {/* When to use what */}
-        <section className="section">
-          <div className="section-label">Guide</div>
-          <h2 className="section-title">When to use what</h2>
-          <div className="guide-table">
-            <div className="guide-row guide-header">
-              <span>Use case</span><span>API</span><span>Why</span>
+          {/* When to use what */}
+          <section className="section">
+            <div className="section-label">Guide</div>
+            <h2 className="section-title">When to use what</h2>
+            <div className="guide-table">
+              <div className="guide-row guide-header">
+                <span>Use case</span>
+                <span>API</span>
+                <span>Why</span>
+              </div>
+              <div className="guide-row">
+                <span>Existing styled elements</span>
+                <span>
+                  <code>&lt;Pixel&gt;</code>
+                </span>
+                <span>Reads CSS automatically, zero config</span>
+              </div>
+              <div className="guide-row">
+                <span>Third-party components</span>
+                <span>
+                  <code>usePixelRef</code>
+                </span>
+                <span>Attach via ref, no wrapper div</span>
+              </div>
+              <div className="guide-row">
+                <span>Full manual control</span>
+                <span>
+                  <code>PixelBox</code>
+                </span>
+                <span>Explicit props, no CSS reading</span>
+              </div>
+              <div className="guide-row">
+                <span>Quick buttons</span>
+                <span>
+                  <code>PixelButton</code>
+                </span>
+                <span>Ready-to-use variants</span>
+              </div>
             </div>
-            <div className="guide-row">
-              <span>Existing styled elements</span>
-              <span><code>&lt;Pixel&gt;</code></span>
-              <span>Reads CSS automatically, zero config</span>
-            </div>
-            <div className="guide-row">
-              <span>Third-party components</span>
-              <span><code>usePixelRef</code></span>
-              <span>Attach via ref, no wrapper div</span>
-            </div>
-            <div className="guide-row">
-              <span>Full manual control</span>
-              <span><code>PixelBox</code></span>
-              <span>Explicit props, no CSS reading</span>
-            </div>
-            <div className="guide-row">
-              <span>Quick buttons</span>
-              <span><code>PixelButton</code></span>
-              <span>Ready-to-use variants</span>
-            </div>
-          </div>
-        </section>
+          </section>
 
-        {/* FAQ */}
-        <section className="section">
-          <div className="section-label">Help</div>
-          <h2 className="section-title">FAQ</h2>
-          <div className="faq-list">
-            <details className="faq-item" onToggle={() => trackEvent('toggle_faq', { question: 'gradient not pixelated' })}>
-              <summary>Gradient looks smooth, not pixelated?</summary>
-              <p>Increase <code>pixelSize</code>. At size 2, blocks are 2x2 CSS pixels — too small on Retina screens. Try 6 or higher.</p>
-            </details>
-            <details className="faq-item" onToggle={() => trackEvent('toggle_faq', { question: 'tailwind support' })}>
-              <summary>Does it work with Tailwind CSS?</summary>
-              <p>Yes. <code>&lt;Pixel&gt;</code> reads <code>getComputedStyle</code> which resolves Tailwind classes into final CSS values. Just wrap your element.</p>
-            </details>
-            <details className="faq-item" onToggle={() => trackEvent('toggle_faq', { question: 'supported css properties' })}>
-              <summary>What CSS properties are converted?</summary>
-              <p><code>background</code>, <code>background-image</code> (linear/radial/repeating gradients), <code>border-radius</code>, <code>border</code>, <code>box-shadow</code>. Other properties (color, font, padding) are preserved as-is.</p>
-            </details>
-            <details className="faq-item" onToggle={() => trackEvent('toggle_faq', { question: 'ssr nextjs compatible' })}>
-              <summary>Is it SSR / Next.js compatible?</summary>
-              <p>Yes. Core uses pure math (no Canvas/DOM). Elements render normally on the server and pixelate after hydration.</p>
-            </details>
-            <details className="faq-item" onToggle={() => trackEvent('toggle_faq', { question: 'typescript support' })}>
-              <summary>TypeScript support?</summary>
-              <p>Fully typed. Import types: <code>PixelArtConfig</code>, <code>PixelShadowConfig</code>, <code>BorderRadii</code>, etc.</p>
-            </details>
-          </div>
-        </section>
+          {/* FAQ */}
+          <section className="section">
+            <div className="section-label">Help</div>
+            <h2 className="section-title">FAQ</h2>
+            <div className="faq-list">
+              <details
+                className="faq-item"
+                onToggle={() =>
+                  trackEvent("toggle_faq", {
+                    question: "gradient not pixelated",
+                  })
+                }
+              >
+                <summary>Gradient looks smooth, not pixelated?</summary>
+                <p>
+                  Increase <code>pixelSize</code>. At size 2, blocks are 2x2 CSS
+                  pixels — too small on Retina screens. Try 6 or higher.
+                </p>
+              </details>
+              <details
+                className="faq-item"
+                onToggle={() =>
+                  trackEvent("toggle_faq", { question: "tailwind support" })
+                }
+              >
+                <summary>Does it work with Tailwind CSS?</summary>
+                <p>
+                  Yes. <code>&lt;Pixel&gt;</code> reads{" "}
+                  <code>getComputedStyle</code> which resolves Tailwind classes
+                  into final CSS values. Just wrap your element.
+                </p>
+              </details>
+              <details
+                className="faq-item"
+                onToggle={() =>
+                  trackEvent("toggle_faq", {
+                    question: "supported css properties",
+                  })
+                }
+              >
+                <summary>What CSS properties are converted?</summary>
+                <p>
+                  <code>background</code>, <code>background-image</code>{" "}
+                  (linear/radial/repeating gradients),{" "}
+                  <code>border-radius</code>, <code>border</code>,{" "}
+                  <code>box-shadow</code>. Other properties (color, font,
+                  padding) are preserved as-is.
+                </p>
+              </details>
+              <details
+                className="faq-item"
+                onToggle={() =>
+                  trackEvent("toggle_faq", {
+                    question: "ssr nextjs compatible",
+                  })
+                }
+              >
+                <summary>Is it SSR / Next.js compatible?</summary>
+                <p>
+                  Yes. Core uses pure math (no Canvas/DOM). Elements render
+                  normally on the server and pixelate after hydration.
+                </p>
+              </details>
+              <details
+                className="faq-item"
+                onToggle={() =>
+                  trackEvent("toggle_faq", { question: "typescript support" })
+                }
+              >
+                <summary>TypeScript support?</summary>
+                <p>
+                  Fully typed. Import types: <code>PixelArtConfig</code>,{" "}
+                  <code>PixelShadowConfig</code>, <code>BorderRadii</code>, etc.
+                </p>
+              </details>
+            </div>
+          </section>
 
-        {/* How it works */}
-        <section className="section">
-          <div className="section-label">Under the hood</div>
-          <h2 className="section-title">How it works</h2>
-          <div className="features-grid">
-            <FeatureCard icon="auto" title="Auto-detection" desc="getComputedStyle reads your CSS. Tailwind, inline, CSS modules — all work." />
-            <FeatureCard icon="clip" title="Staircase Corners" desc="clip-path: polygon() via Bresenham circle algorithm." />
-            <FeatureCard icon="image" title="Pixel Gradients" desc="Composite BMP with staircase borders baked in + image-rendering: pixelated." />
-            <FeatureCard icon="shadow" title="Hard Shadows" desc="drop-shadow(blur=0) follows the clip-path contour." />
-            <FeatureCard icon="observe" title="Live Updates" desc="MutationObserver + ResizeObserver track style changes." />
-            <FeatureCard icon="ssr" title="SSR Compatible" desc="Pure math. Zero browser APIs in core." />
-          </div>
-        </section>
+          {/* How it works */}
+          <section className="section">
+            <div className="section-label">Under the hood</div>
+            <h2 className="section-title">How it works</h2>
+            <div className="features-grid">
+              <FeatureCard
+                icon="auto"
+                title="Auto-detection"
+                desc="getComputedStyle reads your CSS. Tailwind, inline, CSS modules — all work."
+              />
+              <FeatureCard
+                icon="clip"
+                title="Staircase Corners"
+                desc="clip-path: polygon() via Bresenham circle algorithm."
+              />
+              <FeatureCard
+                icon="image"
+                title="Pixel Gradients"
+                desc="Compressed RGBA PNG with staircase borders baked in + image-rendering: pixelated."
+              />
+              <FeatureCard
+                icon="shadow"
+                title="Hard Shadows"
+                desc="drop-shadow(blur=0) follows the clip-path contour."
+              />
+              <FeatureCard
+                icon="observe"
+                title="Live Updates"
+                desc="MutationObserver + ResizeObserver track style changes."
+              />
+              <FeatureCard
+                icon="ssr"
+                title="SSR Compatible"
+                desc="Pure math. Zero browser APIs in core."
+              />
+            </div>
+          </section>
 
-        {/* Footer */}
-        <div className="install-bar">
-          <code>npm install @react-pixel-ui/react</code>
-          <span style={{ color: 'var(--text-muted)' }}>|</span>
-          <a href="https://github.com/Todari/react-pixel-ui" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_github_link')}>
-            GitHub
-          </a>
-          <span style={{ color: 'var(--text-muted)' }}>|</span>
-          <a href="https://www.npmjs.com/package/@react-pixel-ui/react" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_npm_link')}>
-            npm
-          </a>
-          <span style={{ color: 'var(--text-muted)' }}>|</span>
-          <a href="https://github.com/Todari/react-pixel-ui/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 13 }} onClick={() => trackEvent('click_license_link')}>
-            MIT License
-          </a>
-        </div>
-        <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 12, paddingBottom: 24 }}>
-          © 2025 <a href="https://github.com/Todari" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'underline' }}>Todari</a> — Released under the MIT License
-        </div>
-      </div>
-    </PixelConfigProvider>
+          {/* Footer */}
+          <footer>
+            <div className="install-bar">
+              <code>npm install @react-pixel-ui/react</code>
+              <span style={{ color: "var(--text-muted)" }}>|</span>
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: "var(--accent)",
+                  textDecoration: "none",
+                  fontSize: 13,
+                }}
+                onClick={() =>
+                  trackEvent("click_github_link", { placement: "footer" })
+                }
+              >
+                GitHub
+              </a>
+              <span style={{ color: "var(--text-muted)" }}>|</span>
+              <a
+                href={NPM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: "var(--accent)",
+                  textDecoration: "none",
+                  fontSize: 13,
+                }}
+                onClick={() => trackEvent("click_npm_link")}
+              >
+                npm
+              </a>
+              <span style={{ color: "var(--text-muted)" }}>|</span>
+              <a
+                href="https://github.com/Todari/react-pixel-ui/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: "var(--accent)",
+                  textDecoration: "none",
+                  fontSize: 13,
+                }}
+                onClick={() => trackEvent("click_license_link")}
+              >
+                MIT License
+              </a>
+            </div>
+            <p className="copyright">
+              © 2025–present{" "}
+              <a
+                href="https://github.com/Todari"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Todari
+              </a>{" "}
+              — Released under the MIT License
+            </p>
+          </footer>
+        </main>
+      </PixelConfigProvider>
+    </>
   );
 }
 
-function ShowcaseItem({ label, children }: { label: string; children: React.ReactNode }) {
+function ShowcaseItem({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="showcase-item">
       {children}
@@ -497,14 +975,28 @@ function ShowcaseItem({ label, children }: { label: string; children: React.Reac
   );
 }
 
-function FeatureCard({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+function FeatureCard({
+  icon,
+  title,
+  desc,
+}: {
+  icon: string;
+  title: string;
+  desc: string;
+}) {
   const icons: Record<string, string> = {
-    auto: '\u2728', clip: '\u2702', image: '\u25A6', shadow: '\u2592',
-    observe: '\u21BB', ssr: '\u2601',
+    auto: "\u2728",
+    clip: "\u2702",
+    image: "\u25A6",
+    shadow: "\u2592",
+    observe: "\u21BB",
+    ssr: "\u2601",
   };
   return (
     <div className="feature-card">
-      <div className="feature-icon">{icons[icon] || '\u25A0'}</div>
+      <div className="feature-icon" aria-hidden="true">
+        {icons[icon] || "\u25A0"}
+      </div>
       <h3>{title}</h3>
       <p>{desc}</p>
     </div>
@@ -513,34 +1005,84 @@ function FeatureCard({ icon, title, desc }: { icon: string; title: string; desc:
 
 /** Simple JSX/TS syntax highlighter */
 function Code({ children }: { children: string }) {
+  const [copied, setCopied] = useState(false);
   const highlight = (code: string) => {
     const tokens: Array<{ text: string; cls: string }> = [];
-    const re = /(\/\/[^\n]*|'[^']*'|"[^"]*"|`[^`]*`|\b(?:import|from|export|default|const|let|var|function|return|if|else)\b|<\/?[A-Z]\w*|<\/?[a-z]\w*|\b\d+\b|\w+(?==))/g;
+    const re =
+      /(\/\/[^\n]*|'[^']*'|"[^"]*"|`[^`]*`|\b(?:import|from|export|default|const|let|var|function|return|if|else)\b|<\/?[A-Z]\w*|<\/?[a-z]\w*|\b\d+\b|\w+(?==))/g;
     let last = 0;
     let m: RegExpExecArray | null;
     while ((m = re.exec(code)) !== null) {
-      if (m.index > last) tokens.push({ text: code.slice(last, m.index), cls: '' });
+      if (m.index > last)
+        tokens.push({ text: code.slice(last, m.index), cls: "" });
       const t = m[0];
-      let cls = '';
-      if (t.startsWith('//')) cls = 'comment';
-      else if (t.startsWith("'") || t.startsWith('"') || t.startsWith('`')) cls = 'string';
-      else if (/^<\/?\s*[A-Z]/.test(t)) cls = 'component';
-      else if (/^<\/?\s*[a-z]/.test(t)) cls = 'tag';
-      else if (/^(import|from|export|default|const|let|var|function|return|if|else)$/.test(t)) cls = 'keyword';
-      else if (/^\d+$/.test(t)) cls = 'number';
-      else if (re.lastIndex < code.length && code[re.lastIndex] === '=') cls = 'prop';
+      let cls = "";
+      if (t.startsWith("//")) cls = "comment";
+      else if (t.startsWith("'") || t.startsWith('"') || t.startsWith("`"))
+        cls = "string";
+      else if (/^<\/?\s*[A-Z]/.test(t)) cls = "component";
+      else if (/^<\/?\s*[a-z]/.test(t)) cls = "tag";
+      else if (
+        /^(import|from|export|default|const|let|var|function|return|if|else)$/.test(
+          t,
+        )
+      )
+        cls = "keyword";
+      else if (/^\d+$/.test(t)) cls = "number";
+      else if (re.lastIndex < code.length && code[re.lastIndex] === "=")
+        cls = "prop";
       tokens.push({ text: t, cls });
       last = re.lastIndex;
     }
-    if (last < code.length) tokens.push({ text: code.slice(last), cls: '' });
+    if (last < code.length) tokens.push({ text: code.slice(last), cls: "" });
     return tokens;
   };
 
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(children);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = children;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    }
+    setCopied(true);
+    trackEvent("copy_code");
+    window.setTimeout(() => setCopied(false), 1600);
+  };
+
   return (
-    <div className="code-block">
-      {highlight(children).map((t, i) =>
-        t.cls ? <span key={i} className={t.cls}>{t.text}</span> : t.text
-      )}
+    <div className="code-shell">
+      <button
+        className="copy-button"
+        type="button"
+        onClick={copy}
+        aria-label="Copy code to clipboard"
+      >
+        {copied ? "Copied" : "Copy"}
+      </button>
+      <pre className="code-block">
+        <code>
+          {highlight(children).map((t, i) =>
+            t.cls ? (
+              <span key={i} className={t.cls}>
+                {t.text}
+              </span>
+            ) : (
+              t.text
+            ),
+          )}
+        </code>
+      </pre>
+      <span className="sr-only" aria-live="polite">
+        {copied ? "Code copied to clipboard" : ""}
+      </span>
     </div>
   );
 }
@@ -548,14 +1090,23 @@ function Code({ children }: { children: string }) {
 function RefHookDemo({ pixelSize }: { pixelSize: number }) {
   const pixelRef = usePixelRef({ pixelSize });
   return (
-    <div ref={pixelRef} style={{
-      background: 'linear-gradient(135deg, #fd79a8, #e84393)',
-      border: '3px solid #b8256e', borderRadius: 20,
-      width: 'min(240px, 100%)', height: 80,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: '#fff', fontWeight: 700, fontSize: 15,
-      boxShadow: '4px 4px 0 rgba(0,0,0,0.3)',
-    }}>
+    <div
+      ref={pixelRef}
+      style={{
+        background: "linear-gradient(135deg, #fd79a8, #e84393)",
+        border: "3px solid #b8256e",
+        borderRadius: 20,
+        width: "min(240px, 100%)",
+        height: 80,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#fff",
+        fontWeight: 700,
+        fontSize: 15,
+        boxShadow: "4px 4px 0 rgba(0,0,0,0.3)",
+      }}
+    >
       usePixelRef
     </div>
   );

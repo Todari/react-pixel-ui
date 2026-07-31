@@ -1,48 +1,36 @@
-/**
- * Shared ESLint config for React + TypeScript packages.
- * Adds react and react-hooks rules on top of the library config.
- */
-module.exports = {
-  root: true,
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaVersion: 2022,
-    sourceType: 'module',
-    ecmaFeatures: { jsx: true },
+const jsxA11y = require('eslint-plugin-jsx-a11y');
+const react = require('eslint-plugin-react');
+const reactHooks = require('eslint-plugin-react-hooks');
+const library = require('./library');
+
+module.exports = [
+  ...library,
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: {
+      react,
+      'react-hooks': reactHooks,
+      'jsx-a11y': jsxA11y,
+    },
+    settings: {
+      react: { version: 'detect' },
+    },
+    rules: {
+      ...react.configs.recommended.rules,
+      ...react.configs['jsx-runtime'].rules,
+      ...reactHooks.configs.recommended.rules,
+      ...jsxA11y.configs.recommended.rules,
+      'react/prop-types': 'off',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      // The library intentionally builds imperative DOM adapters around refs.
+      // These compiler-oriented rules reject ref composition and style writes
+      // even though they run in layout effects/callbacks, not during render.
+      'react-hooks/refs': 'off',
+      'react-hooks/immutability': 'off',
+    },
   },
-  plugins: ['@typescript-eslint', 'react', 'react-hooks'],
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:react/jsx-runtime',
-  ],
-  env: {
-    browser: true,
-    node: true,
-    es2022: true,
+  {
+    ignores: ['**/vite-env.d.ts'],
   },
-  settings: {
-    react: { version: 'detect' },
-  },
-  rules: {
-    '@typescript-eslint/no-unused-vars': [
-      'warn',
-      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-    ],
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-non-null-assertion': 'off',
-    'react/prop-types': 'off',
-    'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
-    'no-empty': ['error', { allowEmptyCatch: true }],
-  },
-  ignorePatterns: [
-    'dist',
-    'node_modules',
-    '*.config.ts',
-    '*.config.js',
-    'vite-env.d.ts',
-  ],
-};
+];

@@ -15,22 +15,39 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
     "test": "turbo run test",
+    "test:compat": "node scripts/package-smoke.mjs 18.3.1 && node scripts/package-smoke.mjs 19.2.8 && node scripts/next-smoke.mjs",
+    "test:e2e": "playwright test",
     "setup": "pnpm install && pnpm build",
     "version": "changeset version",
-    "release": "pnpm build && pnpm test && changeset publish"
+    "release": "pnpm lint && pnpm type-check && pnpm test && pnpm build && changeset publish"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.7",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "^8.0.0",
+    "eslint": "^9.39.5",
     "prettier": "^3.2.5",
-    "turbo": "^2.3.3",
+    "turbo": "^2.9.14",
     "typescript": "^5.0.0"
   },
   "packageManager": "pnpm@9.9.0",
+  "pnpm": {
+    "overrides": {
+      "@babel/core": "7.29.6",
+      "brace-expansion@1": "1.1.16",
+      "esbuild": "0.25.0",
+      "flatted": "3.4.2",
+      "glob@10": "10.5.0",
+      "js-yaml@3": "3.15.0",
+      "minimatch@3": "3.1.5",
+      "minimatch@9": "9.0.7",
+      "picomatch@2": "2.3.2",
+      "picomatch@4": "4.0.4",
+      "postcss": "8.5.18",
+      "rollup": "4.59.0"
+    }
+  },
   "workspaces": [
     "packages/*",
     "apps/*"
