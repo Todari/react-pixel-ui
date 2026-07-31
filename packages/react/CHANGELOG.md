@@ -1,5 +1,17 @@
 # @react-pixel-ui/react
 
+## 2.2.1
+
+### Patch Changes
+
+- [#8](https://github.com/Todari/react-pixel-ui/pull/8) [`ba4979c`](https://github.com/Todari/react-pixel-ui/commit/ba4979cd7a4870ed2b0911c26a41c7a3d7b4bcd0) Thanks [@Todari](https://github.com/Todari)! - Preserve existing parent filters when `usePixelRef` renders shadows, coordinate
+  filters shared by sibling instances, and reuse one root theme observer.
+
+  Correct the published package documentation and PNG terminology.
+
+- Updated dependencies [[`ba4979c`](https://github.com/Todari/react-pixel-ui/commit/ba4979cd7a4870ed2b0911c26a41c7a3d7b4bcd0)]:
+  - @react-pixel-ui/core@2.2.1
+
 ## 2.2.0
 
 ### Minor Changes
