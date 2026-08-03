@@ -8,6 +8,17 @@ Turn supported CSS into pixel art. Wrap one rendered HTML element with `<Pixel>`
 
 [Demo](https://react-pixel-ui.vercel.app) | [npm](https://www.npmjs.com/package/@react-pixel-ui/react) | [GitHub](https://github.com/Todari/react-pixel-ui)
 
+![React Pixel UI — turn CSS into pixel art](https://react-pixel-ui.vercel.app/og.png)
+
+## Why React Pixel UI?
+
+- **Keep real DOM and CSS** — text, layout, events, and accessibility stay on the original element.
+- **Use existing styles** — Tailwind, CSS modules, inline styles, gradients, borders, and shadows are read from computed CSS.
+- **No Canvas dependency** — pixel art is generated with `clip-path`, RGBA PNG data URLs, and `drop-shadow()`.
+- **SSR compatible** — elements render normally on the server and are enhanced after hydration.
+- **Reactive by default** — style, class, theme, hover, focus, and active changes can be observed automatically.
+- **Framework-independent core** — use `@react-pixel-ui/core` when you only need the CSS-to-pixel-art engine.
+
 ## Install
 
 ```bash
@@ -23,17 +34,19 @@ Requires **React 18+**. `@react-pixel-ui/core` is installed automatically.
 ## Quick Start
 
 ```tsx
-import { Pixel } from '@react-pixel-ui/react';
+import { Pixel } from "@react-pixel-ui/react";
 
 function App() {
   return (
     <Pixel size={6}>
-      <div style={{
-        background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)',
-        borderRadius: 16,
-        border: '3px solid #333',
-        padding: 20,
-      }}>
+      <div
+        style={{
+          background: "linear-gradient(135deg, #ff6b6b, #4ecdc4)",
+          borderRadius: 16,
+          border: "3px solid #333",
+          padding: 20,
+        }}
+      >
         Pixel Art!
       </div>
     </Pixel>
@@ -65,13 +78,14 @@ import { Pixel } from '@react-pixel-ui/react';
 </Pixel>
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `size` | `number` | `4` | Pixel block size in CSS px. Larger = blockier. |
-| `enabled` | `boolean` | `true` | Toggle pixelation on/off |
+| Prop       | Type           | Default  | Description                                                      |
+| ---------- | -------------- | -------- | ---------------------------------------------------------------- |
+| `size`     | `number`       | `4`      | Pixel block size in CSS px. Larger = blockier.                   |
+| `enabled`  | `boolean`      | `true`   | Toggle pixelation on/off                                         |
 | `children` | `ReactElement` | required | Single HTML element, or a component that forwards its ref to one |
 
 **Supported CSS properties:**
+
 - `background` / `background-color` — solid colors and gradients (`linear-gradient`, `radial-gradient`, `repeating-*`). Alpha-preserving.
 - `border-radius` — converted to staircase corners (supports per-corner `[tl, tr, br, bl]`)
 - `border` — pixel art border with staircase corners. Box size is preserved via `border-color: transparent` (no layout shift, even with `box-sizing: content-box`).
@@ -88,7 +102,7 @@ not cut it off. Existing parent filters are preserved, and multiple managed
 children share the parent safely.
 
 ```tsx
-import { usePixelRef } from '@react-pixel-ui/react';
+import { usePixelRef } from "@react-pixel-ui/react";
 
 function MyComponent() {
   const pixelRef = usePixelRef({ pixelSize: 6 });
@@ -97,9 +111,9 @@ function MyComponent() {
     <div
       ref={pixelRef}
       style={{
-        background: 'linear-gradient(135deg, #fd79a8, #e84393)',
+        background: "linear-gradient(135deg, #fd79a8, #e84393)",
         borderRadius: 20,
-        border: '3px solid #b8256e',
+        border: "3px solid #b8256e",
         padding: 16,
       }}
     >
@@ -109,20 +123,20 @@ function MyComponent() {
 }
 ```
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `pixelSize` | `number` | `4` | Pixel block size |
-| `enabled` | `boolean` | `true` | Toggle pixelation |
-| `observeHover` | `boolean` | `true` | Re-compute on `:hover` |
-| `observeFocus` | `boolean` | `true` | Re-compute on `:focus` |
-| `observeActive` | `boolean` | `true` | Re-compute on `:active` |
+| Option          | Type      | Default | Description             |
+| --------------- | --------- | ------- | ----------------------- |
+| `pixelSize`     | `number`  | `4`     | Pixel block size        |
+| `enabled`       | `boolean` | `true`  | Toggle pixelation       |
+| `observeHover`  | `boolean` | `true`  | Re-compute on `:hover`  |
+| `observeFocus`  | `boolean` | `true`  | Re-compute on `:focus`  |
+| `observeActive` | `boolean` | `true`  | Re-compute on `:active` |
 
 ### `PixelConfigProvider` — Global defaults
 
 Set default `pixelSize` for all `<Pixel>` and `usePixelRef` instances in the tree.
 
 ```tsx
-import { PixelConfigProvider } from '@react-pixel-ui/react';
+import { PixelConfigProvider } from "@react-pixel-ui/react";
 
 function App() {
   return (
@@ -134,17 +148,17 @@ function App() {
 }
 ```
 
-| Config Key | Type | Default | Description |
-|------------|------|---------|-------------|
-| `pixelSize` | `number` | `4` | Default pixel block size |
-| `borderColor` | `string` | — | Default for `PixelBox`; CSS-reading APIs use the computed border color |
+| Config Key    | Type     | Default | Description                                                            |
+| ------------- | -------- | ------- | ---------------------------------------------------------------------- |
+| `pixelSize`   | `number` | `4`     | Default pixel block size                                               |
+| `borderColor` | `string` | —       | Default for `PixelBox`; CSS-reading APIs use the computed border color |
 
 ### `PixelBox` — Explicit props
 
 Use when you want direct control instead of auto-reading CSS.
 
 ```tsx
-import { PixelBox } from '@react-pixel-ui/react';
+import { PixelBox } from "@react-pixel-ui/react";
 
 <PixelBox
   width={280}
@@ -154,23 +168,23 @@ import { PixelBox } from '@react-pixel-ui/react';
   borderWidth={3}
   borderColor="#333"
   background="linear-gradient(45deg, #ff6b6b, #4ecdc4)"
-  shadow={{ x: 4, y: 4, color: 'rgba(0,0,0,0.3)' }}
+  shadow={{ x: 4, y: 4, color: "rgba(0,0,0,0.3)" }}
 >
   Content
-</PixelBox>
+</PixelBox>;
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `width` | `number` | `200` | Element width in px |
-| `height` | `number` | `100` | Element height in px |
-| `pixelSize` | `number` | `4` | Pixel block size |
-| `borderRadius` | `number \| [number, number, number, number]` | — | Corner radius. Array = `[topLeft, topRight, bottomRight, bottomLeft]` |
-| `borderWidth` | `number` | — | Border thickness (auto-snapped to pixelSize grid) |
-| `borderColor` | `string` | — | Any CSS color |
-| `background` | `string` | — | CSS color or gradient string |
-| `shadow` | `{ x: number, y: number, color: string }` | — | Hard pixel shadow |
-| `responsive` | `boolean` | `false` | Follow the size your CSS gives the box (detected via ResizeObserver) instead of `width`/`height` props. Size it with `style`/`className` (e.g. `style={{ width: '100%', height: 120 }}`). |
+| Prop           | Type                                         | Default | Description                                                                                                                                                                               |
+| -------------- | -------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `width`        | `number`                                     | `200`   | Element width in px                                                                                                                                                                       |
+| `height`       | `number`                                     | `100`   | Element height in px                                                                                                                                                                      |
+| `pixelSize`    | `number`                                     | `4`     | Pixel block size                                                                                                                                                                          |
+| `borderRadius` | `number \| [number, number, number, number]` | —       | Corner radius. Array = `[topLeft, topRight, bottomRight, bottomLeft]`                                                                                                                     |
+| `borderWidth`  | `number`                                     | —       | Border thickness (auto-snapped to pixelSize grid)                                                                                                                                         |
+| `borderColor`  | `string`                                     | —       | Any CSS color                                                                                                                                                                             |
+| `background`   | `string`                                     | —       | CSS color or gradient string                                                                                                                                                              |
+| `shadow`       | `{ x: number, y: number, color: string }`    | —       | Hard pixel shadow                                                                                                                                                                         |
+| `responsive`   | `boolean`                                    | `false` | Follow the size your CSS gives the box (detected via ResizeObserver) instead of `width`/`height` props. Size it with `style`/`className` (e.g. `style={{ width: '100%', height: 120 }}`). |
 
 `className`, `style`, and other HTML props always land on the **root**
 element — the wrapper `<div>` when a border is used.
@@ -178,41 +192,43 @@ element — the wrapper `<div>` when a border is used.
 ### `PixelButton` — Pre-styled button
 
 ```tsx
-import { PixelButton } from '@react-pixel-ui/react';
+import { PixelButton } from "@react-pixel-ui/react";
 
-<PixelButton variant="primary" width={160} height={48}>Click me</PixelButton>
+<PixelButton variant="primary" width={160} height={48}>
+  Click me
+</PixelButton>;
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `variant` | `'primary' \| 'secondary' \| 'danger'` | `'primary'` | Color theme |
-| `width` | `number` | `160` | Button width |
-| `height` | `number` | `48` | Button height |
-| `borderRadius` | `number` | `8` | Corner radius |
-| `pixelSize` | `number` | from context | Pixel block size |
-| `shadow` | `{ x, y, color }` | auto | Pixel shadow |
+| Prop           | Type                                   | Default      | Description      |
+| -------------- | -------------------------------------- | ------------ | ---------------- |
+| `variant`      | `'primary' \| 'secondary' \| 'danger'` | `'primary'`  | Color theme      |
+| `width`        | `number`                               | `160`        | Button width     |
+| `height`       | `number`                               | `48`         | Button height    |
+| `borderRadius` | `number`                               | `8`          | Corner radius    |
+| `pixelSize`    | `number`                               | from context | Pixel block size |
+| `shadow`       | `{ x, y, color }`                      | auto         | Pixel shadow     |
 
 The rendered `<button>` defaults to `type="button"` (it won't submit a
 surrounding form); pass `type="submit"` explicitly when you want that.
 
 ## When to use what
 
-| Use case | API | Why |
-|----------|-----|-----|
-| Existing styled elements | `<Pixel>` | Reads CSS automatically, zero config |
-| Third-party components | `usePixelRef` | Attach via ref, no wrapper div |
-| Full manual control | `PixelBox` | Explicit props, no CSS reading |
-| Pre-built buttons | `PixelButton` | Ready-to-use with variants |
+| Use case                 | API           | Why                                  |
+| ------------------------ | ------------- | ------------------------------------ |
+| Existing styled elements | `<Pixel>`     | Reads CSS automatically, zero config |
+| Third-party components   | `usePixelRef` | Attach via ref, no wrapper div       |
+| Full manual control      | `PixelBox`    | Explicit props, no CSS reading       |
+| Pre-built buttons        | `PixelButton` | Ready-to-use with variants           |
 
 ## How It Works
 
-| Feature | CSS Technique |
-|---------|---------------|
-| Staircase corners | `clip-path: polygon()` — Bresenham circle algorithm generates stepped polygon |
-| Pixel gradients | Composite PNG data URL + `image-rendering: pixelated` — 2D grid sampling per block with full RGBA alpha |
-| Pixel borders | Border color + gradient baked into single PNG with staircase shapes |
-| Hard shadows | `filter: drop-shadow(blur=0)` — follows clip-path contour |
-| Auto-detection | `getComputedStyle()` reads any CSS → converted to pixel art config |
+| Feature           | CSS Technique                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------- |
+| Staircase corners | `clip-path: polygon()` — Bresenham circle algorithm generates stepped polygon                           |
+| Pixel gradients   | Composite PNG data URL + `image-rendering: pixelated` — 2D grid sampling per block with full RGBA alpha |
+| Pixel borders     | Border color + gradient baked into single PNG with staircase shapes                                     |
+| Hard shadows      | `filter: drop-shadow(blur=0)` — follows clip-path contour                                               |
+| Auto-detection    | `getComputedStyle()` reads any CSS → converted to pixel art config                                      |
 
 ## Recipes
 
@@ -224,9 +240,21 @@ function PixelSlider() {
 
   return (
     <>
-      <input type="range" min={2} max={16} value={size} onChange={e => setSize(+e.target.value)} />
+      <input
+        type="range"
+        min={2}
+        max={16}
+        value={size}
+        onChange={(e) => setSize(+e.target.value)}
+      />
       <Pixel size={size}>
-        <div style={{ background: '#ff6b6b', borderRadius: 12, border: '2px solid #333' }}>
+        <div
+          style={{
+            background: "#ff6b6b",
+            borderRadius: 12,
+            border: "2px solid #333",
+          }}
+        >
           Size: {size}px
         </div>
       </Pixel>
@@ -239,12 +267,15 @@ function PixelSlider() {
 
 ```tsx
 <Pixel size={6}>
-  <div style={{
-    background: '#ffeaa7',
-    borderRadius: '24px 4px 24px 4px', // TL TR BR BL
-    border: '3px solid #e17055',
-    width: 200, height: 80,
-  }}>
+  <div
+    style={{
+      background: "#ffeaa7",
+      borderRadius: "24px 4px 24px 4px", // TL TR BR BL
+      border: "3px solid #e17055",
+      width: 200,
+      height: 80,
+    }}
+  >
     Asymmetric corners
   </div>
 </Pixel>
@@ -255,12 +286,15 @@ function PixelSlider() {
 ```tsx
 // Gradient stops can use any supported color form.
 <Pixel size={6}>
-  <div style={{
-    background: 'linear-gradient(135deg, oklch(0.75 0.2 30), oklch(0.6 0.25 280))',
-    borderRadius: 16,
-    border: '3px solid hsl(220 40% 20%)',
-    padding: 20,
-  }}>
+  <div
+    style={{
+      background:
+        "linear-gradient(135deg, oklch(0.75 0.2 30), oklch(0.6 0.25 280))",
+      borderRadius: 16,
+      border: "3px solid hsl(220 40% 20%)",
+      padding: 20,
+    }}
+  >
     oklch + hsl
   </div>
 </Pixel>
@@ -271,10 +305,13 @@ function PixelSlider() {
 ```tsx
 // Alpha is preserved end-to-end via the RGBA composite PNG.
 <Pixel size={6}>
-  <div style={{
-    background: 'linear-gradient(to right, rgba(255,107,107,0.2), rgba(78,205,196,1))',
-    borderRadius: 12,
-  }}>
+  <div
+    style={{
+      background:
+        "linear-gradient(to right, rgba(255,107,107,0.2), rgba(78,205,196,1))",
+      borderRadius: 12,
+    }}
+  >
     Fades from translucent to opaque
   </div>
 </Pixel>
@@ -297,12 +334,19 @@ function PixelSlider() {
 
 ```tsx
 // app/page.tsx — server component importing <Pixel> works out of the box
-import { Pixel } from '@react-pixel-ui/react';
+import { Pixel } from "@react-pixel-ui/react";
 
 export default function Page() {
   return (
     <Pixel size={6}>
-      <div style={{ background: '#6c5ce7', borderRadius: 12, padding: 20, color: '#fff' }}>
+      <div
+        style={{
+          background: "#6c5ce7",
+          borderRadius: 12,
+          padding: 20,
+          color: "#fff",
+        }}
+      >
         SSR compatible
       </div>
     </Pixel>
@@ -345,7 +389,7 @@ A: Yes. The core package uses pure math (no Canvas, no DOM APIs). Elements rende
   (`to right in oklab`), `turn`/`rad`/`grad` angle units, double-position
   stops, and aspect-ratio-correct corner keywords (`to top right`). Stops
   may use any supported color form including `oklch()`.
-- **`box-shadow`**: the *first* non-inset shadow is converted into a hard
+- **`box-shadow`**: the _first_ non-inset shadow is converted into a hard
   pixel `drop-shadow`. Additional shadows and inset shadows are ignored by
   design (pixel art uses a single hard shadow).
 - **Alpha**: translucent colors and gradient stops are preserved end-to-end
@@ -364,7 +408,7 @@ A: Yes. The core package uses pure math (no Canvas, no DOM APIs). Elements rende
   `color-mix()` or `var(--token)` (there's no DOM resolution step).
 - **Dynamic children via ancestor selectors**: `<Pixel>` observes the child's
   React props (`className`, `style`) and the `<html>` / `<body>` theme
-  classes. If an unrelated *middle* ancestor toggles a class that changes
+  classes. If an unrelated _middle_ ancestor toggles a class that changes
   the child via descendant selectors, trigger a parent re-render or use
   `usePixelRef`, which listens to `style` mutations on the managed element
   directly in addition to hover / focus / active / resize.
@@ -376,11 +420,11 @@ A: Yes. The core package uses pure math (no Canvas, no DOM APIs). Elements rende
 
 ## Browser Compatibility
 
-| Feature | Chrome | Firefox | Safari | Edge |
-|---------|--------|---------|--------|------|
-| `clip-path: polygon()` | 55+ | 54+ | 10+ | 79+ |
-| `image-rendering: pixelated` | 41+ | 56+ (`crisp-edges`) | 10+ | 79+ |
-| `filter: drop-shadow()` | 18+ | 35+ | 6+ | 79+ |
+| Feature                      | Chrome | Firefox             | Safari | Edge |
+| ---------------------------- | ------ | ------------------- | ------ | ---- |
+| `clip-path: polygon()`       | 55+    | 54+                 | 10+    | 79+  |
+| `image-rendering: pixelated` | 41+    | 56+ (`crisp-edges`) | 10+    | 79+  |
+| `filter: drop-shadow()`      | 18+    | 35+                 | 6+     | 79+  |
 
 ## TypeScript
 
@@ -392,7 +436,7 @@ import type {
   PixelArtStyles,
   PixelShadowConfig,
   BorderRadii,
-} from '@react-pixel-ui/react';
+} from "@react-pixel-ui/react";
 ```
 
 ## Project Structure
@@ -432,18 +476,20 @@ npm install @react-pixel-ui/react
 ```
 
 ```tsx
-import { Pixel } from '@react-pixel-ui/react';
+import { Pixel } from "@react-pixel-ui/react";
 
 // 어떤 스타일이든 <Pixel>로 감싸면 픽셀 아트로 변환
 <Pixel size={6}>
-  <div style={{
-    background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)',
-    borderRadius: 16,
-    border: '3px solid #333',
-  }}>
+  <div
+    style={{
+      background: "linear-gradient(135deg, #ff6b6b, #4ecdc4)",
+      borderRadius: 16,
+      border: "3px solid #333",
+    }}
+  >
     자동으로 픽셀화!
   </div>
-</Pixel>
+</Pixel>;
 ```
 
 Tailwind, 인라인 스타일, CSS 모듈 모두 지원. Canvas 없음, SSR 호환.
